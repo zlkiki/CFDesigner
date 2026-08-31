@@ -9,6 +9,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from .routes import router
+from .manual_routes import router as manual_router
 
 app = FastAPI(
     title="CFDesigner Web",
@@ -25,8 +26,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API Router
+# Include API Routers
 app.include_router(router)
+app.include_router(manual_router)
 
 # Mount Static Assets
 current_dir = os.path.dirname(os.path.abspath(__file__))

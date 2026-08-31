@@ -122,7 +122,14 @@ class CFDesignerApp {
     // 2D Overlay Tools
     document.getElementById('btnFitView').addEventListener('click', () => this.canvas2d.fitToView());
 
-    // Report Modal
+    // Report Modal & Online Manual
+    const btnManual = document.getElementById('btnOpenManual');
+    if (btnManual) {
+      btnManual.addEventListener('click', () => {
+        window.open('/manual', '_blank');
+      });
+    }
+
     document.getElementById('btnOpenReport').addEventListener('click', () => this.openReportModal());
     document.getElementById('btnCloseReport').addEventListener('click', () => this.closeReportModal());
   }

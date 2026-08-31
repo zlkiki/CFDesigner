@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CFDesigner - 온라인 도움말 & 공학 매뉴얼</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- KaTeX for Math Equations -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Manual Stylesheet -->
+  <link rel="stylesheet" href="/static/css/manual.css">
+</head>
+<body data-theme="dark">
+
+  <!-- ================= Header ================= -->
+  <header class="manual-header">
+    <div class="header-left">
+      <a href="/" class="brand-link" title="메인 대시보드로 돌아가기">
+        <div class="brand-logo">CF</div>
+        <div class="brand-text">
+          <span class="brand-title">CFDesigner</span>
+          <span class="brand-subtitle">온라인 공학 매뉴얼</span>
+        </div>
+      </a>
+      <span class="manual-badge">KDS 14 31 10 / AISI S100</span>
+    </div>
+
+    <div class="header-center">
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="manualSearchInput" class="search-input" placeholder="키워드 검색 (예: 좌굴, 전단중심, KDS, Cw, DSM)..." autocomplete="off">
+        <button id="btnClearSearch" class="btn-clear-search" style="display: none;">✕</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="btn-action" id="btnThemeToggle" title="다크/라이트 테마 전환">🌓 테마</button>
+      <a href="/" class="btn-action btn-home">🏠 대시보드</a>
+    </div>
+  </header>
+
+  <!-- ================= Layout ================= -->
+  <div class="manual-layout">
+    
+    <!-- Left Navigation Sidebar -->
+    <aside class="manual-sidebar" id="manualSidebar">
+      <div class="sidebar-header">
+        <h3>📚 매뉴얼 목차</h3>
+        <span class="topic-count-badge" id="topicCountBadge">15 Topics</span>
+      </div>
+
+      <!-- Search Result Dropdown / Overlay when searching -->
+      <div id="searchResultsArea" class="search-results-panel" style="display: none;">
+        <div class="search-results-header">
+          <span id="searchResultsCount">검색 결과 (0건)</span>
+        </div>
+        <ul id="searchResultsList" class="search-results-list"></ul>
+      </div>
+
+      <!-- TOC Accordion Tree -->
+      <nav class="manual-toc" id="manualTocNav">
+        <div class="toc-loading">목차를 불러오는 중...</div>
+      </nav>
+    </aside>
+
+    <!-- Main Content Reader -->
+    <main class="manual-content-wrapper">
+      <!-- Breadcrumb Bar -->
+      <div class="breadcrumb-bar" id="breadcrumbBar">
+        <span class="breadcrumb-item" id="bcCategory">1. 시작하기 & UI 가이드</span>
+        <span class="breadcrumb-separator">›</span>
+        <span class="breadcrumb-item active" id="bcTopic">시스템 소개 및 특징</span>
+      </div>
+
+      <!-- Topic Article Body -->
+      <article class="manual-body" id="manualArticleContent">
+        <div class="article-loading">
+          <div class="spinner"></div>
+          <p>문서를 불러오는 중입니다...</p>
+        </div>
+      </article>
+
+      <!-- Bottom Navigation (Prev / Next Topic) -->
+      <div class="manual-pager">
+        <button class="pager-btn pager-prev" id="btnPrevTopic">
+          <span class="pager-arrow">←</span>
+          <div class="pager-info">
+            <span class="pager-label">이전 토픽</span>
+            <span class="pager-title" id="prevTopicTitle">-</span>
+          </div>
+        </button>
+        <button class="pager-btn pager-next" id="btnNextTopic">
+          <div class="pager-info">
+            <span class="pager-label">다음 토픽</span>
+            <span class="pager-title" id="nextTopicTitle">-</span>
+          </div>
+          <span class="pager-arrow">→</span>
+        </button>
+      </div>
+
+      <!-- Footer -->
+      <footer class="manual-footer">
+        <p>CFDesigner v1.0.0 &copy; 2026. KDS 14 31 10 & AISI S100 Cold-Formed Steel Design Manual.</p>
+      </footer>
+    </main>
+
+  </div>
+
+  <!-- Manual Scripts -->
+  <script src="/static/js/manual.js"></script>
+</body>
+</html>
