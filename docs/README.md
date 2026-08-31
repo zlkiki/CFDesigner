@@ -18,6 +18,7 @@
 | **[`06_python_engine_migration_plan.md`](file:///f:/PyProject/CFDesigner/docs/06_python_engine_migration_plan.md)** | Python 독립 엔진 아키텍처 설계서 | 4대 계층 독립 Python 엔진 구조 및 API 사양 |
 | **[`07_altdp_web_app_specification.md`](file:///f:/PyProject/CFDesigner/docs/07_altdp_web_app_specification.md)** | AltDP 스타일 웹 SaaS 애플리케이션 사양서 | FastAPI 백엔드, 2D Canvas, 3D Three.js, A4 계산서 사양 |
 | **[`08_online_help_manual_specification.md`](file:///f:/PyProject/CFDesigner/docs/08_online_help_manual_specification.md)** | 온라인 도움말 시스템 사양서 (한글화 & KDS 기준) | 4대 카테고리 목차, KDS 14 31 10 용어 매핑, 웹 매뉴얼 뷰어 사양 |
+| **[`09_online_help_bilingual_implementation_plan.md`](file:///f:/PyProject/CFDesigner/docs/09_online_help_bilingual_implementation_plan.md)** | 온라인 도움말 영문 원문 병기 및 대조 뷰 구현 설계서 | 3-Way 뷰(한글/한영2열/영문), 인라인 토글, 다국어 검색 사양 |
 | **[`cfs_help_manual/`](file:///f:/PyProject/CFDesigner/docs/cfs_help_manual/overview.htm)** | CFS 14.0 공식 매뉴얼 원문 아카이브 | 95개 HTML 공식 이론 및 인터페이스 도움말 |
 
 ---

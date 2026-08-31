@@ -1,6 +1,7 @@
 /**
- * CFDesigner Online Help Manual Frontend Script
- * Handles TOC loading, topic routing, real-time search, KaTeX math rendering, and theme toggling.
+ * CFDesigner Online Help Manual Frontend Script (Bilingual Edition)
+ * Handles TOC loading, topic routing, 3-Way bilingual viewing (Korean/Split/English),
+ * inline English toggle accordion, glossary tooltips, KaTeX math rendering, and search.
  */
 
 class ManualViewer {
@@ -8,13 +9,20 @@ class ManualViewer {
     this.categories = [];
     this.allTopics = [];
     this.currentTopicId = null;
+    this.currentTopicData = null;
+    this.viewMode = localStorage.getItem("cfdesigner-manual-mode") || "ko"; // 'ko' | 'split' | 'en'
     this.searchDebounceTimer = null;
 
     // DOM Elements
     this.tocNav = document.getElementById("manualTocNav");
     this.articleContent = document.getElementById("manualArticleContent");
+    this.splitView = document.getElementById("manualSplitView");
+    this.splitContentKo = document.getElementById("splitContentKo");
+    this.splitContentEn = document.getElementById("splitContentEn");
+
     this.bcCategory = document.getElementById("bcCategory");
     this.bcTopic = document.getElementById("bcTopic");
+    this.currentModeIndicator = document.getElementById("currentModeIndicator");
     this.topicCountBadge = document.getElementById("topicCountBadge");
     
     this.btnPrev = document.getElementById("btnPrevTopic");
@@ -29,12 +37,18 @@ class ManualViewer {
     this.searchResultsCount = document.getElementById("searchResultsCount");
 
     this.btnTheme = document.getElementById("btnThemeToggle");
+    this.viewModeButtons = document.querySelectorAll(".btn-view-mode");
+
+    this.tooltip = document.getElementById("glossaryTooltip");
+    this.tooltipTerm = document.getElementById("tooltipTerm");
+    this.tooltipDef = document.getElementById("tooltipDef");
 
     this.init();
   }
 
   async init() {
     this.initTheme();
+    this.initViewMode();
     this.bindEvents();
     await this.loadCategories();
 
@@ -48,6 +62,39 @@ class ManualViewer {
     document.body.setAttribute("data-theme", savedTheme);
   }
 
+  initViewMode() {
+    this.updateViewModeButtons();
+  }
+
+  setViewMode(mode) {
+    if (!["ko", "split", "en"].includes(mode)) return;
+    this.viewMode = mode;
+    localStorage.setItem("cfdesigner-manual-mode", mode);
+    this.updateViewModeButtons();
+    if (this.currentTopicData) {
+      this.renderCurrentTopic();
+    }
+  }
+
+  updateViewModeButtons() {
+    this.viewModeButtons.forEach(btn => {
+      if (btn.dataset.mode === this.viewMode) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+
+    if (this.currentModeIndicator) {
+      const modeNames = {
+        ko: "🇰🇷 한글 뷰 모드",
+        split: "🌐 한·영 2열 대조 뷰",
+        en: "🇺🇸 English Reference"
+      };
+      this.currentModeIndicator.textContent = modeNames[this.viewMode] || "한글 뷰";
+    }
+  }
+
   bindEvents() {
     // Theme toggle
     if (this.btnTheme) {
@@ -58,6 +105,14 @@ class ManualViewer {
         localStorage.setItem("cfdesigner-theme", nextTheme);
       });
     }
+
+    // View mode buttons
+    this.viewModeButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const mode = btn.dataset.mode;
+        this.setViewMode(mode);
+      });
+    });
 
     // Hash change routing
     window.addEventListener("hashchange", () => {
@@ -108,6 +163,22 @@ class ManualViewer {
         this.btnClearSearch.style.display = "none";
         this.hideSearchResults();
       });
+    }
+
+    // Split view synchronized scrolling
+    if (this.splitContentKo && this.splitContentEn) {
+      let isSyncing = false;
+      const syncScroll = (source, target) => {
+        if (!isSyncing) {
+          isSyncing = true;
+          const percentage = source.scrollTop / (source.scrollHeight - source.clientHeight || 1);
+          target.scrollTop = percentage * (target.scrollHeight - target.clientHeight);
+          setTimeout(() => { isSyncing = false; }, 20);
+        }
+      };
+
+      this.splitContentKo.addEventListener("scroll", () => syncScroll(this.splitContentKo, this.splitContentEn));
+      this.splitContentEn.addEventListener("scroll", () => syncScroll(this.splitContentEn, this.splitContentKo));
     }
   }
 
@@ -192,7 +263,6 @@ class ManualViewer {
     document.querySelectorAll(".toc-topic-item").forEach(item => {
       if (item.dataset.topicId === topicId) {
         item.classList.add("active");
-        // Ensure parent category is not collapsed
         const header = item.closest(".toc-category")?.querySelector(".toc-cat-header");
         if (header && header.classList.contains("collapsed")) {
           header.classList.remove("collapsed");
@@ -203,6 +273,8 @@ class ManualViewer {
     });
 
     // Render loading state
+    this.articleContent.style.display = "block";
+    this.splitView.style.display = "none";
     this.articleContent.innerHTML = `
       <div class="article-loading">
         <div class="spinner"></div>
@@ -213,23 +285,21 @@ class ManualViewer {
     try {
       const res = await fetch(`/api/manual/topic/${topicId}`);
       if (!res.ok) throw new Error("Topic not found");
-      const topicData = await res.json();
+      this.currentTopicData = await res.json();
 
       // Update Breadcrumbs
-      if (this.bcCategory) this.bcCategory.textContent = topicData.category_title;
-      if (this.bcTopic) this.bcTopic.textContent = topicData.title;
+      if (this.bcCategory) this.bcCategory.textContent = this.currentTopicData.category_title;
+      if (this.bcTopic) {
+        this.bcTopic.textContent = this.viewMode === "en" ? (this.currentTopicData.title_en || this.currentTopicData.title) : this.currentTopicData.title;
+      }
 
-      // Render content
-      this.articleContent.innerHTML = topicData.content_html;
-
-      // Render KaTeX equations
-      this.renderEquations();
+      this.renderCurrentTopic();
 
       // Update Pager buttons
       this.updatePager();
 
-      // Scroll top of reader
-      const wrapper = document.querySelector(".manual-content-wrapper");
+      // Scroll top
+      const wrapper = document.getElementById("manualContentWrapper");
       if (wrapper) wrapper.scrollTop = 0;
 
     } catch (err) {
@@ -243,9 +313,88 @@ class ManualViewer {
     }
   }
 
-  renderEquations() {
-    if (window.renderMathInElement) {
-      window.renderMathInElement(this.articleContent, {
+  renderCurrentTopic() {
+    if (!this.currentTopicData) return;
+
+    if (this.viewMode === "split") {
+      this.articleContent.style.display = "none";
+      this.splitView.style.display = "grid";
+      
+      this.splitContentKo.innerHTML = this.currentTopicData.content_html || "";
+      this.splitContentEn.innerHTML = this.currentTopicData.content_en_html || this.currentTopicData.content_html || "";
+
+      this.renderEquations(this.splitContentKo);
+      this.renderEquations(this.splitContentEn);
+      this.bindGlossaryTooltips(this.splitContentKo);
+      this.bindGlossaryTooltips(this.splitContentEn);
+    } else {
+      this.splitView.style.display = "none";
+      this.articleContent.style.display = "block";
+
+      if (this.viewMode === "en") {
+        this.articleContent.innerHTML = this.currentTopicData.content_en_html || this.currentTopicData.content_html || "";
+      } else {
+        // 'ko' mode
+        this.articleContent.innerHTML = this.currentTopicData.content_html || "";
+      }
+
+      this.renderEquations(this.articleContent);
+      this.bindGlossaryTooltips(this.articleContent);
+    }
+  }
+
+  toggleInlineEn(btn) {
+    const wrapper = btn.closest(".en-toggle-wrapper");
+    if (!wrapper) return;
+    const box = wrapper.querySelector(".inline-en-box");
+    if (!box) return;
+
+    if (box.style.display === "none" || !box.style.display) {
+      box.style.display = "block";
+      btn.textContent = "🌐 원문 접기 (Hide Original)";
+      btn.classList.add("active");
+    } else {
+      box.style.display = "none";
+      btn.textContent = "🌐 원문 보기 (View Original)";
+      btn.classList.remove("active");
+    }
+  }
+
+  bindGlossaryTooltips(container) {
+    if (!container || !this.tooltip) return;
+    const terms = container.querySelectorAll(".glossary-term");
+
+    terms.forEach(term => {
+      term.addEventListener("mouseenter", (e) => {
+        const enTitle = term.dataset.en || "";
+        const def = term.dataset.def || "";
+        if (!enTitle && !def) return;
+
+        this.tooltipTerm.textContent = enTitle;
+        this.tooltipDef.textContent = def;
+        this.tooltip.style.display = "block";
+
+        const rect = term.getBoundingClientRect();
+        let left = rect.left + window.scrollX;
+        let top = rect.bottom + window.scrollY + 8;
+
+        if (left + 320 > window.innerWidth) {
+          left = window.innerWidth - 330;
+        }
+
+        this.tooltip.style.left = `${Math.max(10, left)}px`;
+        this.tooltip.style.top = `${top}px`;
+      });
+
+      term.addEventListener("mouseleave", () => {
+        this.tooltip.style.display = "none";
+      });
+    });
+  }
+
+  renderEquations(targetElement) {
+    if (window.renderMathInElement && targetElement) {
+      window.renderMathInElement(targetElement, {
         delimiters: [
           { left: "$$", right: "$$", display: true },
           { left: "$", right: "$", display: false },
@@ -305,7 +454,7 @@ class ManualViewer {
       item.className = "search-result-item";
       item.innerHTML = `
         <div class="search-res-cat">${r.category_title}</div>
-        <div class="search-res-title">${r.title}</div>
+        <div class="search-res-title">${r.title} <span style="font-size:11px; font-weight:400; color:var(--text-muted);">(${r.title_en})</span></div>
         <div class="search-res-summary">${r.summary}</div>
       `;
       item.addEventListener("click", () => {

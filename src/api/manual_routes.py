@@ -1,6 +1,6 @@
 """
 CFDesigner Online Help Manual FastAPI Router
-Endpoints for serving manual SPA and topic data.
+Endpoints for serving manual SPA, bilingual topic data, and multilingual search.
 """
 
 from fastapi import APIRouter, HTTPException, Query
@@ -40,12 +40,15 @@ async def get_categories() -> List[Dict[str, Any]]:
                 cat_topics.append({
                     "id": t["id"],
                     "title": t["title"],
+                    "title_en": t.get("title_en", t["title"]),
                     "summary": t["summary"],
+                    "summary_en": t.get("summary_en", ""),
                     "tags": t.get("tags", [])
                 })
         result.append({
             "id": cat["id"],
             "title": cat["title"],
+            "title_en": cat.get("title_en", cat["title"]),
             "icon": cat["icon"],
             "topics": cat_topics
         })
@@ -55,7 +58,7 @@ async def get_categories() -> List[Dict[str, Any]]:
 @router.get("/api/manual/topic/{topic_id}")
 async def get_topic(topic_id: str) -> Dict[str, Any]:
     """
-    Returns the complete topic detail including HTML content and metadata.
+    Returns the complete topic detail including Korean and English HTML content and metadata.
     """
     if topic_id not in TOPICS:
         raise HTTPException(status_code=404, detail=f"Topic '{topic_id}' not found.")
@@ -63,28 +66,35 @@ async def get_topic(topic_id: str) -> Dict[str, Any]:
 
 
 @router.get("/api/manual/search")
-async def search_topics(q: str = Query(..., min_length=1, description="Search keyword")) -> List[Dict[str, Any]]:
+async def search_topics(q: str = Query(..., min_length=1, description="Search keyword (Korean or English)")) -> List[Dict[str, Any]]:
     """
-    Searches topics by keyword in title, summary, tags, and content.
+    Searches topics by keyword across Korean & English titles, summaries, tags, and contents.
     """
     query = q.strip().lower()
     matches = []
     
     for tid, t in TOPICS.items():
         score = 0
-        title_lower = t["title"].lower()
-        summary_lower = t["summary"].lower()
+        title_ko = t["title"].lower()
+        title_en = t.get("title_en", "").lower()
+        summary_ko = t["summary"].lower()
+        summary_en = t.get("summary_en", "").lower()
         tags_lower = [tag.lower() for tag in t.get("tags", [])]
-        content_lower = t["content_html"].lower()
+        content_ko = t.get("content_html", "").lower()
+        content_en = t.get("content_en_html", "").lower()
         
-        if query in title_lower:
-            score += 10
+        # Scoring: Title matches (highest)
+        if query in title_ko or query in title_en:
+            score += 15
+        # Tag matches
         if any(query in tag for tag in tags_lower):
-            score += 8
-        if query in summary_lower:
-            score += 5
-        if query in content_lower:
-            score += 2
+            score += 10
+        # Summary matches
+        if query in summary_ko or query in summary_en:
+            score += 6
+        # Content matches
+        if query in content_ko or query in content_en:
+            score += 3
             
         if score > 0:
             matches.append({
@@ -92,7 +102,9 @@ async def search_topics(q: str = Query(..., min_length=1, description="Search ke
                 "category_id": t["category_id"],
                 "category_title": t["category_title"],
                 "title": t["title"],
+                "title_en": t.get("title_en", t["title"]),
                 "summary": t["summary"],
+                "summary_en": t.get("summary_en", ""),
                 "tags": t.get("tags", []),
                 "score": score
             })
