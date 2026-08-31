@@ -1,0 +1,77 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Custom Material Properties - Carbon Steel Tab</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Custom Material Properties - Carbon Steel Tab</h1>
+
+<p>This window is displayed when you press the ‘...’ button on either the
+<a href="options-material.htm">Material tab</a>
+of the Options window, or on the
+<a href="section-inputs-section.htm">Section tab</a> of the Section Inputs
+window. If you came from the Options
+window, you are defining the default material for new sections; it does not
+affect any existing sections. If you
+came from the Section Inputs window, you are defining the material for the
+current section only.</p>
+
+<p>This tab will appear if the original material was a carbon steel.
+See also <a href="custom-material-ss.htm">Stainless Steel Tab</a>.</p>
+
+<table>
+<tr><td width=175>Material Type</td><td>The designation for the
+type of material of the section.</td></tr>
+
+<tr><td>Modulus of Elasticity, E</td><td>AISI specifies this value to be
+29500 ksi or 203,000 MPa for carbon steel.</td></tr>
+
+<tr><td>Minimum Yield Strength</td><td>The minimum value of yield strength for
+this type of carbon steel.</td></tr>
+
+<tr><td>Default Yield Strength</td><td>The default value of yield strength
+when using this type of carbon steel (usually the minimum yield strength).</td></tr>
+
+<tr><td>Minimum Tensile Strength</td><td>The minimum value of tensile
+strength for this type of carbon steel.
+This also is used as a maximum value of yield strength.</td></tr>
+
+<tr><td>Default Tensile Strength</td><td>The default value of
+tensile strength when using this type of carbon steel (usually the minimum
+tensile strength).</td></tr>
+
+<tr><td>Maximum Tensile Strength</td><td>The maximum value of tensile
+strength for this type of carbon steel.</td></tr>
+
+<tr><td>Minimum Elongation in 2 inches (%)</td><td>The specified minimum
+elongation in a 2 inch (50 mm) gage length standard test specimen. This is
+used to determine whether a lower yield stress is required for design.</td></tr>
+
+<tr><td>Minimum thickness for this elongation</td><td>The minimum thickness
+for which the above elongation is applicable. If the elongation is applicable
+to any thickness, enter 0.</td></tr>
+
+<tr><td>Min elongation for thinner steel (%)</td><td>For steel thinner than
+the minimum entered above, enter the specified minimum elongation
+in a 2 inch (50 mm) gage length standard test specimen.</td></tr>
+
+<tr><td>Default Button</td><td>This button sets the
+material to the current default settings for the new sections (defined in the
+Options window).</td></tr>
+
+<tr><td>Customize Button</td><td>This button allows you to
+customize the material currently being displayed.
+You may modify the name of the material, but
+CFS will always place the name inside brackets to identify it as a material not
+originally provided with CFS. You may
+also modify any of the numerical inputs, with some limitations imposed by
+CFS. The customized material will then
+become your default material for new sections.</td></tr>
+</table>
+
+</body>
+</html>

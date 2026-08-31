@@ -1,0 +1,78 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Locations to Check</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Locations to Check</h1>
+
+<p>This window is displayed when you select Member Check or Web Crippling from the
+<a href="compute-menu.htm">Compute menu</a>, and the active window is an analysis.
+It offers three options on which design
+checks to include in the report:</p>
+
+<p>Report controlling location among all load combinations</p>
+
+<p style='margin-left:.25in'>
+This option will check all critical locations (as described
+below) for every load combination, and report only the one with the highest
+unity check value. It will also change
+the current load combination to the one that controlled.</p>
+
+<p>Report controlling location for EACH load combinations</p>
+
+<p style='margin-left:.25in'>
+This option will check all critical locations (as described
+below) for every load combination, and report the one with the highest
+unity check value for each load combination.</p>
+
+<p>Report controlling location for THIS load combination</p>
+
+<p style='margin-left:.25in'>
+This option will check all critical locations (as described
+below) for the current load combination, and report only the one with the
+highest unity check value.</p>
+
+<p>Report selected locations for THIS load combination</p>
+
+<p style='margin-left:.25in'>
+This option lets you select which locations to check and
+include in the report. It provides a
+list of critical locations from which to choose.
+For member checks, you may also specify any
+other location in the analysis to check.</p>
+
+<table>
+<tr><td width=125>Locations</td><td>For member checks, this list includes
+locations of shear and moment minima and maxima, brace points, and support points.
+For web crippling checks, it
+includes locations of each load carrying support and each concentrated load.
+If a particular location could have different
+results on each side of the location (due to a difference in shear, unbraced
+length, axial load, or end of a member), then the entry will indicate left side
+or right side (or upper/lower side for vertical members). You may select as many of
+these locations as you want.</td></tr>
+
+<tr><td>Check All Button</td><td>You may quickly select all the locations in
+the list by pressing the Check All button.
+Then the button will change to Uncheck All, which you may use to
+deselect all the locations.</td></tr>
+
+<tr><td>Add Button</td><td>The list of locations may not
+necessarily contain all controlling locations.
+For example, if the unbraced length varies significantly within a member
+span, the maximum forces may not occur within the controlling unbraced length.
+To add a different location to the list,
+enter it here and press the Add button.
+This will add it to the list and select it.
+If the location could have different results
+on each side of the entered location, the entry will indicate left side or
+right side.</td></tr>
+</table>
+
+</body>
+</html>

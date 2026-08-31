@@ -1,0 +1,83 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Elastic Buckling Parameters</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Elastic Buckling Parameters</h1>
+
+<p>This window is displayed when you select Elastic Buckling from the
+<a href="compute-menu.htm">Compute menu</a>. After you enter the appropriate
+values and choose the appropriate settings, press the OK button and the
+<a href="buckling-results.htm">Elastic Buckling Results</a>
+will be displayed when the analysis is complete.</p>
+
+<p>The elastic buckling analysis uses the finite strip method to determine the
+magnitude of the forces at which elastic buckling occurs. These buckling forces
+are affected by the member length (half wave length) and the stress
+distribution. The analysis will determine forces corresponding to numerous
+member lengths, and identify the lengths that correspond to controlling
+buckling modes.</p>
+
+<p>The time to complete the analysis can take from a few seconds to several minutes
+depending on the complexity of the cross-section, the number of member lengths
+to calculate, and the speed of the computer.</p>
+
+<table>
+<tr><td width=150>Start Length</td><td>The smallest member length to
+consider in the buckling analysis. To capture local buckling, this should
+generally be less than 1/2 the width of the largest flat element.</td></tr>
+
+<tr><td>End Length</td><td>The largest member length to
+consider in the buckling analysis. Intermediate lengths of 5 to 10 times the
+size of the section may exhibit distortional buckling. Greater lengths will
+reveal flexural and/or torsional buckling modes.</td></tr>
+
+<tr><td>Increment Size</td><td>The size of the length increments
+to use between the start length and the end length. The choices are:<br>
+
+<ul>
+<li>Small - each length is about 1.125 times the previous length<br>(20 increments in a 10x length range)</li>
+<li>Medium - each length is about 1.25 times the previous length<br>(10 increments in a 10x length range)</li>
+<li>Large - each length is about 1.6 times the previous length<br>(5 increments in a 10x length range)</li>
+</ul>
+</td></tr>
+
+<tr><td>Use Alternate Method</td><td>CFS uses a very fast eigenvalue solution technique to determine
+buckling stresses and mode shapes. There are some rare cases where this method does not calculate the
+buckling stresses for all member lengths. If that occurs you may choose the alternate method which might
+be able to obtain more of the results. This alternate method takes much longer to run.</td></tr>
+
+<tr><td width=150>Constrained Bending</td><td>Bending about a non-principal axis causes stress redistribution
+resulting from a rotated neutral axis. If you leave this option unchecked (recommended), the
+stresses will be adjusted but the buckling moments will correspond to the proportions you specify. 
+If you check this option for constrained bending, the output buckling moments represent
+those which produce the stress distribution you specify. For sections
+oriented to the principal axes, this option has no impact.</td></tr>
+
+<tr><td width=150>Repeating Connected Shape</td><td>Choose this option for sections which are rigidly
+connected in a repeating pattern, such as some panel installations. This will force the start of the
+first element and the end of the last element to translate and rotate together during buckling.
+This option is not available for closed sections.</td></tr>
+
+<tr><td>Stress Distribution</td><td>The vertical and horizontal slider bars
+are used to define the stress distribution you would like to apply to the
+cross-section. With both slider bars in the middle, uniform compression is
+applied. The vertical slider bar controls the moment about the X axis, where
+the top position produces a positive moment and the bottom position produces a
+negative moment. The horizontal slider bar controls the moment about the Y
+axis, where the right position produces a positive moment and the left position
+produces a negative moment.</td></tr>
+
+<tr><td>fbx, fby, fc</td><td>The relative stress level resulting from bending about the X axis, bending
+about the Y axis, and compression, respectively. Bending values may vary from -1 to 1, and the compression
+value may vary from 0 to 1. The sum of the absolute values is forced to be 1.</td></tr>
+
+</table>
+
+</body>
+</html>

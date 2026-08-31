@@ -1,0 +1,98 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Analysis Inputs - Members Tab</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Analysis Inputs - Members Tab</h1>
+
+<p>This window is displayed when you create a new analysis or open an existing
+analysis. It is displayed as a floating
+window separate from the main application window.
+Closing this window will not close the
+analysis itself and will not lose any information about the analysis.
+To redisplay this window (when an analysis is
+open), select Analysis Inputs from the
+<a href="view-menu.htm">View menu</a>, or press F4.</p>
+
+<p>This tab contains inputs for the members in the analysis.
+Each row in the grid represents a member in the analysis. See also
+<a href="analysis-inputs-general.htm">General Tab</a>,
+<a href="analysis-inputs-supports.htm">Supports Tab</a>,
+<a href="analysis-inputs-loadings.htm">Loadings Tab</a>,
+<a href="analysis-inputs-combinations.htm">Combinations Tab</a>, and
+<a href="analysis-inputs-notes.htm">Notes Tab</a>.</p>
+
+<table>
+<tr><td width=100>Section</td><td>The name of the section file to use
+for the member. This drop-down list
+contains all of the sections currently open in CFS.
+To add a different section to an analysis,
+you must first open the section. To add
+a member, enter its section name in the blank row after the last member.
+Each member in an analysis may use a
+different section.</td></tr>
+
+<tr><td>Start Location</td><td>The global longitudinal position of the
+‘left’ end of the member (‘top’ end for columns). Multiple
+members must be continuous. Members may
+overlap but you cannot have gaps between members.
+Lapped members are assumed to provide full continuity.</td></tr>
+
+<tr><td>End Location</td><td>The global longitudinal position of the
+‘right’ end of the member (‘bottom’ end for columns). This location
+must be greater than the start location, otherwise they will get swapped.</td></tr>
+
+<tr><td>Braced Flange</td><td>For members having one flange fastened to
+deck, sheathing, roof system, or other continually connected system, select the
+flange that is attached: Bottom, Top, Left, or Right. Otherwise, select None.
+These flange definitions refer to the orientation of the cross section.</td></tr>
+
+<tr><td>R</td><td>If there is a braced
+flange, enter the moment reduction factor as defined in the AISI or ASCE
+Specification for your situation. For example:<br>
+      R=0.70 for continuous span Z sections<br>
+      R=0.60 for continuous span C sections<br>
+      R=0.70 for simple span C or Z section, depth <span style='font-family:Symbol'>£</span> 6.5&quot;<br>
+      R=0.65 for simple span C or Z section, 6.5&quot; <span style='font-family:Symbol'>&lt;</span> depth <span style='font-family:Symbol'>£</span> 8.5&quot;<br>
+      R=0.50 for simple span Z section, 8.5&quot; <span style='font-family:Symbol'>&lt;</span> depth <span style='font-family:Symbol'>£</span> 12&quot;<br>
+      R=0.40 for simple span C section, 8.5&quot; <span style='font-family:Symbol'>&lt;</span> depth <span style='font-family:Symbol'>£</span> 12&quot;</td></tr>
+
+<tr><td>Stiffness, k<span style='font-family:Symbol'>f</span></td>
+<td>The rotational stiffness provided to the
+braced flange by connection to the bracing material (deck, sheathing, etc.).
+This stiffness is incorporated in the distortional buckling calculations for
+the flange which is braced (bottom, top, left, or right). The units for this
+input are moment/radian/unit length (such as k-in/rad/in) which is then reduced
+to a force (such as k). Refer to the AISI Specification and Commentary for more
+information on determining what value to use.</td></tr>
+
+<tr><td>Length, Lm</td><td>The distance along the
+length of the member between discrete rigid restraints that restrict
+distortional buckling. If there are no discrete restraints for distortional
+buckling, leave this as a large value (such as the span length) and CFS will
+calculate the distortional buckling wavelength. If the member is fully
+restricted against distortional buckling, use Lm = 0. If the shape does not
+have a distortional buckling failure mode, the value of Lm has no effect.<br><br>
+
+In cases where rotational
+stiffness is provided to the braced flange by connection to bracing material,
+Lm does not represent the spacing between fasteners. It is the distance between
+rigid restraints against distortional buckling, if they exist.</td></tr>
+
+<tr><td>ex, ey</td><td>The load eccentricity in the X and Y direction,
+measured from the origin of the section. Positive ex is horizontal to the right
+of the origin and positive ey is vertically above the origin. The combination
+of the axial loads and these eccentricities produce additional bending moments.
+The combination of transverse loads and these eccentricities affect the magnitude
+of torsional loads applied to the member. For more information, see
+<a href="torsion-analysis.htm">Torsion Analysis</a></td></tr>
+
+</table>
+
+</body>
+</html>

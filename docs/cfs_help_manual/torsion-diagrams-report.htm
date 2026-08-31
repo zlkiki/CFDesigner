@@ -1,0 +1,42 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Torsion Diagrams Report</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Torsion Diagrams Report</h1>
+
+<p>This report is created when you click the Report button on the
+<a href="torsion-diagrams.htm">Diagrams</a> window while displaying the
+torsion diagrams. It contains the maximum torques, bimoments, and twist
+for the current load combination, or for the envelope of all load combinations
+if selected on the Diagrams window.</p>
+
+<p>For a single load combination, this report includes the torsional loads
+applied to the members. These loads are calculated from the applied transverse
+and axial loads as follows:</p>
+
+<ul>
+<li>Distributed loads produce distributed torques</li>
+<li>Concentrated loads produce concentrated torques</li>
+<li>Concentrated moments produce concentrated bimoments</li>
+<li>Axial loads with eccentricity produce concentrated bimoments</li>
+</ul>
+
+<p>The magnitude of the torisonal load is equal to the magnitude of the transverse
+load times the torsion arm (see <a href="torsion-analysis.htm">Torsion Analysis</a>).
+If two or more members overlap, the torsion arm is a weighted average using the
+relative stiffness of the members. If a concentrated bimoment occurs on a member
+exhibiting pure torsion only, the result is an abrupt change in angle of twist
+equal to B/GJ radians.</p>
+
+<p>This output can be appended to an analysis report containing other analysis outputs,
+such as member checks and web crippling checks. See
+<a href="reports.htm">Working With Reports</a>.</p>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Working with Analyses</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Working with Analyses</h1>
+
+<p>There are two ways to create an <a href="analysis-window.htm">Analysis Window</a>:
+create a new analysis with the <a href="analysis-wizard-1.htm">Analysis Wizard</a>
+or open an existing analysis (cfsa) file.
+The analysis window contains a graphic of the members, supports, and
+loads. Simple beams, continuous beams,
+beams with laps, and beam-columns are examples of the types of problems that
+can be analyzed.</p>
+
+<p>All the inputs for an analysis are contained in the Analysis Inputs window.
+These inputs are grouped into five categories, each on a separate page in the window.
+The <a href="analysis-inputs-general.htm">General Page</a> contains inputs and information for the analysis.
+The <a href="analysis-inputs-members.htm">Members Page</a> contains inputs that define the members in the analysis.
+The <a href="analysis-inputs-supports.htm">Supports Page</a> contains inputs that define the member supports.
+The <a href="analysis-inputs-loadings.htm">Loadings Page</a> contains inputs that define loads applied to the
+members, and are grouped into different loadings.
+The <a href="analysis-inputs-combinations.htm">Combinations Page</a> contains inputs that
+define combinations of loadings to analyze.</p>
+
+<p>All geometric locations are input using a one-dimensional global coordinate
+system. Members, supports, and loads are
+all defined independently, so that members may span across multiple supports,
+and loads may span across multiple members.
+Node numbers and beam elements are assigned internally by CFS and are
+invisible to the user. The plot of the geometry may be shown in either a
+horizontal or vertical orientation.</p>
+
+<p>Each member has an associated section, and all sections used in an analysis must be
+open (loaded) when working with the analysis. The orientation of the section is as viewed
+from the left end (or top end) of the member.
+Lapped members are assumed to provide full continuity.</p>
+
+<p>Supports may be horizontal (X), vertical (Y), torsional (T), and rotational about both X
+and Y axes (Rx and Ry). CFS does not
+consider ends of overlapped sections as support
+locations. If you want to consider these
+as support points, you must explicitly define them.</p>
+
+<p>Loads are grouped by loading type (dead, live, etc.), and numerous ASD and LRFD load
+combinations may be defined. Transverse
+loads may be distributed (uniform or trapezoidal) as well as concentrated, and
+may be in any direction perpendicular to the members.
+Axial loads are defined by specifying both
+ends: the point of application and the point of restraint.</p>
+
+<p>Once an analysis is defined, computations may be performed for one load combination at a time. The current combination on
+the Combinations Page of the Analysis Inputs is displayed in the analysis window. You may create shear, moment, and deflection
+<a href="analysis-diagrams.htm">diagrams</a>, and you may also compute
+<a href="member-check-report.htm">member checks</a> and
+<a href="web-crippling-report.htm">web crippling checks</a> for
+any location. These are accessed from the 
+<a href="compute-menu.htm">Compute menu</a>.</p>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+body{font-family:Arial; font-size:10pt; font-weight:normal; color:black; background-color:floralwhite}
+p{font-family:Arial; font-size:10pt; font-weight:normal; color:black;}
+h1{font-family:Arial; font-size:16pt; font-weight:normal; color:black; background-color:lightsteelblue}
+table{width:100%;}
+tr{vertical-align:top;}
+td{font-family:Arial; font-size:10pt; font-weight:normal; color:black; padding-bottom:3pt;}
+select{font-family:Arial; font-size:10pt; font-weight:normal; color:black;}
+input{font-family:Arial; font-size:10pt; font-weight:normal; color:black;}
+.header{font-family:Arial; font-size:12pt; font-weight:normal; color:#191970;}
+.copyright{font-family:Arial; font-size:8pt; font-weight:normal; color:gray;}
+.nav{font-family:Arial; font-size:10pt; font-weight:bold; color:black;}
+h4{font-family:Arial; font-size:10pt; font-weight:bold; color:black;}
+

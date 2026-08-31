@@ -1,0 +1,95 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Section Inputs - Part Tab</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Section Inputs - Part Tab</h1>
+
+<p>This window is displayed when you create a new section or open an existing
+section. It is displayed as a floating
+window separate from the main application window.
+Closing this window will not close the
+section itself and will not lose any information about the section.
+To redisplay this window (when a section is
+open), select Section Inputs from the View menu, or press F3.</p>
+
+<p>A section may contain multiple parts that act together as a member.
+This tab contains the inputs for each part
+of the section, one part at a time. See also
+<a href="section-inputs-section.htm">Section Tab</a>,
+<a href="section-inputs-elements.htm">Elements Tab</a>, and
+<a href="section-inputs-dsm.htm">Direct Strength Tab</a>.</p>
+
+<table>
+<tr><td width=150>Part Name</td><td>The name associated with
+the part, useful in built-up sections to identify the different parts more
+readily. The name may be changed to any
+name not already used in the section. To
+view the part inputs for a different part, select its name from the list.
+There is always one more entry in the list
+than there are parts currently defined.
+To add a part, select the last entry in the list and optionally rename
+it. You may delete a part by deleting
+its name and pressing Enter.</td></tr>
+
+<tr><td>Thickness (name)</td><td>A selection of predefined thicknesses
+and corresponding default radii. If you
+select a different thickness name, the thickness and default radius are
+updated. The predefined thicknesses may
+be customized by selecting Options from the Tools menu.</td></tr>
+
+<tr><td>Thickness (value)</td><td>The design
+thickness of the part. If you enter a
+thickness that matches a predefined thickness, its corresponding default radius
+will be assigned. If it does not match a
+predefined thickness and the default radius is less than the new thickness, the
+default radius is set equal to the new thickness.</td></tr>
+
+<tr><td>Default Inside Radius</td><td>The inside bend radius used for new elements
+on the part. Changing this input will
+automatically change existing radii on the current part that were equal to the
+previous default radius.</td></tr>
+
+<tr><td>Centerline Dimensions</td><td>When unchecked, element lengths and
+hole distances are measured to the outside intersection
+points. When checked, element lengths
+and hole distances are measured to the centerline
+intersection points. Changing this input
+automatically adjusts the element lengths and hole distances.
+Centerline dimensions are useful for panels
+and similar shapes that use the same centerline dimensions for different
+material thicknesses.</td></tr>
+
+<tr><td>Closed Part</td><td>When unchecked, the part
+geometry is open, such as a channel or zee.
+When checked, the part geometry is closed, such as a tube.</td></tr>
+</table>
+
+<h4>Placement of Part from Origin:</h4>
+
+<table>
+<tr><td width=50>X</td><td>The horizontal position of the current part with respect to
+the section origin. This position may be
+defined as measured to the left edge, to the right edge, or to the center of
+gravity of the part. Positive X is to
+the right of the origin.</td></tr>
+
+<tr><td>Y</td><td>The vertical position of the current part with respect to
+the section origin. This position may be
+defined as measured to the top edge, to the bottom edge, or to the center of
+gravity of the part. Positive Y is above
+the origin.</td></tr>
+</table>
+
+<h4>Distance from Center of Gravity:</h4>
+
+<p>The distance from the center of gravity of the current part to the extreme fibers
+(top, left, bottom, right) of the part.</p>
+
+</body>
+</html>

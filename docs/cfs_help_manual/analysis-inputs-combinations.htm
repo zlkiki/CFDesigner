@@ -1,0 +1,71 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Analysis Inputs - Combinations Tab</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Analysis Inputs - Combinations Tab</h1>
+
+<p>This window is displayed when you create a new analysis or open an existing
+analysis. It is displayed as a floating
+window separate from the main application window.
+Closing this window will not close the
+analysis itself and will not lose any information about the analysis.
+To redisplay this window (when an analysis is
+open), select Analysis Inputs from the
+<a href="view-menu.htm">View menu</a>, or press F4.</p>
+
+<p>This tab contains inputs for the load combinations to analyze.
+A load combination is a set of loadings with
+corresponding load factors. The grid
+displays the loadings and factors for one combination at a time.
+You may define several load combinations, but
+you may only analyze one combination at a time. See also
+<a href="analysis-inputs-general.htm">General Tab</a>,
+<a href="analysis-inputs-members.htm">Members Tab</a>,
+<a href="analysis-inputs-supports.htm">Supports Tab</a>,
+<a href="analysis-inputs-loadings.htm">Loadings Tab</a>, and
+<a href="analysis-inputs-notes.htm">Notes Tab</a>.</p>
+
+<table>
+<tr><td>Combination</td><td>The name associated with the load
+combination. This name may be changed to any name not already used. To view the
+loadings and load factors for a different combination, select its name from the
+list. There is always one more entry in the list than there are combinations currently defined.
+To add a combination, select the last entry in the list and optionally rename it.
+You may delete a combination by deleting its name and pressing Enter.</td></tr>
+
+<tr><td width=125>Use Inflection Point Bracing</td><td>Check this
+box if you want the analysis to treat inflection points as brace points for the
+current load combination.</td></tr>
+
+<tr><td>Specification</td><td>Choose the design specification to be used
+with the current load combination. If the load combination uses unfactored loads,
+select an ASD specification. If the load
+combination uses factored loads, select an LRFD or LSD specification.
+If a load combination should not be used in strength checks (member checks or
+web-crippling checks), select "Deflection Only" as the Specification.</td></tr>
+
+<tr><td width=125>For All Strength Combinations</td><td>Check this box to force all
+load combinations to use the same Specification selection.</td></tr>
+
+<tr><td>Loading</td><td>The name of the loading to include in the current combination. This
+drop-down list contains all of the loadings currently defined in the analysis,
+plus member self weight.
+The self weight loading is a distributed load in the negative Y direction, based on each
+members’ cross section area and a density of 0.2833 lb/in³. To add a loading
+to the combination, enter its name in the blank row after the last loading in
+the combination. To add a loading that
+does not yet exist, you must first create it on the loadings tab.</td></tr>
+
+<tr><td>Load Factor</td><td>The multiplier to apply to all the loads
+in the loading. This may be positive or
+negative.</td></tr>
+</table>
+
+</body>
+</html>

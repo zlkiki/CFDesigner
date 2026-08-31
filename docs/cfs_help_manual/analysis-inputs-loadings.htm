@@ -1,0 +1,82 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Analysis Inputs - Loadings Tab</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Analysis Inputs - Loadings Tab</h1>
+
+<p>This window is displayed when you create a new analysis or open an existing
+analysis. It is displayed as a floating
+window separate from the main application window.
+Closing this window will not close the
+analysis itself and will not lose any information about the analysis.
+To redisplay this window (when an analysis is
+open), select Analysis Inputs from the
+<a href="view-menu.htm">View menu</a>, or press F4.</p>
+
+<p>This tab contains inputs for the loads in the analysis.
+Loads may be grouped into different types of
+loadings (dead, live, etc.). The grid
+displays the loads for one loading at a time.
+Each row in the grid defines one load. See also
+<a href="analysis-inputs-general.htm">General Tab</a>,
+<a href="analysis-inputs-members.htm">Members Tab</a>,
+<a href="analysis-inputs-supports.htm">Supports Tab</a>,
+<a href="analysis-inputs-combinations.htm">Combinations Tab</a>, and
+<a href="analysis-inputs-notes.htm">Notes Tab</a>.</p>
+
+<table>
+<tr><td width=125>Loading</td><td>The name associated with the
+loading. This name may be changed to any
+name not already used. To view the loads
+for a different loading, select its name from the list.
+There is always one more entry in the list
+than there are loadings currently defined.
+To add a loading, select the last entry in the list and optionally
+rename it. You may delete a loading by
+deleting its name and pressing Enter.</td></tr>
+
+<tr><td>Load Type</td><td>Select either Distributed,
+Concentrated, Axial, or Moment. Distributed and concentrated
+loads are applied transverse to the member, whereas axial loads
+are applied longitudinally.</td></tr>
+
+<tr><td>Load Angle</td><td>The angle of the load with respect to the
+cross section coordinate system. For distributed and concentrated loads,
+an angle of 0 is horizontal to the right, and an angle of 90 degrees is
+vertically upward. For a concentrated moment, an angle of 0 is a moment
+about the X axis, and an angle of 90 degrees is a moment about the Y axis.
+Load angle is not applicable to axial loads.</td></tr>
+
+<tr><td>Start Location</td><td>The global longitudinal position of the
+start of a distributed or axial load, or the single position of a concentrated
+load or moment. Since loads are global (as opposed
+to local member loads), they may span across multiple supports and multiple
+members. The start and end locations of
+an axial load represent the point of application and the point of restraint.</td></tr>
+
+<tr><td>End Location</td><td>For distributed and axial loads, the
+global longitudinal position of the end of the load.
+Not applicable to concentrated loads or moments.</td></tr>
+
+<tr><td>Start Magnitude</td><td>The magnitude of the load at the start
+location. For distributed loads, this is a force per unit length. For concentrated
+and axial loads, this is a force. For moments, this is an applied moment.</td></tr>
+
+<tr><td>End Magnitude</td><td>The magnitude of the load at the end
+location. For distributed loads, this is a force per unit length. For axial
+loads, this is a force, and must be equal to the start magnitude.
+Not applicable for concentrated loads or moments.</td></tr>
+
+<tr><td>Width</td><td>For concentrated loads, the width of the load
+is the length of bearing in the longitudinal direction.
+Not applicable for other types of loads.</td></tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Analysis Inputs - General Tab</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Analysis Inputs - General Tab</h1>
+
+<p>This window is displayed when you create a new analysis or open an existing
+analysis. It is displayed as a floating
+window separate from the main application window.
+Closing this window will not close the
+analysis itself and will not lose any information about the analysis.
+To redisplay this window (when an analysis is
+open), select Analysis Inputs from the <a href="view-menu.htm">View menu</a>,
+or press F4.</p>
+
+<p>This tab contains general inputs and information for the analysis. See also
+<a href="analysis-inputs-members.htm">Members Tab</a>,
+<a href="analysis-inputs-supports.htm">Supports Tab</a>,
+<a href="analysis-inputs-loadings.htm">Loadings Tab</a>,
+<a href="analysis-inputs-combinations.htm">Combinations Tab</a>, and
+<a href="analysis-inputs-notes.htm">Notes Tab</a>.</p>
+
+<table>
+<tr><td width=100>Description</td><td>Text describing the type of analysis.</td></tr>
+<tr><td>Project</td><td>Text describing the use for the analysis.</td></tr>
+<tr><td>Revised</td><td>The date and time of the last revision
+to the analysis inputs, and the name of the user that made the last
+revision. The user name comes from the
+Heading tab of the Options window.</td></tr>
+<tr><td>Member Orientation</td><td>Choose between Horizontal for beams and Vertical for columns.
+This only affects how the members are displayed. This has no impact on other inputs.
+For columns, the locations are measured from the top down.</td></tr>
+</table>
+
+<p>Two member check options are defined on this tab:</p>
+
+<table>
+<tr><td width=150>Calculate global buckling using elastic theory</td>
+<td>Most of the global buckling equations in the AISI Specification are based on elastic theory.
+But special cases exist for unequal unbraced lengths and non-symmetric sections, where more
+rigorous elastic theory could predict a higher buckling stress. Choosing this option enables
+these advanced elastic theory calculations. For AISI Specification editions prior to 2016,
+using elastic theory may in some cases be treated as a rational analysis with more conservative
+safety and resistance factors.</td></tr>
+<tr><td width=150>Include torsion in member checks</td>
+<td>If checked, the applied torsion bimoment is determined at each member check location, and
+the impact on flexural strength is included in the member check.</td></tr>
+</table>
+
+</body>
+</html>

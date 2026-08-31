@@ -1,0 +1,94 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Section Inputs - Elements Tab</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Section Inputs - Elements Tab</h1>
+
+<p>This
+window is displayed when you create a new section or open an existing
+section. It is displayed as a floating
+window separate from the main application window.
+Closing this window will not close the
+section itself and will not lose any information about the section.
+To redisplay this window (when a section is
+open), select Section Inputs from the View menu, or press F3.</p>
+
+<p>Parts
+are made up of elements, each defining the geometry and behavior of a flat
+segment of the shape. This tab contains
+the inputs for elements, one part at a time. See also
+<a href="section-inputs-section.htm">Section Tab</a>,
+<a href="section-inputs-part.htm">Part Tab</a>, and
+<a href="section-inputs-dsm.htm">Direct Strength Tab</a>.</p>
+
+<table>
+<tr><td width=100>Part Name</td><td>The name of the part whose elements are
+currently displayed in the grid.</td></tr>
+
+<tr><td>Length</td><td>The distance measured parallel to
+the element between the outside intersection points, or between the centerline
+intersection points if using centerline dimensions.
+To add an element to an open part, enter its
+length on the blank row after the last element.
+To add an element to a closed part, modify the length (or angle) of the
+last element. The length and angle of
+the added element on a closed part will always be determined by the program to
+close to the beginning of the first element.</td></tr>
+
+<tr><td>Angle</td><td>The direction of an element from
+the preceding element. An angle of 0 is
+horizontal to the right. Positive angles
+are measured counter-clockwise.</td></tr>
+
+<tr><td>Radius</td><td>The inside radius of the bend
+between the current element and the preceding element.
+The radius of the first bend on an open part
+has no relevance. The radius of the
+first bend on a closed part is the radius between the last element and the
+first element.</td></tr>
+
+<tr><td>Web</td><td>Indicates the type of shear and
+web crippling behavior of the element.
+All web types other than 'None' have shear and web crippling
+strength. 'Cee', 'Zee', 'Hat', and
+'Deck' are used for the web elements in those types of sections. 'Double' is
+used for webs restrained against rotation such as back-to-back Cees. 'Nested'
+is used for 'Zee' shapes that are overlapped at a support. 'Single' is a
+generic type for all other elements that should contribute to the shear and web
+crippling strength.</td></tr>
+
+<tr><td>k Coefficient</td><td>The plate buckling coefficient used to determine
+the effective width of the element under compression. This should typically be
+the default value of 0, which indicates the program should determine
+the appropriate value (see <a href="element-behavior.htm">Element Behavior</a>).
+It can be useful for unusual situations not covered explicitly by CFS,
+and is also used to indicate a cover plate with intermittent fasteners
+(see <a href="element-behavior.htm">Element Behavior</a>).
+If you enter a non-zero plate buckling coefficient (maximum value of 4), it is
+applied using the compression width of the element and the average compressive
+stress in the element. This will be treated as a rational analysis using the more
+conservative safety and resistance factors.
+You may not define a plate buckling coefficient and a hole in the same element.</td></tr>
+
+<tr><td>Hole Size</td><td>The size of
+the hole in the plane of the cross
+section. The default hole
+size of 0 indicates the element has no hole.
+The maximum hole size is the flat width
+of the element. You may not define a
+hole and a plate buckling coefficient in the same element.</td></tr>
+
+<tr><td>Distance</td><td>The distance from the beginning of
+the element to the center of the hole, measured from the outside intersection
+point, or from
+the centerline intersection point if using centerline dimensions.</td></tr>
+</table>
+
+</body>
+</html>

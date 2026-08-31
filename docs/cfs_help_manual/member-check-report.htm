@@ -1,0 +1,63 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Member Check Report</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Member Check Report</h1>
+
+<p>The Member Check report is created when you choose Member Check from the
+<a href="compute-menu.htm">Compute menu</a>. For sections, you must enter the
+<a href="member-check-parameters.htm">member check parameters</a> and loads. For
+an analysis, you must select the member <a href="locations.htm">locations</a>
+to perform the check(s).</p>
+
+<p>This report consists of a summary of the parameters, the loads (total or entered, applied,
+and strength), and the interaction equations for combined axial and bending,
+and combined bending and shear.</p>
+
+<p>For section member checks, 'Applied' loads are the same as the 'Entered' loads
+except additional moments will occur with axial load eccentricities, measured
+from the point of application to the centroid of the effective section.
+For the 2016 and later editions of AISI, moment amplifiers for P-&#948; effects are
+incorporated into the 'Applied' loads for beam-columns, unless Mx and My were
+specified as already including the P-&#948; effects. Additionally, angle sections
+might have an extra moment of PL/1000 applied as required by the Specification.</p>
+
+<p>For analysis member checks, `Total' loads are those determined from the analysis
+force and moment distribution, and are applied to all members that exist at the
+location being checked. 'Applied' loads are the portions of the 'Total' loads seen
+by the member being checked. For axial loads, this is proportioned by the
+full section area. For bending and shear loads, this is proportioned by the full
+section moment of inertia. These loads may also include adjustments for
+eccentricities, as stated above for section member checks.</p>
+
+<p>The 'Strength' values are the design strengths for the section computed according
+to the selected specification. Global column buckling and lateral-torsional buckling 
+stresses are calculated using elastic theory if that option is chosen.</p>
+
+<!--
+<p>The effective section properties are computed at the axial and bending loads
+applied to the full section. These may be used for independent calculations of
+deflections or working stresses.</p>
+-->
+
+<p>The interaction equations for combined axial load and bending and combined
+bending and shear are shown. Note that the combined bending and shear equation
+is for unreinforced webs. If torsion is included in the member check, a separate
+unity check is shown. For biaxial bending or non-symmetric sections, CFS uses
+a rational extension of the provisions as described in the AISI Commentary.
+See also <a href="torsion-design.htm">Torsion Design</a>.</p>
+
+<p>If the section is built-up from two or more parts and the direction of
+applied shear causes shear flow between parts, the magnitude of shear flow
+is summarized. For three or more parts, the shear flow for each part is shown
+which is the total shear flow for all the connections between that part and
+the other parts, and the sum of these shear flows for all parts is zero.</p>
+
+</body>
+</html>

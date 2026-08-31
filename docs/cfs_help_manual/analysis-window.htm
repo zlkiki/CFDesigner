@@ -1,0 +1,67 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Analysis Window</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Analysis Window</h1>
+
+<p>The analysis window displays a graphic of the analysis.
+Every open analysis has a corresponding
+analysis window, whether it was created as a new analysis with the
+<a href="analysis-wizard-1.htm">Analysis Wizard</a>, or opened from an analysis file.</p>
+
+<p><center><img src="analysis.png"></center></p>
+
+<p>The graphic contains a horizontal or vertical representation of the members,
+viewed isometrically. The orientation of the section
+for each member is as viewed from the left end of the member,
+or from the top for the vertical orientation.
+Overlapping members are shown with a slight
+stagger in the lines so the overlap is visible.
+Supports are shown as follows: X
+supports are horizontal lines, Y supports are vertical lines, torsional
+supports are circles around the member, and rotational supports are horizontal
+or vertical hatched walls.</p>
+
+<p>Graphical representations are also given for members with braced flanges and fully braced
+regions. And if the analysis inputs window is currently on the 
+<a href="analysis-inputs-loadings.htm">Loadings tab</a>, all the loads for that loading are also
+shown in the graphic.</p>
+
+<p>You may use the mouse to <b>select members and supports</b>.
+Selected items are shown highlighted in the graphic.
+You may select any member or support simply by clicking on it. You may select
+multiple consecutive members or supports by clicking on one and dragging to another.
+A pop-up menu of <a href="edit-menu.htm">edit commands</a>
+is available by clicking with the right mouse button.</p>
+
+<p>You may also <b>measure the distance</b> between two points along the members or supports.
+Hold the Ctrl key and click the first point. CFS will select the nearest endpoint or support,
+and show a point marker in the window. Then hold the Ctrl key and click the
+second point to display the dimension between the two points.
+To remove the dimension, hold the Ctrl key and click one more time.</p>
+
+<p>You may also <b>zoom and pan</b> the display using either the mouse or the keyboard.</p>
+
+<p>Here is a summary of the mouse and keyboard methods:</p>
+
+<table>
+<tr><td width=20></td><td width=150><b>Action</b></td><td width=150><b>Mouse</b></td><td><b>Keyboard</b></td></tr>
+<tr><td></td><td>Select Members</td><td>Click, Click & Drag</td><td></td></tr>
+<tr><td></td><td>Select Supports</td><td>Click, Click & Drag</td><td></td></tr>
+<tr><td></td><td>Select Point</td><td>Ctrl-Click</td><td></td></tr>
+<tr><td></td><td>Zoom In/Out</td><td>Ctrl-Mouse Wheel</td><td>Page Up, Page Down</td></tr>
+<tr><td></td><td>Pan Up/Down</td><td>Mouse Wheel</td><td>Ctrl-Up, Ctrl-Down</td></tr>
+<tr><td></td><td>Pan Left/Right</td><td>Shift-Mouse Wheel</td><td>Ctrl-Left, Ctrl-Right</td></tr>
+<tr><td></td><td>Drag</td><td>Middle-Click & Drag</td><td></td></tr>
+<tr><td></td><td>Zoom All</td><td></td><td>Home or Escape</td></tr>
+<tr><td></td><td>Edit Menu</td><td>Right-Click</td><td>Apps Key</td></tr>
+</table>
+
+</body>
+</html>

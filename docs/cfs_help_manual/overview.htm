@@ -1,0 +1,80 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Overview</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Overview</h1>
+
+<p>The CFS application allows you to work with two types of objects:
+<a href="sections.htm">Section</a> and <a href="analyses.htm">Analysis</a>.
+A Section is a geometric definition of a
+cold-formed steel cross sectional shape and its material properties.
+An Analysis is a configuration of cold-formed
+steel members, supports, and loads, for a simple beam, continuous beam, or
+beam-column arrangement.</p>
+
+<h4>Sections</h4>
+
+<p>A Section is composed of one or more individual cold-formed steel cross sectional shapes
+(parts) that together represent a beam or column member.
+Each part in a section is of uniform
+thickness with curved bends, and may be an open or closed shape.
+Parts are made up of elements that each
+define the flat portion of the shape, the radius at the bend, an optional hole size,
+and some behavior characteristics.</p>
+
+<p>Many useful editing features are available to quickly modify shapes.
+In addition to ordinary cut, copy, paste,
+insert, and delete functions, you may also rotate and mirror parts and entire sections,
+add stiffening ribs to elements of a section, and generate the second half of a
+symmetrical part. You may also undo and
+redo the last change you make.</p>
+
+<p>A section also has a specific set of material properties associated with it.
+CFS provides several carbon steel and
+stainless steel material types to choose from.
+Additionally, you may define a custom carbon steel or stainless steel
+material for a section.</p>
+
+<h4>Analyses</h4>
+
+<p>An Analysis is composed of members, supports, and loads.
+It may be used for analyzing simple beams,
+continuous beams, or beam-columns, with both vertical and horizontal transverse
+loads, as well as axial loads.</p>
+
+<p>Each member has an associated section, and all sections used in an analysis must be
+open (loaded) when working with the analysis.
+Member locations are defined independent from support locations.
+This approach provides a convenient way to
+define overlaps and multiple supports without numerous member segments and
+nodes. Supports may be horizontal,
+vertical, torsional, and rotational about both X and Y axes.</p>
+
+<p>Loads are grouped by loading type (dead, live, etc.), and numerous ASD, LRFD, and LSD
+load combinations may be defined.
+Transverse loads may be distributed (uniform or trapezoidal) or
+concentrated. Axial loads are defined by
+specifying both ends: the point of application and the point of restraint.</p>
+
+<h4>Computations</h4>
+
+<p>Several computations are available: Section
+<a href="properties-report.htm">Properties</a> (full and net),
+Section <a href="strength-report.htm">Strength</a> (axial, bending, and shear),
+<a href="member-check-report.htm">Member Checks</a>, and
+<a href="web-crippling-report.htm">Web Crippling</a> Checks. The
+output from any of these computations may be combined into
+<a href="reports.htm">reports</a> for saving
+and printing. A finite strip <a href="buckling-parameters.htm">elastic buckling analysis</a>
+can be performed on any section containing one part.
+You may also display and print shear, moment,
+and deflection <a href="analysis-diagrams.htm">diagrams</a> for an analysis.</p>
+
+</body>
+</html>

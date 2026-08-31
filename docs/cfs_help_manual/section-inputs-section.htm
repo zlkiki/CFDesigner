@@ -1,0 +1,114 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Section Inputs - Section Tab</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Section Inputs - Section Tab</h1>
+
+<p>This window is displayed when you create a new section or open an existing
+section. It is displayed as a floating
+window separate from the main application window.
+Closing this window will not close the
+section itself and will not lose any information about the section.
+To redisplay this window (when a section is
+open), select Section Inputs from the <a href="view-menu.htm">View menu</a>, or press F3.</p>
+
+<p>This tab contains general inputs that apply to the entire section.
+See also <a href="section-inputs-part.htm">Part Tab</a>,
+<a href="section-inputs-elements.htm">Elements Tab</a>, and
+<a href="section-inputs-dsm.htm">Direct Strength Tab</a>.</p>
+
+<table>
+<tr><td width=125>Description</td><td>Text describing the type of
+section.</td></tr>
+
+<tr><td>Project</td><td>Text describing the use for the section.</td></tr>
+
+<tr><td>Revised</td><td>The date and time of the
+last revision to the section, and the name of the user that made the last
+revision. The user name comes from the
+<a href="options-heading.htm">Heading tab</a> of the Options window.</td></tr>
+
+<tr><td>Material Type</td><td>The designation for the type of
+material of the section. When you select
+a different material, the yield strength and tensile strength inputs are
+updated to the defaults for that material.
+For carbon steels, these may then be changed if necessary.
+If you have created a custom material it will
+also be available to select from the list.
+Additionally, you may view detailed information about the material and
+customize it specifically for the current section by pressing the ‘…’ button
+next to the material type.</td></tr>
+
+<tr><td width=125>Apply cold work of forming strength increase</td>
+<td>Indicates whether to calculate and apply the strength increase from cold work of forming.
+If the inleastic reserve option is also checked, the strength increase from cold work of forming
+is not permiited, but CFS will calculate and report the higher strength of the two options.
+The cold work of forming option does not get applied to cylindrical tubes.</td></tr>
+
+<tr><td width=125>Apply inelastic reserve strength increase</td>
+<td>Indicates whether to calculate and apply the inelastic reserve strength.
+If the cold work of forming option is also checked, the inelastic reserve strength
+is not permiited, but CFS will calculate and report the higher strength of the two options.</td></tr>
+
+<tr><td>Yield Strength, Fy</td>
+<td>The section material yield strength used for design calculations. For stainless steel materials, this
+represents the longitudinal compression yield strength and is not editable.</td></tr>
+
+<tr><td>Tensile Strength, Fu</td>
+<td>The section material longitudinal ultimate tensile strength.
+For stainless steel materials, this is not editable.</td></tr>
+
+<tr><td>J Override</td><td>St. Venant torsion constant to be used instead
+of the value calculated by CFS, if the override is greater than the calculated
+value. This is useful for sections containing multiple parts that are connected
+such that the section torsion constant is larger than the sum of the individual
+part torsion constants, which generally happens when separate parts join to
+form a closed shape. The Section Wizard will compute and assign the appropriate
+value for applicable sections using the assumption that the parts are rigidly
+and continuously connected. However if you subsequently make changes to the
+inputs, this value will not be automatically updated. For sections with holes,
+this override should reflect the weighted average torsion constant consistent
+with the hole length and spacing.</td></tr>
+
+<tr><td>Cw Override</td><td>Torsional warping constant to be used instead of
+the value calculated by CFS, if the override is greater than zero. This is
+useful for sections containing multiple parts that are connected such that the
+section torsional warping constant is different from the sum of the individual
+part torsional warping constants. The Section Wizard will compute and assign
+the appropriate value for applicable sections using the assumption that the
+parts are rigidly and continuously connected. However if you subsequently
+make changes to the inputs, this value will not be automatically updated.
+For sections with holes, this override should reflect the net section warping
+constant.</td></tr>
+
+<tr><td></td><td>The effective torsion properties for built-up sections
+depend on the stiffness of the connections, which can be difficult to determine
+if not rigidly and continuously connected. This article provides information
+which may be helpful:
+<a href="https://www.sciencedirect.com/science/article/pii/S0263823119320269">
+The mechanics of built-up cold-formed steel members</a>.</td></tr>
+
+<tr><td>Connector Spacing</td><td>For built-up sections of more than one part,
+this defines the longitudinal spacing between shear connectors. It is
+used to adjust the KL/r for column members. It is also used for the spacing
+of intermittent connections of cover plates.</td></tr>
+
+<tr><td>Hole Length</td><td>For sections with holes, enter the length of the
+holes. This affects distortional buckling stresses and the average section
+properties used for calculating global buckling stresses. To ignore the impact
+on buckling stresses, enter a hole length of 0.</td></tr>
+
+<tr><td>Hole Spacing</td><td>For sections with holes, enter the longitudinal
+hole spacing. This affects distortional buckling stresses and the average section
+properties used for calculating global buckling stresses.</td></tr>
+
+</table>
+
+</body>
+</html>

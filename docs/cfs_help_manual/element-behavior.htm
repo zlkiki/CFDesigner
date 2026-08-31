@@ -1,0 +1,171 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Element Behavior</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Element Behavior</h1>
+
+<p>The effective section properties and allowable loads are computed using 
+the AISI and ASCE specifications, as selected in the application.
+However, since CFS allows you to define any
+general shape including holes, there are some situations that are not covered
+by these specifications. Therefore, some
+assumptions have been made as described below.
+These assumptions are made with reasonable engineering judgment but
+might not always be appropriate for your design.
+It is the responsibility of the engineer to
+evaluate these assumptions and determine the validity of the results.
+For more information about specific effective width calculations,
+utilize the <a href="tools-menu.htm">Trace</a> feature to get the calculation details.</p>
+
+<h4>Unstiffened Elements</h4>
+
+<p>The first and last elements of an open part are considered unstiffened.
+However if the free edge is in tension, the
+element is considered stiffened.</p>
+
+<p>If an unstiffened element contains a hole, any ineffective area exclusive of the
+hole is removed from the section. Thus
+if a hole is entirely within the ineffective portion, the element has the same
+capacity with or without the hole.</p>
+
+<h4>Partially Stiffened Elements</h4>
+
+<p>The second and second to last elements of an open part are considered partially
+stiffened, if it is entirely in compression and the adjacent edge element is
+treated as unstiffened. Otherwise it is
+treated as stiffened.</p>
+
+<p>If a partially stiffened element contains a hole, the two flat portions of the
+element on each side of the hole are treated as unstiffened elements.
+Further, the plate buckling coefficients for
+these two elements are reduced below the normal value for unstiffened elements,
+just as a partially stiffened element has a reduced plate buckling coefficient.
+These plate buckling coefficients are proportioned by the same ratio as the
+width reduction factor for the partially stiffened element.</p>
+
+<h4>Stiffened Elements</h4>
+
+<p>All elements between the third and third to last element of an open part and all
+elements of a closed part are considered stiffened, except for cases where
+elements are identified by CFS as having intermediate stiffeners (see
+Intermediate Stiffeners below). The
+plate buckling coefficient (k) for stiffened elements is computed based on the
+stress gradient per AISI and ASCE.</p>
+
+<h4>Three Element Parts</h4>
+
+<p>If a part has three elements, the middle element is considered fully stiffened.</p>
+
+<h4>One Element Parts</h4>
+
+<p>If a part has only one element, it is treated as an unstiffened element. If both
+edges are in compression, the ineffective area is removed from each edge,
+proportioned by the relative stresses at the edges.</p>
+
+<h4>Intermediate Stiffeners</h4>
+
+<p>The AISI Specification has provisions for elements with multiple intermediate
+stiffeners. CFS applies this new provision by first searching for elements that
+may contain intermediate stiffeners. Starting from the second element and
+continuing through to the second-to-last element, intermediate stiffeners are
+identified when a set of two or more elements are found to be collinear
+(parallel and along the same line). There are some conditions that disqualify
+all or part of the section as having intermediate stiffeners:</p>
+
+<ul>
+<li>If the stiffened element crosses the neutral axis, only those elements in compression are considered using this method.</li>
+<li>Any elements with user-defined plate buckling coefficients (k) will terminate the extent of an element with intermediate stiffeners.</li>
+<li>If the total flat width of the collinear elements is less than the flat widths contained in the
+bounded non-collinear elements (stiffeners), those non-collinear elements are considered too large to be treated as intermediate stiffeners.
+For example, a symmetrical panel section with uniform corrugations, neither the top series of elements nor the bottom series
+of elements would be treated as intermediately stiffened elements. All the interior elements would all be treated as fully stiffened.</li>
+</ul>
+
+<p>CFS uses this method even if there is only one intermediate stiffener.
+If a stress gradient exists along the
+stiffened element, the method is still applied using the average compressive
+stress in the element.</p>
+
+<p>Earlier editions of the AISI Specification contained different provisions for multiple
+intermediate stiffeners, but CFS uses the above method for all cases, including
+stainless steel design.</p>
+
+<h4>Stiffness Override</h4>
+
+<p>If you input an element stiffness (k), it is used with the average compressive
+stress in the element, and the width of the compressive portion of the element
+to determine the effective width. The
+position of the ineffective portion is determined using the same method as for
+stiffened elements with a stress gradient, even if the override is applied to
+an edge element. Elements with holes
+cannot have a stiffness override.</p>
+
+<h4>Cover Plate with Intermittent Fasteners</h4>
+
+<p>The AISI Specification has special provisions for determining the effective width
+of cover plate segments connected to fluted sections with intermittent fasteners.
+To have CFS perform these calculations, define the cover plate as consecutive elements
+in the same direction, where the beginning and end of each element defines the
+fastener location. Then enter a non-zero plate buckling coefficient (k>0) for those elements connected
+by intermittent fasteners (including edge elements) and define the fastener spacing as the
+Connector Spacing on the Section tab of the Section Inputs.</p>
+
+<p>These provisions only apply to the flexural strength of the cover-plated member with the
+cover plate under uniform compression. For axial load or cover plates under non-uniform
+compression, CFS will use the <b>Stiffness Override</b> logic stated above with the k
+value provided.</p>
+
+<p>For interior cover plate elements, CFS uses k=4 regardless of the k value provided.
+For edge cover plate elements, CFS conservatively uses k=1.25 rather than applying the
+edge stiffener provisions to determine k. The cover plate may contain any type of
+elements beyond the flat portion. These elements are treated as described elsewhere
+in this help topic. If the cover plate has a simple edge stiffener element, CFS does
+not use the modified edge stiffener width and stress as defined by AISI. This is an
+approximation which typically has little impact on the overall flexural strength
+calculation.</p>
+
+<p>CFS does not treat the cover plate effective width calculation as a rational
+analysis using more conservative safety and resistance factors, unless the section
+parameters do not comply with the limits stated in the AISI provisions.</p>
+
+<h4>Large Radius Arc Segments</h4>
+
+<p>The 2012 and later editions of the AISI Specification limited R/t to 10. The Commentary provides a
+rational analysis for reducing the plate buckling coefficients for elements adjacent to
+large radius bends. This rational analysis is employed by CFS for 10 &lt; R/t &lt; 30.</p>
+
+<p>For bends with larger R/t, CFS may reduce the effective area in the bend itself.
+The effective area calculations for cylindrical tubular members under
+compression have been extended in CFS for use on
+arc segments of non-cylindrical sections. This provides continuity in member strength
+for sections that are nearly cylindrical.</p>
+
+<h4>Extreme Fiber</h4>
+
+<p>If the extreme compression fiber of the section is the tip of an unstiffened
+element, application of the AISI and ASCE Specifications might produce conservative
+allowable moments. If the element is not fully effective, the depth of the section
+may be reduced dramatically. CFS uses the reduced depth for the effective moment of
+inertia and effective section modulus.</p>
+
+<h4>Shear Distribution</h4>
+
+<p>For sections with multiple webs, the shear strength is determined as the sum of the
+shear strengths for each web. The shear strengths are calculated for unreinforced webs.
+For angled webs, the shear strength is multiplied by the cosine of the angle between the
+load direction and element direction. If all web elements are perpendicular to the
+load direction, the shear strength is zero in that direction.</p>
+
+<p>In computing the shear strength of webs with holes, CFS assumes the holes to be
+non-circular, which results in a capacity slightly less than for circular
+holes. Although the AISI provisions only apply to C-sections with centered holes,
+CFS uses the same calculations for other conditions.</p>
+
+</body>
+</html>

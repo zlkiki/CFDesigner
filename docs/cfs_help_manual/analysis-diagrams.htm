@@ -1,0 +1,58 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Analysis Diagrams</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Analysis Diagrams</h1>
+
+<p>The Diagrams window is displayed when you select Diagrams from the
+<a href="compute-menu.htm">Compute menu</a> (only available for an analysis). This
+window shows diagrams for reactions, shears, moments, and deflections for the
+current load combination. The magnitudes
+of the reactions and the peak values of shear, moment, and deflection are
+labeled on the diagrams. You can move the mouse pointer along the length of a diagram
+to display the magnitude at any location.</p>
+
+<table>
+<tr><td width=150>Combination</td>
+<td>The current load combination is selected by default. You may choose
+a different load combination or the Envelope of all load combinations.
+The Envelope is displayed as shaded regions representing the minimum
+and maximum values along the length.</td></tr>
+
+<tr><td width=150>Direction</td>
+<td>You may choose to display diagrams for vertical (Y) direction, horizontal (X) direction,
+or Torsion. For more details, see <a href="torsion-diagrams.htm">Torsion Diagrams</a>.</td></tr>
+
+</table>
+
+<p>If the selected load combination and direction does not include any transverse loads,
+there are no diagrams to display.</p>
+
+<p>Deflections are determined using full section properties and factored loads.
+To determine service load deflections, create a load combination that includes the service loads.
+Use a load factor of 1 for each loading if the section is fully effective.
+Otherwise use the ratio Ix/Ixe as the load factor or as a multiplier on the deflection values,
+where Ixe is the effective moment of inertia at the service load.</p>
+
+<p>Lapped members are assumed to provide full continuity.
+The bending stiffness at a lap uses the sum of the full moments of inertia
+of the lapped members.</p>
+
+<p>The Print button will print the currently displayed diagrams. This printout is formatted for
+standard 8½x11 inch paper in portrait orientation.Other sizes and orientations should work, but
+may result in less effective use of the paper or illegible diagrams.</p>
+
+<p>The Copy Image button will copy the diagrams display image to the clipboard,
+which may then be pasted into another application.</p>
+
+<p>The Report button will produce a text version of the peak values on the diagrams. See
+<a href="diagrams-report.htm">Diagrams Report</a>.</p>
+
+</body>
+</html>

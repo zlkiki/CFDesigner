@@ -1,0 +1,66 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Analysis Inputs - Supports Tab</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Analysis Inputs - Supports Tab</h1>
+
+<p>This window is displayed when you create a new analysis or open an existing
+analysis. It is displayed as a floating
+window separate from the main application window.
+Closing this window will not close the
+analysis itself and will not lose any information about the analysis.
+To redisplay this window (when an analysis is
+open), select Analysis Inputs from the
+<a href="view-menu.htm">View menu</a>, or press F4.</p>
+
+<p>This tab contains inputs for the supports in the analysis.
+Each row in the grid represents one support definition. See also
+<a href="analysis-inputs-general.htm">General Tab</a>,
+<a href="analysis-inputs-members.htm">Members Tab</a>,
+<a href="analysis-inputs-loadings.htm">Loadings Tab</a>,
+<a href="analysis-inputs-combinations.htm">Combinations Tab</a>, and
+<a href="analysis-inputs-notes.htm">Notes Tab</a>.</p>
+
+<table>
+<tr><td width=100>Support Type</td><td>Support types may be horizontal (X),
+vertical (Y), torsional (T), rotation about X axis (Rx), rotation about Y axis
+(Ry), or a combination of the above. The X and Y directions correspond to the
+horizontal and vertical axes in the cross section.
+Rotational supports are only allowed at the left-most or right-most ends
+of the members. A flexural hinge may also be defined for bending about the
+X axis (Hx) or the Y axis (Hy). To add a support or hinge, enter
+its type in the blank row after the last support.</td></tr>
+
+<tr><td>Location</td><td>The global longitudinal position of
+the support (vertical position for columns).</td></tr>
+
+<tr><td>Bearing</td><td>The length of bearing in the longitudinal
+direction (width of the support).</td></tr>
+
+<tr><td>Fastened</td><td>Indicates whether the bearing flange
+is fastened to the support. This can affect the web-crippling strength at the
+support. To change between Yes and No, press F2 or a letter key, or
+double-click.</td></tr>
+
+<tr><td>K</td><td>The effective length factor to use in the span between this
+support and the next support of this type. If X, Y, and T supports are at the
+same location with different effective length factors, you may define them
+separately. Note that horizontal (X) supports define Ky for buckling about
+the Y axis, and vertical (Y) supports define Kx for buckling about the X axis.
+If the section cantilevers beyond the last support, CFS uses K=2.1 on the
+cantilevered length, unless the entered K value is larger.
+You may model a continuously supported span by entering a factor of
+K=0. Loads applied in the direction of a continuously supported span will be
+ignored, and the continuously supported span will have no shear, moment, or
+deflection in that direction.</td></tr>
+
+</table>
+
+</body>
+</html>

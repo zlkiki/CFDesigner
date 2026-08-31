@@ -1,0 +1,82 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Section Wizard - Page 2 of 2</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Section Wizard - Page 2 of 2</h1>
+
+<p>This window is displayed by selecting New Section from the
+<a href="file-menu.htm">File menu</a>.
+The Section Wizard is used to easily create
+the geometry for many common shapes.
+After you finish the Wizard, you have full editing capabilities for the
+section.</p>
+
+<p>The second page of the Section Wizard is used to define the geometric parameters
+applicable to the shape you selected (see <a href="section-wizard-1.htm">Page 1</a>).
+All of the dimensional parameters of Section
+Depth, Flange Width, and Lip Length are measured to the outside intersection points,
+except for panel sections which dimension to the centerline of the
+thickness. Some of the inputs do not
+apply to every shape.</p>
+
+<table>
+<tr><td width=125>Thickness (name)</td><td>A selection
+of predefined thicknesses and corresponding default bend radii.
+If you select a different thickness name, the
+thickness and default bend radius are updated.
+The predefined thicknesses may be customized by selecting Options from
+the Tools menu.</td></tr>
+
+<tr><td>Thickness (value)</td><td>The design
+thickness of the part. If you enter a
+thickness that matches a predefined thickness, its corresponding default bend
+radius will be assigned. If it does not
+match a predefined thickness and the bend radius is less than the new
+thickness, the bend radius is set equal to the new thickness.</td></tr>
+
+<tr><td>Section Depth</td><td>The overall vertical dimension of
+the section.</td></tr>
+
+<tr><td>Flange Width</td><td>The width of the flange.
+This is usually the dimension of the
+horizontal element(s). For angle
+sections, it is the length of the legs.</td></tr>
+
+<tr><td>Lip Length</td><td>The length of the lip edge
+stiffener.</td></tr>
+
+<tr><td>Radius</td><td>The inside bend radius
+for all bends on the part. If some bends
+use a different bend radius, you may make these changes after the Section
+Wizard creates the section.</td></tr>
+
+<tr><td>Web Angle</td><td>The angle of the web,
+measured from the horizontal.</td></tr>
+
+<tr><td>Lip Angle</td><td>The angle of the lip,
+measured from the horizontal.</td></tr>
+
+<tr><td>Rib Spacing</td><td>The horizontal distance from
+the center of one rib to the center of the next rib.
+This only applies to panel sections.</td></tr>
+
+<tr><td>Number of Spacings</td><td>The
+number of rib spacings in the panel.
+There is one more rib than the number of spacings.</td></tr>
+</table>
+
+<p>For sections comprised of multiple parts, CFS provides the override
+values for the torsion properties J and Cw. These values are calculated
+with the assumption that the parts are rigidly and continuously connected
+at the contact points. If this assumption is not correct for your section,
+you will need to modify these override values on the Section tab of the
+Section Inputs window.</p>
+
+</body>
+</html>

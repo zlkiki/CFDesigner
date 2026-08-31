@@ -1,0 +1,57 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Cut, Copy, and Paste</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Cut, Copy, and Paste</h1>
+
+<p>These commands on the <a href="edit-menu.htm">Edit menu</a>
+apply primarily to rows of grid inputs:
+<a href="section-inputs-elements.htm">elements</a>,
+<a href="analysis-inputs-members.htm">members</a>,
+<a href="analysis-inputs-supports.htm">supports</a>,
+<a href="analysis-inputs-loadings.htm">loads</a>, and
+<a href="analysis-inputs-combinations.htm">load factors</a>.</p>
+
+<p>The Cut command (Ctrl-X) removes the selected row or rows from the grid, and copies
+them to the clipboard. This allows you
+to later paste them back into the same grid.
+The Copy command (Ctrl-C) also copies the selected row or rows to the
+clipboard, but does not remove them from the grid.</p>
+
+<p>For the elements grid, if you select all the rows in the grid (including the blank
+row at the bottom for open shapes), the Copy command will copy all of the
+inputs for the part (thickness, position, etc.) along with the elements
+themselves to the clipboard. The Cut
+command will do the same thing, plus remove the entire part from the
+section. The clipboard part may then be
+pasted into different section as an additional part, instead of being pasted in
+as additional elements to the current part.</p>
+
+<p>Similarly, Cut and Copy in the loads grid and load factors grid operate on the entire
+loading and entire load combination respectively, if you select all the rows
+including the blank row at the bottom.</p>
+
+<p>The Paste command (Ctrl-V) inserts the copied row or rows into the grid at the
+current cell pointer location. If more
+than one row is selected when you paste, the selected rows are removed when the
+copied rows are inserted. If the current
+grid is for different inputs than those copied to the clipboard, you cannot
+paste into it. If the clipboard contains
+an entire part, loading, or load combination, it will be pasted as a new entry
+at the end of the list.</p>
+
+<p>Since section elements, analysis members, and analysis supports may be selected in
+the graphic, you may perform the Cut, Copy, and Paste commands without using
+the grid in the inputs window.</p>
+
+<p>In addition to the grid inputs, you may use cut, copy, and paste in text inputs
+with the shortcut keys Ctrl-X, Ctrl-C, and Ctrl-V.</p>
+
+</body>
+</html>

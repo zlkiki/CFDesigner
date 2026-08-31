@@ -1,0 +1,126 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Member Check Parameters</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Member Check Parameters</h1>
+
+<p>This window is displayed when you select Member Check from the
+<a href="compute-menu.htm">Compute menu</a>, and the
+active window is a section. After you enter the appropriate values,
+press the OK button and the <a href="member-check-report.htm">Member Check</a>
+output will be displayed.</p>
+
+<h4>Unbraced Lengths</h4>
+
+<table>
+<tr><td width=150>Lx, Ly, Lt</td><td>The unbraced lengths of the member for buckling about the X axis (in the Y
+direction), buckling about the Y axis (in the X direction), and torsional
+buckling, respectively. For lateral-torsional
+buckling of beams symmetrical about the X axis and bending about the X axis, Ly
+and Lt are the controlling unbraced lengths.</td></tr>
+
+<tr><td>Kx, Ky, Kt</td><td>The effective length factors applied to the respective unbraced lengths.
+A value of 0 indicates a fully braced condition, where internal forces resulting from loads in that
+direction are set to 0.</td></tr>
+
+<tr><td>Lm</td><td>The distance
+along the length of the member between discrete rigid restraints that restrict
+distortional buckling. If there are no discrete restraints for distortional
+buckling, leave this as a large value (such as the span length) and CFS will
+calculate the distortional buckling wavelength. If the member is fully
+restricted against distortional buckling, use Lm = 0. If the shape does not
+have a distortional buckling failure mode, the value of Lm has no effect.<br><br>
+
+In cases where rotational stiffness is provided to the braced flange by connection to sheathing,
+Lm does not represent the spacing between fasteners. It is the distance between
+rigid restraints against distortional buckling, if they exist.</td></tr>
+</table>
+
+<h4>Coefficients</h4>
+
+<table>
+<tr><td width=150>Cbx, Cby</td><td>The bending coefficients used to determine the elastic critical moments for the member
+about the X axis and Y axis, respectively.
+The value is dependent on the moment gradient throughout the unbraced
+length. You may conservatively use the
+default value of 1. For bending about a non-symmetric axis, you must enter the reciprocal of C<sub>TF</sub>
+as the value of Cb, which may also be conservatively set to 1.</td></tr>
+
+<tr><td>Cmx, Cmy</td><td>The moment coefficients used in the combined compressive axial load and bending interaction equation,
+for moments about the X axis and Y axis, respectively. You may conservatively use the default value of 1.</td></tr>
+
+<tr><td>Braced Flange</td><td>For members having one flange
+fastened to deck, sheathing, roof system, or other continually connected
+system, select the flange that is attached:
+Bottom, Top, Left, or Right. Otherwise,
+select None.</td></tr>
+
+<tr><td>Reduction Factor, R</td><td>If there is a braced flange, enter the moment reduction
+factor as defined in the AISI or ASCE Specification for your situation. For example:<br>
+      R=0.70 for continuous span Z sections<br>
+      R=0.60 for continuous span C sections<br>
+      R=0.70 for simple span C or Z section, depth <span style='font-family:Symbol'>£</span> 6.5&quot;<br>
+      R=0.65 for simple span C or Z section, 6.5&quot; <span style='font-family:Symbol'>&lt;</span> depth <span style='font-family:Symbol'>£</span> 8.5&quot;<br>
+      R=0.50 for simple span Z section, 8.5&quot; <span style='font-family:Symbol'>&lt;</span> depth <span style='font-family:Symbol'>£</span> 12&quot;<br>
+      R=0.40 for simple span C section, 8.5&quot; <span style='font-family:Symbol'>&lt;</span> depth <span style='font-family:Symbol'>£</span> 12&quot;</td></tr>
+
+<tr><td>Stiffness, k<span style='font-family:Symbol'>f</span>
+</td><td>The rotational stiffness provided to the braced flange by
+connection to the bracing material (deck, sheathing, etc.). This stiffness is
+incorporated in the distortional buckling calculations for the flange which is
+braced (bottom, top, left, or right). The units for this input are
+moment/radian/unit length (such as k-in/rad/in) which is then reduced to a
+force (such as k). Refer to the AISI Specification and Commentary for more
+information on determining what value to use.</td></tr>
+
+<tr><td width=150>Mx and My include<br>P-&#948; effects</td>
+<td>Choosing this option will prevent moment amplifiers from being applied due to axial compression load.</td></tr>
+
+</table>
+
+<h4>Internal Forces</h4>
+
+<table>
+<tr><td width=150>P</td><td>The axial
+force (factored for LRFD) applied to the section.
+Positive loads are compression and negative
+loads are tension.</td></tr>
+
+<tr><td>ex, ey</td><td>The axial load eccentricity in the X and Y
+direction, measured from the origin of the section.
+Positive ex is horizontal to the right of the
+origin and positive ey is vertically above the
+origin. The combination of the axial
+load and these eccentricities produces additional bending moment if the
+unbraced length is greater than zero.</td></tr>
+
+<tr><td>Mx</td><td>The moment (factored for LRFD) about the X axis applied to the section.
+Positive moments produce compression above the X axis.</td></tr>
+
+<tr><td>Vy</td><td>The shear force (factored for LRFD) in the Y direction applied to the section.
+This generally accompanies a moment about the
+X axis.</td></tr>
+
+<tr><td>My</td><td>The moment (factored for LRFD) about the Y axis applied to the
+section. Positive moments produce
+compression to the right of the Y axis.</td></tr>
+
+<tr><td>Vx</td><td>The shear force (factored for LRFD) in the X direction applied to the section.
+This generally accompanies a moment about the
+Y axis.</td></tr>
+
+<tr><td>B</td><td>The torsional bimoment (factored for LRFD) applied to the section.
+The sign of the bimoment is very important when combined with bending. For a C section with a
+vertical web, a positive bimoment causes tension in the upper-right and lower-left quadrants of the
+section, and causes compression in the upper-left and lower-right quadrants of the section.</td></tr>
+
+</table>
+
+</body>
+</html>

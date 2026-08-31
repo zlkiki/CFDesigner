@@ -1,0 +1,93 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Strength Report</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Strength Report</h1>
+
+<p>The Strength report is created when you select Strength from the
+<a href="compute-menu.htm">Compute menu</a> (only available for sections). If ASD is
+selected on the Compute menu, this report includes strengths for the Allowable
+Stress Design method. If LRFD is
+selected on the Compute menu, this report includes design strengths for the
+Load and Resistance Factor Design method.
+The strength values in this report are for the fully braced case.
+In other words, axial and bending strengths
+are based on the initiation of yielding.</p>
+
+<p>This report includes strengths for compression, tension, shear, bending,
+and torsional bimoment. A positive moment about the X axis has compression
+above the X axis. A positive moment about the Y axis has compression to the
+right of the Y axis. For a C section with a vertical web, a positive bimoment
+causes tension in the upper-right and lower-left quadrants of the section, and
+causes compression in the upper-left and lower-right quadrants of the section.</p>
+
+<p>The compression and bending strengths are accompanied by the effective section
+properties used in determining the nominal strength of the section, where the
+maximum stress is the yield stress. The
+effective widths of elements are determined in accordance with the AISI Specification
+for carbon steel, and the ASCE Specification
+for stainless steel (see <a href="element-behavior.htm">Element Behavior</a>).</p>
+
+<p>If the section has any holes, the effective properties are computed based on the
+net section. This is done because fully
+braced failure will occur at the weakest point in the member.</p>
+
+<p>The yield stress used for each strength type is increased to the appropriate
+calculated value if you choose to apply strength increase from cold work of
+forming in the <a href="section-inputs-section.htm">Section Inputs</a>
+window, and the section meets the other specification criteria necessary to use the increase.</p>
+
+<p>Since CFS allows you to specify radii of different sizes, it uses a generalized form
+of the AISI calculation for the strength increase:
+Fya&nbsp;=&nbsp;(<span style='font-family:Symbol'>S</span>AcFyc&nbsp;+&nbsp;<span style='font-family:Symbol'>S</span>AfFy)/(<span style='font-family:Symbol'>S</span>Ac+<span style='font-family:Symbol'>S</span>Af),
+where Ac and Fyc are the area and the tensile yield
+point of each corner, and Af is the area of each
+flat, disregarding any holes. For axial
+loads, the summations apply to all elements.
+For bending loads, the summations apply to flats at the extreme fiber of
+the full section parallel to the axis of bending, and the adjacent
+corners. If there are no flats along the
+extreme fiber, no strength increase is used.
+For carbon steel, any bend with R/t&gt;7 or angle of bend (exterior angle) &lt;60° does
+not get a strength increase (Fyc=Fy). The details of the cold work of forming increase
+can be obtained using the <a href="tools-menu.htm">Trace</a> option.</p>
+
+<p>Since the strength increase applies only when the compression
+elements are compact enough,
+each strength type (tension, compression, +Mx, -Mx, +My, and -My)
+is independently checked to determine whether the strength increase is allowed.
+Since fully braced strengths are computed
+using the net section, the strength increase will only apply if both the full
+section and the net section are fully effective with the extreme fiber at Fya.</p>
+
+<p>The strength increase from inelastic reserve cannot use the strength increase
+from cold work of forming. If both options are selected, CFS will compute both
+and report the higher strength. The ASCE specification for stainless steel also
+contains inelastic reserve provisions for axial tension and compression, however
+CFS does not utilize these provisions.</p>
+
+<p>There is an unusual case for the lateral buckling strength calculation (not computed
+in this report), where the moment causing initial yield at the extreme
+compression fiber of the full section is calculated.
+This could result in a tension stress greater
+than Fy and a compression
+stress greater than otherwise calculated.
+Since this situation might not be fully effective, whereas it might have
+been with the extreme tension fiber at Fy,
+this special case requires the additional check for a fully effective full
+section.</p>
+
+<p>It is important to note that since CFS allows the definition of any general shape,
+the assumptions made by CFS for determining these strengths may not always be
+appropriate. It is the responsibility of
+the engineer to evaluate these assumptions and determine the validity of the
+results.</p>
+
+</body>
+</html>

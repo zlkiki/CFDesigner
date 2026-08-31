@@ -1,0 +1,52 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Torsion Design</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Torsion Design</h1>
+
+<p>Torsion applied to a member produces internal stresses which may contribute to
+certain failure modes. The stresses are identified as pure (St. Venant) torsion shear
+stress (&#x03C4;<sub>sv</sub>), warping shear stress (&#x03C4;<sub>w</sub>), and warping
+longitudinal stress (&#x03C3;<sub>w</sub>).
+</p>
+
+<p>&#x03C4;<sub>sv</sub> = T<sub>sv</sub>t/J = –Gt&#x03D5;' for open sections</p>
+
+<p>&#x03C4;<sub>sv</sub> = T<sub>sv</sub>/2A<sub>m</sub>t = –2G&#x03D5;'A<sub>m</sub>/S<sub>m</sub> for closed sections</p>
+
+<p>&#x03C4;<sub>w</sub> = T<sub>w</sub>S<sub>w</sub>/C<sub>w</sub>t = ES<sub>w</sub>&#x03D5;'''/t</p>
+
+<p>&#x03C3;<sub>w</sub> = BW<sub>n</sub>/C<sub>w</sub> = EW<sub>n</sub>&#x03D5;''</p>
+
+<p>See also <a href="torsion-properties-report.htm">Torsion Properties</a>.</p>
+
+<p>The AISI Specification has design provisions for combined bending and torsion, where
+longitudinal stresses from torsion may reduce the flexural strength of the member. If a
+member check includes a torsional bimoment (B), a moment reduction is calculated using
+the ratio of the maximum bending stress to the maximum combined bending and warping stress.</p>
+
+<p>The available bimoment strength shown on the member check report is the magnitude of B at
+which the maximum longitudinal warping stress is equal to the yield stress (F<sub>y</sub>), with
+the appropriate safety or resistance factor applied. If the section contains more than one part,
+the nominal bimoment strength (B<sub>n</sub>) is approximated as the sum of the individual
+part bimoment strengths, and the maximum warping stress is calculated as F<sub>y</sub>B/B<sub>n</sub>.
+This is conservative because: 1) the bimoment strength should be greater than the sum of
+the parts, 2) the maximum stresses for warping and bending may not occur at the same location
+with the same sign, and 3) no strength increase is considered based on the controlling location
+(i.e., flange/web junction).</p>
+
+<p>If the section has an override value for C<sub>w</sub>, CFS has no information about the
+expected warping behavior of the section and is not able to calculate the bimoment strength.
+Therefore CFS cannot check combined bending and torsion for that case.</p>
+
+<p>See also <a href="torsion-analysis.htm">Torsion Analysis</a> and
+<a href="torsion-diagrams.htm">Torsion Diagrams</a>.</p>
+
+</body>
+</html>

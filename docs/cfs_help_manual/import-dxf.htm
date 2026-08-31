@@ -1,0 +1,52 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Import DXF</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Import DXF</h1>
+
+<p>When you select Import DXF from the <a href="file-menu.htm">File menu</a>,
+you may import section geometry from a DXF file created by a CAD application.</p>
+
+<ul>
+<li>Each part is defined by a continuous <b>2D Polyline</b> at the <b>Centerline</b> of the material</li>
+<li>It may be a general polyline or a lightweight polyline (LWPolyline)</li>
+<li>The vertices of the polyline identify coordinates on the <b>Centerline</b> of the part</li>
+<li>The <b>Width</b> of the polyline defines the thickness of the part</li>
+<li>A closed polyline defines a closed CFS part</li>
+<li>If geometry is not in inches, the units must be specified in the DXF file</li>
+</ul>
+
+<p>Polyline Requirements:</p>
+
+<ul>
+<li>The segments should alternate line, arc, line, arc, etc. (exceptions are allowed)</li>
+<li>The Polyline vertices must lie in the XY plane (Z=0)</li>
+<li>The Polyline Width must be greater than 0 and constant throughout the polyline</li>
+<li>The Polyline Width cannot exceed 1 inch (25.4 mm)</li>
+<li>Element lengths cannot exceed 100 inches (2540 mm)</li>
+<li>Radii cannot exceed 10 inches (254 mm)</li>
+<li>Arc segments must be less than 180 degrees</li>
+<li>The polyline cannot exceed the CFS limit of 254 elements</li>
+<li>Example DXF file: <a href="https://rsgsoftware.com/download/400S162-54.dxf">400S162-54</a></li>
+</ul>
+
+<p>Tips</p>
+
+<ul>
+<li>Create the polyline initially with straight line segments (square corners). Then use the Fillet command to insert the bend radii.</li>
+<li>Specify a constant width for the entire polyline, rather than setting the widths at each vertex.</li>
+</ul>
+
+<p>CFS automatically centers the section at the
+origin. Material properties and web elements must still be specified after the
+import. For sections with multiple parts, you may also need to override J and Cw,
+and define the connector spacing.</p>
+
+</body>
+</html>

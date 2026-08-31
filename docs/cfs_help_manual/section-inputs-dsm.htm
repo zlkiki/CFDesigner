@@ -1,0 +1,80 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Section Inputs - Direct Strength Tab</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Section Inputs - Direct Strength Tab</h1>
+
+<p>This window is displayed when you create a new section or open an existing section.
+It is displayed as a floating window separate
+from the main application window.
+Closing this window will not close the section itself and will not lose
+any information about the section. To
+redisplay this window (when a section is open), select Section Inputs from the
+View menu, or press F3.</p>
+
+<p>Parts are made up of elements, each defining the geometry and behavior of a flat
+segment of the shape. This tab contains
+the inputs for elements, one part at a time. See also
+<a href="section-inputs-section.htm">Section Tab</a>,
+<a href="section-inputs-part.htm">Part Tab</a>, and
+<a href="section-inputs-elements.htm">Elements Tab</a>.</p>
+
+<table>
+<tr><td width=150>Use Direct Strength</td><td>Check this box to use the Direct Strength
+Method of calculating section strength according to the AISI Specification. You
+must compute the elastic buckling behavior and enter the corresponding direct
+strength parameters in the table. You may use the
+<a href="buckling-parameters.htm">Elastic Buckling</a> feature from
+the <a href="compute-menu.htm">Compute menu</a> for sections consisting of one part.
+This tool allows you to select points directly from the buckling plot and transfer
+the values into the table.</td></tr>
+
+<tr><td>Prequalified Section</td><td>Check this box if the section complies
+with the geometric parameters of prequalified sections as defined in the Direct
+Strength provisions of the AISI Specification. The strength of non-prequalified
+sections is determined using the safety or resistance factors for rational engineering analysis.</td></tr>
+
+<tr><td>Generate</td><td>This button can be used to automatically generate the critical elastic
+buckling load ratios for compression and bending. This uses the Finite Strip Method for a variety
+of half-wavelengths to identify the critical local buckling and distortional buckling loads.
+This feature is available for sections comprised of one part, with or without holes. If changes
+are made to the section, the Generate button should be used again to recalculate the load ratios.</td></tr>
+
+<tr><td>Pcrl/Py</td><td>The ratio of the critical elastic <b>local</b> buckling load to the compressive
+yield load. A value of 0 causes CFS to revert to the Main Specification
+provisions even if you check the box to Use Direct Strength.</td></tr>
+
+<tr><td>Pcrd/Py</td><td>The ratio of the critical elastic <b>distortional</b> buckling load to the
+compressive yield load. A value of 0 causes CFS to revert to the Main
+Specification provisions even if you check the box to Use Direct Strength.</td></tr>
+
+<tr><td></td><td><b>Note:</b> Py is based on the gross section area and the specified
+longitudinal compression yield stress.</td></tr>
+
+<tr><td>Mcrl/My</td><td>The ratio of the critical elastic <b>local</b>
+buckling moment to the yield moment. A separate value is required for each
+direction of bending. A value of 0 causes CFS to revert to the Main
+Specification provisions even if you check the box to Use Direct Strength.</td></tr>
+
+<tr><td>Mcrd/My</td><td>The ratio of the critical elastic <b>distortional</b>
+buckling moment to the yield moment. A separate value is required for each
+direction of bending. A value of 0 causes CFS to revert to the Main
+Specification provisions even if you check the box to Use Direct Strength.</td></tr>
+
+<tr><td></td><td><b>Note:</b> My is based on the gross section modulus for the extreme fiber
+and the specified longitudinal compression yield stress.</td></tr>
+
+<tr><td>Vcr/Vy</td><td>The ratio of the critical elastic <b>shear</b> buckling force to the shear yield
+force. A separate value is required for vertical and horizontal shear. A value
+of 0 causes CFS to revert to the Main Specification provisions even if you
+check the box to Use Direct Strength.</td></tr>
+</table>
+
+</body>
+</html>

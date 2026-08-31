@@ -1,0 +1,76 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Web Crippling Report</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Web Crippling Report</h1>
+
+<p>The Web Crippling Check report is created when you choose Web Crippling from the
+<a href="compute-menu.htm">Compute menu</a>. For sections, you must enter the
+<a href="web-crippling-parameters.htm">web crippling parameters</a> and loads.
+For an analysis, you must select the member <a href="locations.htm">locations</a>
+to perform the check(s).</p>
+
+<p>This report consists of a summary of the web crippling parameters and loads, web
+crippling strength computations, and the appropriate interaction
+equation(s). For an analysis with
+multiple members at the specified location, the bearing load and bending moment
+on each member is proportional to its moment of inertia about the axis of
+bending.</p>
+
+<p>The web crippling strength of the section is determined by summing the strengths of
+all the web elements. If other elements
+in the section lie between a web element's bearing flange and the bearing
+surface, that web element will be excluded from the strength summation.</p>
+
+<p>The appropriate web crippling equation from the selected specification is determined for each web. The following
+abbreviations are used in classifying the type of calculation performed for each element:</p>
+
+<table>
+<tr>
+<td width=50></td>
+<td width=50>FS<br>FU<br>US<br>UU</td>
+<td>
+Fastened, Stiffened flange<br>
+Fastened, Unstiffened flange<br>
+Unfastened, Stiffened flange<br>
+Unfastened, Unstiffened flange
+</td></tr>
+<tr>
+<td width=50></td>
+<td width=50>EOF<br>ETF<br>IOF<br>ITF</td>
+<td>
+End-One-Flange loading<br>
+End-Two-Flange loading<br>
+Interior-One-Flange loading<br>
+Interior-Two-Flange loading
+</td></tr>
+</table>
+
+<p>If any parameters exceed the limits imposed by the selected specification (R/t,
+h/t, N/t, N/h, etc.), those limits are noted for each web element checked.</p>
+
+<p>For web elements that do not have a bearing flange, the same equations are used
+with a zero bend radius. For web
+elements with holes, the hole is assumed to be positioned longitudinally at the
+edge of bearing. Although the hole provisions apply to C-sections with centered web holes,
+CFS uses the same calculations for other conditions.</p>
+
+<p>If the bearing flange is not perpendicular to the direction of loading, the
+strength in the direction of loading is determined by dividing the strength by
+the cosine of the angle between the flange and the surface perpendicular to the
+direction of loading. This assumes that
+the component parallel to the flange is resisted by an adequate connection.</p>
+
+<p>If any of the web element strengths listed should not be considered, be sure to
+subtract it from the section strength.
+This might occur if the support does not contact all of the assumed
+bearing flanges.</p>
+
+</body>
+</html>

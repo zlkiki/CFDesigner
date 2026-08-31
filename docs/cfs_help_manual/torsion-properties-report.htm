@@ -1,0 +1,41 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Torsion Properties Report</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Torsion Properties Report</h1>
+
+<p>The Torsion Properties report is created when you select Torsion Properties from the
+<a href="compute-menu.htm">Compute menu</a> (only available for sections with one part).
+This report contains key properties at several locations in the section which may be used
+to calculate torsional stresses. These properties include:</p>
+
+<table>
+<tr><td width=75>R<sub>o</sub></td><td>Perpendicular distance from shear center to centerline of element</td></tr>
+<tr><td width=75>W<sub>n</sub></td><td>Normalized unit warping, used for warping longitudinal stress</td></tr>
+<tr><td width=75>S<sub>w</sub></td><td>Warping statical moment, used for warping shear stress</td></tr>
+</table>
+
+<p>The locations reported include both ends of each flat element of the section, edges of holes, and
+the location of the peak value of Sw in each flat element, where W<sub>n</sub> is equal to 0. The shear
+center location (x<sub>o</sub>, y<sub>o</sub>), warping constant (C<sub>w</sub>) and St. Venant torsion
+constant (J) are also included for convenience.</p>
+
+<p>Warping longitudinal stresses can be calculated for any location in the section as
+EW<sub>n</sub>&#x03D5;'', where E is the modulus of elasticity and &#x03D5;''
+is second derivative of the twisting displacement function with respect to the distance along the member.</p>
+
+<p>Warping shear stress can be calculated for any location in the section as
+ES<sub>w</sub>&#x03D5;'''/t, where t is the material thickness and &#x03D5;'''
+is the third derivative of the twisting displacement function with respect to the distance along the member.</p>
+
+<p>Pure torsional shear stress can be calculated as Gt&#x03D5;', where G is the shear modulus and &#x03D5;'
+is the first derivative of the twisting displacement function with respect to the distance along the member.</p>
+
+</body>
+</html>

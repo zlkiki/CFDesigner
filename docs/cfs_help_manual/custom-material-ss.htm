@@ -1,0 +1,67 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Custom Material Properties - Stainless Steel Tab</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Custom Material Properties - Stainless Steel Tab</h1>
+
+<p>This window is displayed when you press the ‘...’ button on either the
+<a href="options-material.htm">Material tab</a>
+of the Options window, or on the
+<a href="section-inputs-section.htm">Section tab</a> of the Section Inputs
+window. If you came from the Options
+window, you are defining the default material for new sections; it does not
+affect any existing sections. If you
+came from the Section Inputs window, you are defining the material for the current
+section only.</p>
+
+<p>This tab will appear if the original material was a stainless steel.
+See also <a href="custom-material-cs.htm">Carbon Steel Tab</a>.</p>
+
+<table>
+<tr><td width=150>Material Type</td><td>The
+designation for the type of material of the section.</td></tr>
+
+<tr><td>Alloy Family</td><td>Choose Austenitic, Ferritic, or Duplex.
+These are the types supported by the ASCE stainless steel specification.</td></tr>
+
+<tr><td>Property Directions</td><td>Stainless
+steel properties may vary in the different directions.
+Longitudinal is parallel to the direction in which the
+steel was produced. CFS assumes this to be the direction of the
+longitudinal axis of a member. Transverse
+is perpendicular to the longitudinal direction, in the plane of the sheet.</td></tr>
+
+<tr><td>Modulus, E</td><td>The initial modulus of elasticity,
+which is the slope of the stress-strain curve at zero stress.</td></tr>
+
+<tr><td>Yield Strength, Fy</td><td>The yield strength of
+the material as determined by the 0.2% offset. For shear,
+this should be set to 60% of the longitudinal compression strength.</td></tr>
+
+<tr><td width=150>Strain-Hardening Coefficient, n</td><td>A coefficient indicating
+the linearity of the stress-strain curve (refer to the ASCE Specification).</td></tr>
+
+<tr><td>Tensile Strength, Fu</td><td>The tensile strength in the longitudinal direction.</td></tr>
+
+<tr><td>Default Button</td><td>This
+button sets the material to the current default settings for the new sections
+(defined in the Options window).</td></tr>
+
+<tr><td>Customize Button</td><td>This button
+allows you to customize the material currently being displayed.
+You may modify the name of the material, but
+CFS will always place the name inside brackets to identify it as a material not
+originally provided with CFS. You may
+also modify any of the numerical inputs, with some limitations imposed by
+CFS. The customized material will then
+become your default material for new sections.</td></tr>
+</table>
+
+</body>
+</html>

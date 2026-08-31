@@ -1,0 +1,1195 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="abbreviations">
+		<param name="Local" value="symbols.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="activate">
+		<param name="Local" value="license-types.htm">
+		<param name="Local" value="license-activation.htm">
+		<param name="Local" value="license-problems.htm">
+		<param name="Local" value="network-license.htm">
+		<param name="Local" value="single-user-license.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="address">
+		<param name="Local" value="options-heading.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="agreement">
+		<param name="Local" value="license-agreement.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="AISI">
+		<param name="Local" value="element-behavior.htm">
+		<param name="Local" value="introduction.htm">
+		<param name="Local" value="open-library-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="analysis">
+		<param name="Local" value="analysis-inputs-combinations.htm">
+		<param name="Local" value="analysis-inputs-general.htm">
+		<param name="Local" value="analysis-inputs-loadings.htm">
+		<param name="Local" value="analysis-inputs-members.htm">
+		<param name="Local" value="analysis-inputs-notes.htm">
+		<param name="Local" value="analysis-inputs-supports.htm">
+		<param name="Local" value="analysis-window.htm">
+		<param name="Local" value="analysis-wizard-1.htm">
+		<param name="Local" value="analysis-wizard-2.htm">
+		<param name="Local" value="analysis-wizard-3.htm">
+		<param name="Local" value="analysis-wizard-4.htm">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="locations.htm">
+		<param name="Local" value="overview.htm">
+		<param name="Local" value="analyses.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="angle">
+		<param name="Local" value="analysis-inputs-loadings.htm">
+		<param name="Local" value="analysis-wizard-3.htm">
+		<param name="Local" value="options-units.htm">
+		<param name="Local" value="section-inputs-elements.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="arrange">
+		<param name="Local" value="windows-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="ASCE">
+		<param name="Local" value="element-behavior.htm">
+		<param name="Local" value="introduction.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="ASD">
+		<param name="Local" value="analysis-inputs-combinations.htm">
+		<param name="Local" value="analysis-wizard-4.htm">
+		<param name="Local" value="options-combinations.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="assistance">
+		<param name="Local" value="technical-assistance.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="background">
+		<param name="Local" value="introduction.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="beam">
+		<param name="Local" value="analysis-wizard-1.htm">
+		<param name="Local" value="quick-design.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="bearing">
+		<param name="Local" value="analysis-inputs-supports.htm">
+		<param name="Local" value="analysis-wizard-2.htm">
+		<param name="Local" value="web-crippling-parameters.htm">
+		<param name="Local" value="web-crippling-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="behavior">
+		<param name="Local" value="element-behavior.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="bimoment">
+		<param name="Local" value="member-check-parameters.htm">
+		<param name="Local" value="member-check-report.htm">
+		<param name="Local" value="torsion-analysis.htm">
+		<param name="Local" value="torsion-design.htm">
+		<param name="Local" value="torsion-diagrams.htm">
+		<param name="Local" value="torsion-diagrams-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="braced flange">
+		<param name="Local" value="analysis-inputs-members.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="braced strength">
+		<param name="Local" value="strength-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="bracing">
+		<param name="Local" value="analysis-wizard-2.htm">
+		<param name="Local" value="quick-design.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="buckling">
+		<param name="Local" value="buckling-parameters.htm">
+		<param name="Local" value="buckling-results.htm">
+		<param name="Local" value="tools-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="CAD">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="import-dxf.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="cantilever">
+		<param name="Local" value="analysis-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="carbon steel">
+		<param name="Local" value="custom-material-cs.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="cascade">
+		<param name="Local" value="windows-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="centerline">
+		<param name="Local" value="section-inputs-part.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="checks">
+		<param name="Local" value="compute-menu.htm">
+		<param name="Local" value="locations.htm">
+		<param name="Local" value="member-check-parameters.htm">
+		<param name="Local" value="member-check-report.htm">
+		<param name="Local" value="symbols.htm">
+		<param name="Local" value="web-crippling-parameters.htm">
+		<param name="Local" value="web-crippling-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="close">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="windows-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="closed part">
+		<param name="Local" value="section-inputs-part.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="coefficients">
+		<param name="Local" value="member-check-parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="cold work">
+		<param name="Local" value="options-material.htm">
+		<param name="Local" value="quick-design.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="column">
+		<param name="Local" value="analysis-wizard-1.htm">
+		<param name="Local" value="quick-design.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="combinations">
+		<param name="Local" value="analysis-inputs-combinations.htm">
+		<param name="Local" value="analysis-wizard-4.htm">
+		<param name="Local" value="options-combinations.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="company">
+		<param name="Local" value="options-heading.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="computations">
+		<param name="Local" value="compute-menu.htm">
+		<param name="Local" value="locations.htm">
+		<param name="Local" value="member-check-report.htm">
+		<param name="Local" value="overview.htm">
+		<param name="Local" value="properties-report.htm">
+		<param name="Local" value="effective-properties.htm">
+		<param name="Local" value="quick-design.htm">
+		<param name="Local" value="strength-report.htm">
+		<param name="Local" value="symbols.htm">
+		<param name="Local" value="torsion-properties-report.htm">
+		<param name="Local" value="web-crippling-report.htm">
+		<param name="Local" value="analyses.htm">
+		<param name="Local" value="reports.htm">
+		<param name="Local" value="sections.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="concentrated">
+		<param name="Local" value="web-crippling-parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="conditions">
+		<param name="Local" value="license-agreement.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="connector">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="constrained">
+		<param name="Local" value="buckling-parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="coordinates">
+		<param name="Local" value="origin.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="copy">
+		<param name="Local" value="cut-copy-paste.htm">
+		<param name="Local" value="copy-image.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="cover plate">
+		<param name="Local" value="element-behavior.htm">
+		<param name="Local" value="section-inputs-elements.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="custom">
+		<param name="Local" value="analysis-wizard-1.htm">
+		<param name="Local" value="custom-material-cs.htm">
+		<param name="Local" value="custom-material-ss.htm">
+		<param name="Local" value="section-wizard-1.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="cut">
+		<param name="Local" value="cut-copy-paste.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Cw override">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="deactivate">
+		<param name="Local" value="license-activation.htm">
+		<param name="Local" value="license-problems.htm">
+		<param name="Local" value="network-license.htm">
+		<param name="Local" value="single-user-license.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="dead load">
+		<param name="Local" value="analysis-wizard-3.htm">
+		<param name="Local" value="quick-design.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="default radius">
+		<param name="Local" value="options-thicknesses.htm">
+		<param name="Local" value="section-inputs-part.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="default strength">
+		<param name="Local" value="custom-material-cs.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="definitions">
+		<param name="Local" value="glossary.htm">
+		<param name="Local" value="symbols.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="deflections">
+		<param name="Local" value="analysis-diagrams.htm">
+		<param name="Local" value="diagrams-report.htm">
+		<param name="Local" value="torsion-diagrams.htm">
+		<param name="Local" value="torsion-diagrams-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="delete">
+		<param name="Local" value="insert-delete.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="depth">
+		<param name="Local" value="section-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="description">
+		<param name="Local" value="analysis-inputs-general.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="design">
+		<param name="Local" value="quick-design.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="diagrams">
+		<param name="Local" value="analysis-diagrams.htm">
+		<param name="Local" value="compute-menu.htm">
+		<param name="Local" value="diagrams-report.htm">
+		<param name="Local" value="analyses.htm">
+		<param name="Local" value="torsion-analysis.htm">
+		<param name="Local" value="torsion-diagrams.htm">
+		<param name="Local" value="torsion-diagrams-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="direct strength">
+		<param name="Local" value="buckling-parameters.htm">
+		<param name="Local" value="buckling-results.htm">
+		<param name="Local" value="section-inputs-dsm.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="distance">
+		<param name="Local" value="section-inputs-elements.htm">
+		<param name="Local" value="section-inputs-part.htm">
+		<param name="Local" value="web-crippling-parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="distortional">
+		<param name="Local" value="section-inputs-dsm.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="DXF">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="import-dxf.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="eccentricity">
+		<param name="Local" value="analysis-inputs-members.htm">
+		<param name="Local" value="origin.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="editing">
+		<param name="Local" value="complete-part-symmetry.htm">
+		<param name="Local" value="cut-copy-paste.htm">
+		<param name="Local" value="edit-menu.htm">
+		<param name="Local" value="insert-delete.htm">
+		<param name="Local" value="insert-ribs.htm">
+		<param name="Local" value="rotate-mirror.htm">
+		<param name="Local" value="undo.htm">
+		<param name="Local" value="analyses.htm">
+		<param name="Local" value="sections.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="effective length">
+		<param name="Local" value="analysis-inputs-supports.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="effective section">
+		<param name="Local" value="effective-properties.htm">
+		<param name="Local" value="element-behavior.htm">
+		<param name="Local" value="strength-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="elastic buckling">
+		<param name="Local" value="buckling-parameters.htm">
+		<param name="Local" value="buckling-results.htm">
+		<param name="Local" value="section-inputs-dsm.htm">
+		<param name="Local" value="tools-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="elasticity">
+		<param name="Local" value="custom-material-cs.htm">
+		<param name="Local" value="custom-material-ss.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="elements">
+		<param name="Local" value="element-behavior.htm">
+		<param name="Local" value="section-inputs-elements.htm">
+		<param name="Local" value="section-window.htm">
+		<param name="Local" value="sections.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="e-mail">
+		<param name="Local" value="options-heading.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="end location">
+		<param name="Local" value="analysis-inputs-loadings.htm">
+		<param name="Local" value="analysis-inputs-members.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="end magnitude">
+		<param name="Local" value="analysis-inputs-loadings.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="envelope">
+		<param name="Local" value="analysis-diagrams.htm">
+		<param name="Local" value="diagrams-report.htm">
+		<param name="Local" value="torsion-diagrams.htm">
+		<param name="Local" value="torsion-diagrams-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="errors">
+		<param name="Local" value="license-problems.htm">
+		<param name="Local" value="technical-assistance.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="exit">
+		<param name="Local" value="file-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="fastened">
+		<param name="Local" value="analysis-inputs-members.htm">
+		<param name="Local" value="analysis-inputs-supports.htm">
+		<param name="Local" value="analysis-wizard-2.htm">
+		<param name="Local" value="member-check-parameters.htm">
+		<param name="Local" value="web-crippling-parameters.htm">
+		<param name="Local" value="web-crippling-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="fax">
+		<param name="Local" value="options-heading.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="file">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="import-dxf.htm">
+		<param name="Local" value="open-library-section.htm">
+		<param name="Local" value="print.htm">
+		<param name="Local" value="recent-files.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="finite strip">
+		<param name="Local" value="buckling-parameters.htm">
+		<param name="Local" value="buckling-results.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="fixed end">
+		<param name="Local" value="analysis-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="flange">
+		<param name="Local" value="section-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="forces">
+		<param name="Local" value="member-check-parameters.htm">
+		<param name="Local" value="options-units.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="full section">
+		<param name="Local" value="properties-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="fully braced">
+		<param name="Local" value="strength-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="general">
+		<param name="Local" value="analysis-inputs-general.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="glossary">
+		<param name="Local" value="glossary.htm">
+		<param name="Local" value="symbols.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="graphic">
+		<param name="Local" value="analysis-window.htm">
+		<param name="Local" value="cut-copy-paste.htm">
+		<param name="Local" value="copy-image.htm">
+		<param name="Local" value="insert-delete.htm">
+		<param name="Local" value="section-window.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="grids">
+		<param name="Local" value="cut-copy-paste.htm">
+		<param name="Local" value="insert-delete.htm">
+		<param name="Local" value="interface.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="hardware lock">
+		<param name="Local" value="license-agreement.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="heading">
+		<param name="Local" value="options-heading.htm">
+		<param name="Local" value="print.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="hinge">
+		<param name="Local" value="analysis-inputs-supports.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="hole">
+		<param name="Local" value="section-inputs-elements.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="HUD">
+		<param name="Local" value="open-library-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="import">
+		<param name="Local" value="import-dxf.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="increase">
+		<param name="Local" value="options-material.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="inelastic">
+		<param name="Local" value="options-material.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="inflection">
+		<param name="Local" value="analysis-inputs-combinations.htm">
+		<param name="Local" value="diagrams-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="inputs">
+		<param name="Local" value="analysis-inputs-combinations.htm">
+		<param name="Local" value="analysis-inputs-general.htm">
+		<param name="Local" value="analysis-inputs-loadings.htm">
+		<param name="Local" value="analysis-inputs-members.htm">
+		<param name="Local" value="analysis-inputs-notes.htm">
+		<param name="Local" value="analysis-inputs-supports.htm">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="interface.htm">
+		<param name="Local" value="section-inputs-dsm.htm">
+		<param name="Local" value="section-inputs-elements.htm">
+		<param name="Local" value="section-inputs-part.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		<param name="Local" value="view-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="insert">
+		<param name="Local" value="insert-delete.htm">
+		<param name="Local" value="insert-ribs.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="interface">
+		<param name="Local" value="interface.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="intermediate stiffeners">
+		<param name="Local" value="element-behavior.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="intermittent">
+		<param name="Local" value="element-behavior.htm">
+		<param name="Local" value="section-inputs-elements.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="internal forces">
+		<param name="Local" value="member-check-parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="introduction">
+		<param name="Local" value="introduction.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="J override">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="k coefficient">
+		<param name="Local" value="element-behavior.htm">
+		<param name="Local" value="section-inputs-elements.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="keys">
+		<param name="Local" value="analysis-window.htm">
+		<param name="Local" value="cut-copy-paste.htm">
+		<param name="Local" value="interface.htm">
+		<param name="Local" value="section-window.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="lap">
+		<param name="Local" value="analysis-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="length">
+		<param name="Local" value="member-check-parameters.htm">
+		<param name="Local" value="options-units.htm">
+		<param name="Local" value="section-inputs-elements.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="LGSI">
+		<param name="Local" value="open-library-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="library">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="library-builder.htm">
+		<param name="Local" value="open-library-section.htm">
+		<param name="Local" value="recent-files.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="license">
+		<param name="Local" value="license-types.htm">
+		<param name="Local" value="license-activation.htm">
+		<param name="Local" value="license-problems.htm">
+		<param name="Local" value="network-license.htm">
+		<param name="Local" value="single-user-license.htm">
+		<param name="Local" value="license-agreement.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="lip">
+		<param name="Local" value="section-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="live load">
+		<param name="Local" value="analysis-wizard-3.htm">
+		<param name="Local" value="quick-design.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="load factor">
+		<param name="Local" value="analysis-inputs-combinations.htm">
+		<param name="Local" value="options-combinations.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="loadings">
+		<param name="Local" value="analysis-inputs-combinations.htm">
+		<param name="Local" value="analysis-inputs-loadings.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="loads">
+		<param name="Local" value="analysis-inputs-loadings.htm">
+		<param name="Local" value="analysis-window.htm">
+		<param name="Local" value="analysis-wizard-3.htm">
+		<param name="Local" value="options-units.htm">
+		<param name="Local" value="web-crippling-parameters.htm">
+		<param name="Local" value="analyses.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="location">
+		<param name="Local" value="analysis-inputs-members.htm">
+		<param name="Local" value="analysis-inputs-supports.htm">
+		<param name="Local" value="locations.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="LRFD">
+		<param name="Local" value="analysis-inputs-combinations.htm">
+		<param name="Local" value="analysis-wizard-4.htm">
+		<param name="Local" value="options-combinations.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="LSD">
+		<param name="Local" value="analysis-inputs-combinations.htm">
+		<param name="Local" value="analysis-wizard-4.htm">
+		<param name="Local" value="options-combinations.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="magnitude">
+		<param name="Local" value="analysis-inputs-loadings.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="material">
+		<param name="Local" value="custom-material-cs.htm">
+		<param name="Local" value="custom-material-ss.htm">
+		<param name="Local" value="options-material.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="MDI">
+		<param name="Local" value="interface.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="members">
+		<param name="Local" value="analysis-inputs-members.htm">
+		<param name="Local" value="analysis-window.htm">
+		<param name="Local" value="analysis-wizard-2.htm">
+		<param name="Local" value="member-check-parameters.htm">
+		<param name="Local" value="member-check-report.htm">
+		<param name="Local" value="analyses.htm">
+		<param name="Local" value="quick-design.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="menu">
+		<param name="Local" value="compute-menu.htm">
+		<param name="Local" value="edit-menu.htm">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="tools-menu.htm">
+		<param name="Local" value="view-menu.htm">
+		<param name="Local" value="windows-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="mirror">
+		<param name="Local" value="rotate-mirror.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="modulus">
+		<param name="Local" value="custom-material-cs.htm">
+		<param name="Local" value="custom-material-ss.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="moment reduction">
+		<param name="Local" value="analysis-inputs-members.htm">
+		<param name="Local" value="analysis-wizard-2.htm">
+		<param name="Local" value="member-check-parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="moments">
+		<param name="Local" value="analysis-diagrams.htm">
+		<param name="Local" value="diagrams-report.htm">
+		<param name="Local" value="options-units.htm">
+		<param name="Local" value="web-crippling-parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="name">
+		<param name="Local" value="section-inputs-elements.htm">
+		<param name="Local" value="section-inputs-part.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="net section">
+		<param name="Local" value="properties-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="new">
+		<param name="Local" value="analysis-wizard-1.htm">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="section-wizard-1.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="notes">
+		<param name="Local" value="analysis-inputs-notes.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="open">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="open-library-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="options">
+		<param name="Local" value="options-heading.htm">
+		<param name="Local" value="options-material.htm">
+		<param name="Local" value="options-thicknesses.htm">
+		<param name="Local" value="options-units.htm">
+		<param name="Local" value="tools-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="origin">
+		<param name="Local" value="origin.htm">
+		<param name="Local" value="section-inputs-part.htm">
+		<param name="Local" value="section-window.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="overview">
+		<param name="Local" value="overview.htm">
+		<param name="Local" value="analyses.htm">
+		<param name="Local" value="reports.htm">
+		<param name="Local" value="sections.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="pages">
+		<param name="Local" value="interface.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="pan">
+		<param name="Local" value="analysis-window.htm">
+		<param name="Local" value="section-window.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="parameters">
+		<param name="Local" value="effective-properties.htm">
+		<param name="Local" value="member-check-parameters.htm">
+		<param name="Local" value="web-crippling-parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="parts">
+		<param name="Local" value="complete-part-symmetry.htm">
+		<param name="Local" value="rotate-mirror.htm">
+		<param name="Local" value="section-inputs-elements.htm">
+		<param name="Local" value="section-inputs-part.htm">
+		<param name="Local" value="section-window.htm">
+		<param name="Local" value="sections.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="paste">
+		<param name="Local" value="cut-copy-paste.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="phone">
+		<param name="Local" value="options-heading.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="placement">
+		<param name="Local" value="section-inputs-part.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="prequalified">
+		<param name="Local" value="section-inputs-dsm.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="principal">
+		<param name="Local" value="rotate-mirror.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="printing">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="options-heading.htm">
+		<param name="Local" value="print.htm">
+		<param name="Local" value="reports.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="problems">
+		<param name="Local" value="technical-assistance.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="project">
+		<param name="Local" value="analysis-inputs-general.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="properties">
+		<param name="Local" value="compute-menu.htm">
+		<param name="Local" value="properties-report.htm">
+		<param name="Local" value="effective-properties.htm">
+		<param name="Local" value="symbols.htm">
+		<param name="Local" value="torsion-properties-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="questions">
+		<param name="Local" value="technical-assistance.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="quick">
+		<param name="Local" value="quick-design.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="radius">
+		<param name="Local" value="options-thicknesses.htm">
+		<param name="Local" value="section-inputs-elements.htm">
+		<param name="Local" value="section-inputs-part.htm">
+		<param name="Local" value="section-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Ramberg-Osgood">
+		<param name="Local" value="custom-material-ss.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="reaction">
+		<param name="Local" value="analysis-diagrams.htm">
+		<param name="Local" value="diagrams-report.htm">
+		<param name="Local" value="web-crippling-parameters.htm">
+		<param name="Local" value="torsion-diagrams.htm">
+		<param name="Local" value="torsion-diagrams-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="recent">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="recent-files.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="redo">
+		<param name="Local" value="undo.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="reduction">
+		<param name="Local" value="analysis-inputs-members.htm">
+		<param name="Local" value="analysis-wizard-2.htm">
+		<param name="Local" value="member-check-parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="reference">
+		<param name="Local" value="symbols.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="refresh">
+		<param name="Local" value="network-license.htm">
+		<param name="Local" value="single-user-license.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="renew">
+		<param name="Local" value="license-types.htm">
+		<param name="Local" value="network-license.htm">
+		<param name="Local" value="single-user-license.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="reports">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="locations.htm">
+		<param name="Local" value="member-check-report.htm">
+		<param name="Local" value="properties-report.htm">
+		<param name="Local" value="effective-properties.htm">
+		<param name="Local" value="quick-design.htm">
+		<param name="Local" value="strength-report.htm">
+		<param name="Local" value="symbols.htm">
+		<param name="Local" value="web-crippling-report.htm">
+		<param name="Local" value="reports.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="reserve">
+		<param name="Local" value="options-material.htm">
+		<param name="Local" value="quick-design.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="responsibility">
+		<param name="Local" value="introduction.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="revised">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="ribs">
+		<param name="Local" value="element-behavior.htm">
+		<param name="Local" value="insert-ribs.htm">
+		<param name="Local" value="section-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="roof live load">
+		<param name="Local" value="analysis-wizard-3.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="rotate">
+		<param name="Local" value="rotate-mirror.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="RSG Software">
+		<param name="Local" value="technical-assistance.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="saving">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="reports.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="scroll">
+		<param name="Local" value="analysis-window.htm">
+		<param name="Local" value="section-window.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="section">
+		<param name="Local" value="analysis-inputs-members.htm">
+		<param name="Local" value="analysis-wizard-2.htm">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="library-builder.htm">
+		<param name="Local" value="member-check-report.htm">
+		<param name="Local" value="open-library-section.htm">
+		<param name="Local" value="options-units.htm">
+		<param name="Local" value="overview.htm">
+		<param name="Local" value="properties-report.htm">
+		<param name="Local" value="effective-properties.htm">
+		<param name="Local" value="quick-design.htm">
+		<param name="Local" value="recent-files.htm">
+		<param name="Local" value="rotate-mirror.htm">
+		<param name="Local" value="section-inputs-dsm.htm">
+		<param name="Local" value="section-inputs-elements.htm">
+		<param name="Local" value="section-inputs-part.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		<param name="Local" value="section-window.htm">
+		<param name="Local" value="section-wizard-1.htm">
+		<param name="Local" value="section-wizard-2.htm">
+		<param name="Local" value="strength-report.htm">
+		<param name="Local" value="sections.htm">
+		<param name="Local" value="torsion-properties-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="select">
+		<param name="Local" value="analysis-window.htm">
+		<param name="Local" value="section-window.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="self weight">
+		<param name="Local" value="analysis-wizard-3.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="settings">
+		<param name="Local" value="tools-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="shapes">
+		<param name="Local" value="section-wizard-1.htm">
+		<param name="Local" value="quick-design.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="shears">
+		<param name="Local" value="analysis-diagrams.htm">
+		<param name="Local" value="diagrams-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="size">
+		<param name="Local" value="section-inputs-elements.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="snow load">
+		<param name="Local" value="analysis-wizard-3.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="software">
+		<param name="Local" value="license-agreement.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="spacing">
+		<param name="Local" value="quick-design.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		<param name="Local" value="section-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="span">
+		<param name="Local" value="analysis-wizard-2.htm">
+		<param name="Local" value="quick-design.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="specification">
+		<param name="Local" value="analysis-inputs-combinations.htm">
+		<param name="Local" value="analysis-wizard-4.htm">
+		<param name="Local" value="element-behavior.htm">
+		<param name="Local" value="introduction.htm">
+		<param name="Local" value="options-combinations.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="SSMA">
+		<param name="Local" value="open-library-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="stainless steel">
+		<param name="Local" value="custom-material-ss.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="start location">
+		<param name="Local" value="analysis-inputs-loadings.htm">
+		<param name="Local" value="analysis-inputs-members.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="start magnitude">
+		<param name="Local" value="analysis-inputs-loadings.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="steel">
+		<param name="Local" value="custom-material-cs.htm">
+		<param name="Local" value="custom-material-ss.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="strength">
+		<param name="Local" value="compute-menu.htm">
+		<param name="Local" value="custom-material-cs.htm">
+		<param name="Local" value="options-material.htm">
+		<param name="Local" value="section-inputs-dsm.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		<param name="Local" value="strength-report.htm">
+		<param name="Local" value="symbols.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="stresses">
+		<param name="Local" value="buckling-parameters.htm">
+		<param name="Local" value="buckling-results.htm">
+		<param name="Local" value="options-units.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="supports">
+		<param name="Local" value="analysis-inputs-supports.htm">
+		<param name="Local" value="analysis-window.htm">
+		<param name="Local" value="analysis-wizard-2.htm">
+		<param name="Local" value="analyses.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="symbols">
+		<param name="Local" value="symbols.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="symmetry">
+		<param name="Local" value="complete-part-symmetry.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="tabs">
+		<param name="Local" value="interface.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="tensile">
+		<param name="Local" value="custom-material-cs.htm">
+		<param name="Local" value="custom-material-ss.htm">
+		<param name="Local" value="options-material.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="terminology">
+		<param name="Local" value="glossary.htm">
+		<param name="Local" value="symbols.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="terms">
+		<param name="Local" value="license-agreement.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="thickness">
+		<param name="Local" value="options-thicknesses.htm">
+		<param name="Local" value="quick-design.htm">
+		<param name="Local" value="section-inputs-part.htm">
+		<param name="Local" value="section-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="tools">
+		<param name="Local" value="library-builder.htm">
+		<param name="Local" value="tools-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="torque">
+		<param name="Local" value="torsion-analysis.htm">
+		<param name="Local" value="torsion-design.htm">
+		<param name="Local" value="torsion-diagrams.htm">
+		<param name="Local" value="torsion-diagrams-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="torsion">
+		<param name="Local" value="compute-menu.htm">
+		<param name="Local" value="torsion-properties-report.htm">
+		<param name="Local" value="torsion-analysis.htm">
+		<param name="Local" value="torsion-design.htm">
+		<param name="Local" value="torsion-diagrams.htm">
+		<param name="Local" value="torsion-diagrams-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="tributary width">
+		<param name="Local" value="analysis-wizard-3.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="twist">
+		<param name="Local" value="torsion-diagrams.htm">
+		<param name="Local" value="torsion-diagrams-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="unbraced lengths">
+		<param name="Local" value="member-check-parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="undo">
+		<param name="Local" value="undo.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="units">
+		<param name="Local" value="interface.htm">
+		<param name="Local" value="options-units.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="user name">
+		<param name="Local" value="options-heading.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="view">
+		<param name="Local" value="view-menu.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="web">
+		<param name="Local" value="section-inputs-elements.htm">
+		<param name="Local" value="section-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="web crippling">
+		<param name="Local" value="web-crippling-parameters.htm">
+		<param name="Local" value="web-crippling-report.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="wind load">
+		<param name="Local" value="analysis-wizard-3.htm">
+		<param name="Local" value="quick-design.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="window">
+		<param name="Local" value="analysis-window.htm">
+		<param name="Local" value="interface.htm">
+		<param name="Local" value="section-window.htm">
+		<param name="Local" value="windows-menu.htm">
+		<param name="Local" value="reports.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="wizard">
+		<param name="Local" value="analysis-wizard-1.htm">
+		<param name="Local" value="analysis-wizard-2.htm">
+		<param name="Local" value="analysis-wizard-3.htm">
+		<param name="Local" value="analysis-wizard-4.htm">
+		<param name="Local" value="file-menu.htm">
+		<param name="Local" value="section-wizard-1.htm">
+		<param name="Local" value="section-wizard-2.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="yield">
+		<param name="Local" value="custom-material-cs.htm">
+		<param name="Local" value="custom-material-ss.htm">
+		<param name="Local" value="options-material.htm">
+		<param name="Local" value="quick-design.htm">
+		<param name="Local" value="section-inputs-section.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="zoom">
+		<param name="Local" value="analysis-window.htm">
+		<param name="Local" value="section-window.htm">
+		</OBJECT>
+</UL>
+</BODY></HTML>

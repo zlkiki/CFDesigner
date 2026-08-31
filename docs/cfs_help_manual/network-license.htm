@@ -1,0 +1,88 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Network License</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Network License</h1>
+
+<p>This license is an annual subscription for a company to share over a network. The number of network
+licenses purchased corresponds to the number of concurrent users permitted to use the full CFS license.</p>
+
+<p>For details on setting up a network license, refer to
+<a href="https://www.rsgsoftware.com/download/cfs-network-license.pdf" target="_blank">
+CFS Network License Instructions</a></p>
+
+<h4>Licensing System</h4>
+
+<p>Licenses are activated on your local network accessible to the users at your company. A network
+share folder is used to host the license file. You must create this folder on a Windows server or computer
+and give all users permission to read, write, and delete files in that folder. This should be on a machine
+that is available at all times.</p>
+
+<p>The licensing system uses network semaphore file-locking in the license folder to manage active users.
+This may be accessed over a wide-area network (WAN) or through a virtual private network (VPN), although
+performance may be affected.</p>
+
+<p>You may backup the contents of the license folder. If it gets lost, or the license files are deleted,
+you can deactivate the license, then activate it again
+(see <a href="license-activation.htm">License Activation</a>).</p>
+
+<h4>License Settings</h4>
+
+<p>Choose Network License Settings from the Tools menu to display information about the status of the license.
+The initial setup of the license is managed here, and individual users can join the license pool.</p>
+
+<table>
+<tr><td width=125>Company</td>
+<td>All users of a network license must use the same company name. This company name appears on CFS outputs,
+so enter the name as you would like it to appear.</td></tr>
+
+<tr><td width=125>Share folder</td>
+<td>Specify the name of the share folder established for your network license. This must be identified
+using a UNC Path (e.g., \\Server\Share\Folder), which is not an alias or DFS path.</td></tr>
+
+<tr><td width=125>Acquire License</td>
+<td>If the license has already been activated from a different computer, you may enter the correct
+Company name and Share folder, then click on Acquire License to join the pool. This can be automated
+by an administrator for all users (see below). In the rare instance where you need to release the
+license and revert to "light mode", press Ctrl-Shift-R.</td></tr>
+
+<tr><td width=125>View Usage Log</td>
+<td>The license folder contains the CFSLicense.log file which records all the license usage activity
+such as acquiring and releasing licenses. This can be helpful to determine who is currently using
+a license if none are currently available.</td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<p>These administration functions are used for the initial setup of the license.</p>
+
+<table>
+<tr><td width=125>Activate License</td>
+<td>After purchasing a network license, you will receive an email with your license ID and activation password.
+Click on the Activate License button to complete the license implementation. For more details,
+see <a href="license-activation.htm">License Activation</a>.</td></tr>
+
+<tr><td width=125>Deactivate License</td>
+<td>If you have an active network license and you need to move the license to a different server or folder,
+you must deactivate the license first. Then the license will be available to activate using the new location.
+For more details, see <a href="license-activation.htm">License Activation</a>.</td></tr>
+
+<tr><td width=125>Refresh License</td>
+<td>After renewing a network license subscription, click on Refresh License to pick up the new expiration
+date. CFS will periodically refresh by itself, so you may not need to use the Refresh License button.</td></tr>
+
+<tr><td width=125>Automate Clients</td>
+<td>All users must have the exact same settings for Company name and Share folder. The Automate Clients button
+provides the registry entries for these settings, which can then be distributed to the users. Once the registry
+data is imported into their registry user settings, the CFS license will automatically be configured for them.
+</td></tr>
+</table>
+
+</body>
+</html>

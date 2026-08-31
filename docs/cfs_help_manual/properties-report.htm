@@ -1,0 +1,41 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Properties Report</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Properties Report</h1>
+
+<p>The Properties report is created when you select Properties from the
+<a href="compute-menu.htm">Compute menu</a> (only available for sections). This
+report includes full and net section properties in accordance with conventional
+methods of structural design. These properties are computed using mathematically
+rigorous derivations, including integration through the bend radius segments and
+across the material thickness. The calculations for torsional properties use
+exact integrations for thin-walled sections that incorporate the bend radius
+segments as well.</p>
+
+<p>The symbols used in this and other reports are defined in <a href="symbols.htm">
+Symbols and Abbreviations</a>. The "Flat" dimension is the width of the pre-formed sheet
+assuming no stretching or thinning of the material at the bends. For sections with
+multiple parts, this is the sum of the flat widths. The "Height" and "Width" dimensions
+are the overall height and width of the entire section.</p>
+
+<p>For sections containing more than one part, and any of the parts do not have a
+principal axis on the principal axis of the section, the location of the shear
+center (x₀ and y₀) is an approximation.
+The torsional warping constant (Cw) and St. Venant torsion
+constant (J) are computed as the sum of the Cw and J
+values for the individual parts. Element
+connectivity between parts tends to change these properties.
+In such cases, you should manually determine
+and enter an override in the <a href="section-inputs-section.htm">Section Inputs</a>
+window. These overrides are then shown in this report
+instead of the values computed by CFS.</p>
+
+</body>
+</html>

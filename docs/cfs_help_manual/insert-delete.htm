@@ -1,0 +1,47 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Insert and Delete</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Insert and Delete</h1>
+
+<p>The Delete command on the <a href="edit-menu.htm">Edit menu</a>
+apply to rows of grid inputs:
+<a href="section-inputs-elements.htm">elements</a>,
+<a href="analysis-inputs-members.htm">members</a>,
+<a href="analysis-inputs-supports.htm">supports</a>,
+<a href="analysis-inputs-loadings.htm">loads</a>, and
+<a href="analysis-inputs-combinations.htm">load factors</a>.
+It removes the selected row or rows from the grid. If all the elements
+of a part are selected, plus the blank row at the bottom for an open shape, the
+Delete command will delete the part and its elements.
+If all the loads in a loading are selected,
+plus the blank row at the bottom, the Delete command will delete the loading
+and its loads. If all the load factors
+in a load combination are selected, plus the blank row at the bottom, the
+Delete command will delete the load combination and its load factors.</p>
+
+<p>The Delete command performs a special operation when you select elements that
+comprise a rib or ribs (see <a href="insert-ribs.htm">Insert Ribs</a>).
+CFS recognizes when the preceding and succeeding elements are collinear,
+and rejoins them into one element after the selected elements are removed.</p>
+
+<p>Since section elements, analysis members, and analysis supports may be selected in
+the graphic, you may perform the Delete command without using the grid in the
+inputs window.</p>
+
+<p>The Insert command on the Edit menu applies only to the elements grid, because it
+is the only grid for which row position has significance.
+It inserts a row at the current cell pointer
+location. If several rows are selected,
+the same number of rows are inserted at the position of the first selected
+row. The inserted row or rows will be
+copies of the first row that was selected.</p>
+
+</body>
+</html>

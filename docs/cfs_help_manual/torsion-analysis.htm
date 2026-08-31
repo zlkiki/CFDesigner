@@ -1,0 +1,115 @@
+<html xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Torsion Analysis</title>
+<link rel=stylesheet href="cfs-help.css" type="text/css">
+</head>
+
+<body lang=en-us link=blue vlink="#954F72">
+
+<h1>Torsion Analysis</h1>
+
+<p>If the Torsion option is chosen on the General tab of the Analysis Inputs window,
+transverse loads (distributed and concentrated) produce torque on the members
+based on the eccentricity of the loads relative to the shear center. The members
+are restrained by the torsional supports defined in the analysis.</p>
+
+<h4>Torsional Loads</h4>
+
+<p>By default, a section containing one part has its Centroid located at the Origin.
+And by default, transverse loads are applied at the Origin. So the torsion arm (a) is
+simply –x<sub>o</sub> for vertical loads.</p>
+
+<p><center><img src="torsion-section1.png"></center></p>
+
+<p>To specify a different load point, enter the eccentricities e<sub>x</sub> and
+e<sub>y</sub> on the Members tab of the Analysis Inputs window. If the section
+Centroid is not located at the Origin, or the load is not applied at the Origin,
+the torsion arm (a) is calculated as shown here for the general case.</p>
+
+<p><center><img src="torsion-section2.png"></center></p>
+
+<table>
+<tr><td width=75>T</td><td>Applied torsional load = P·a</td></tr>
+<tr><td width=75>P</td><td>Applied transverse load; for gravity load, P is negative (down)</td></tr>
+<tr><td width=75>a</td><td>Torsion arm; for vertical loads, a = e<sub>x</sub> – x<sub>cg</sub> – x<sub>o</sub></td></tr>
+<tr><td width=75>e<sub>x</sub>, e<sub>y</sub></td><td>Eccentricity of the Load Point relative to the section Origin (input)</td></tr>
+<tr><td width=75>x<sub>cg</sub>, y<sub>cg</sub></td><td>Location of the section Centroid relative to the section Origin (input)</td></tr>
+<tr><td width=75>x<sub>o</sub>, y<sub>o</sub></td><td>Location of the Shear Center relative to the section Centroid (calculated)</td></tr>
+</table>
+
+<p>If two or more beams overlap, the torsion arm is determined as a weighted average
+based on the relative torsional stiffness of the members. For beam self-weight, the
+load is applied at the centroid so the torsion arm is –x<sub>o</sub>. If transverse
+loads are not vertical, the horizontal component of the loads use the Y offset between
+load point and shear center, which may increase or decrease the applied torque.</p>
+
+<p style="margin-left:25">Note: if the analysis involves both axial and torsional loads at different load
+points on the member, run the analysis twice: 1) with torsion without axial loads,
+and 2) with axial loads without torsion.</p>
+
+<p>Reactions to transverse loads at translational supports could apply torque to the
+member. These supports (X or Y) typically include a twisting restraint (T), for which
+the torque is determined as a torsional reaction. If the support does not include a
+twisting restraint, the support force is assumed to act at the shear center, and
+therefore does not impart any torque on the member.</p>
+
+<p>Concentrated moments, if applied with an offset from the shear center, will produce
+concentrated bimoments. Likewise, axial loads which are offset from the centroid will
+produce concentrated moments, which in turn may produce concentrated bimoments.</p>
+
+<h4>Torsional Supports</h4>
+
+<p>The applied torque and the resulting twist of the member is primarily restrained by
+twisting (T) supports. But other support types influence the torsional behavior as well.
+Here is a summary of the supports and their torsional restraint.</p>
+
+<table>
+<tr><td width=75>T</td><td>Twisting restrained, warping free (torsionally pinned)</td></tr>
+<tr><td width=75>RxRy</td><td>Flexural rotation fixed about both X and Y axes; this also restrains warping (twisting free)</td></tr>
+<tr><td width=75>TRxRy</td><td>Twisting and warping restrained (torsionally fixed)</td></tr>
+<tr><td width=75>Hx or Hy</td><td>Hinge supports release flexural rotation about X or Y axis; either hinge releases warping</td></tr>
+<tr><td width=75>T with K=0</td><td>Segment fully braced against twisting, no twisting or torsional stresses occur</td></tr>
+<tr><td width=75>Braced Flange</td><td>For members defined with a continuously braced flange, no twisting or torsional stresses occur</td></tr>
+</table>
+
+<p>Note: a continuously braced flange can significantly reduce torsional stresses,
+but does not typically eliminate them. The CFS assumption that a braced flange restrains
+torsion could be unconservative. A more rigorous analysis may be required to accurately
+determine the torsional stresses for this case.</p>
+
+<h4>Torsion Analysis</h4>
+
+<p>The solution to a torsion problem may involve three different cases: warping only
+(GJ&lt;&lt;EC<sub>w</sub>/L²), pure torsion only (EC<sub>w</sub>/L²&lt;&lt;GJ), and
+combined warping and pure torsion. Analyses with different sections could involve all
+three in the same solution. Equilibrium is ensured using the following assumptions:</p>
+
+<ul>
+<li>Twist angle is continuous from one member to another</li>
+<li>Warping torque and pure torque transfer from one member to another</li>
+<li>Bimoment transfers from one member to another</li>
+</ul>
+
+<p>Where a member crosses a twisting restraint (T&nbsp;support), the angle of twist is zero,
+a reaction torque occurs at the restraint, and continuity is maintained for the first and
+second derivative of the twisting displacement curve. A section with no warping is a special
+case where this continuity is not required and does not occur.</p>
+
+<p>If two or more members overlap, the combined torsional stiffness components (GJ and
+EC<sub>w</sub>) are the sum of the stiffness components for each lapped member. This assumes
+the members rotate together by the same twist angle, but with no composite action (no torsional
+shear transfer between members). For member checks at locations with two or more members,
+the bimoment applied to each member is proportioned using the relative warping stiffnesses
+(EC<sub>w</sub>).</p>
+
+<p> Warping continuity (bimoment and warping displacement) is maintained
+where the same cross-section is continuous. If the analysis members abruptly switch
+from one section to another, warping continuity is not maintained.</p>
+
+See also <a href="torsion-diagrams.htm">Torsion Diagrams</a> and
+<a href="torsion-design.htm">Torsion Design</a>.</p>
+
+</body>
+</html>
