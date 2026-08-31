@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CFDesigner - 냉간성형강 CAD 연동 구조해석 및 KDS/AISI 부재설계 시스템</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- Chart.js & Three.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body data-theme="dark">
+
+  <!-- ================= Application Header ================= -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="brand-logo">CF</div>
+      <div class="brand-title">
+        <span>CFDesigner</span>
+        <span class="brand-badge">KDS 14 31 10 / AISI S100</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-outline" id="btnThemeToggle" title="테마 전환">🌓 테마</button>
+      <button class="btn btn-primary" id="btnOpenReport">
+        📄 A4 구조계산서 출력
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= Main 3-Column Layout Container ================= -->
+  <div class="app-container">
+    
+    <!-- ================= Left Control Sidebar ================= -->
+    <aside class="left-sidebar">
+      <!-- Tabs -->
+      <div class="tab-nav">
+        <button class="tab-nav-btn active" data-target="tabSection">📐 단면 생성</button>
+        <button class="tab-nav-btn" data-target="tabMember">⚙️ 부재 설계</button>
+      </div>
+
+      <div class="sidebar-content">
+        <!-- Tab 1: Section Modeling -->
+        <div class="tab-pane" id="tabSection">
+          <!-- Section Wizard Card -->
+          <div class="card">
+            <div class="card-title">
+              <span>단면 마법사 (Wizard)</span>
+              <span style="font-size: 11px; color: var(--accent-primary);">파라메트릭</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">단면 형상 (Shape)</label>
+              <select class="form-select" id="wizardShape">
+                <option value="C" selected>C형강 (Lipped Channel)</option>
+                <option value="Z">Z형강 (Lipped Z-Section)</option>
+                <option value="HAT">모자형강 (Hat Channel)</option>
+                <option value="TUBE">각형강관 (Box Tube)</option>
+                <option value="ANGLE">L형강 (Angle)</option>
+                <option value="DECK">데크플레이트 (Deck)</option>
+              </select>
+            </div>
+
+            <div class="grid-input-2">
+              <div class="form-group">
+                <label class="form-label">높이 H (mm)</label>
+                <input type="number" class="form-input" id="wizH" value="150" step="5">
+              </div>
+              <div class="form-group">
+                <label class="form-label">너비 B (mm)</label>
+                <input type="number" class="form-input" id="wizB" value="65" step="5">
+              </div>
+            </div>
+
+            <div class="grid-input-2">
+              <div class="form-group">
+                <label class="form-label">립 C (mm)</label>
+                <input type="number" class="form-input" id="wizC" value="20" step="1">
+              </div>
+              <div class="form-group">
+                <label class="form-label">두께 t (mm)</label>
+                <input type="number" class="form-input" id="wizT" value="2.0" step="0.1">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">코너 반경 R (mm)</label>
+              <input type="number" class="form-input" id="wizR" value="2.0" step="0.5">
+            </div>
+
+            <button class="btn btn-primary" id="btnRunWizard" style="width: 100%; margin-top: 6px;">
+              ⚡ 단면 갱신 및 해석
+            </button>
+          </div>
+
+          <!-- DXF Import Card -->
+          <div class="card">
+            <div class="card-title">
+              <span>AutoCAD DXF 불러오기</span>
+            </div>
+            <div class="dxf-drop-zone" id="dxfDropZone">
+              <div style="font-size: 24px;">📁</div>
+              <div class="dxf-drop-text">
+                <strong>DXF 파일을 드래그 & 드롭</strong><br>
+                또는 클릭하여 파일 선택
+              </div>
+              <input type="file" id="dxfFileInput" accept=".dxf" style="display: none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Member & Load Design -->
+        <div class="tab-pane" id="tabMember" style="display: none;">
+          <!-- Material Properties -->
+          <div class="card">
+            <div class="card-title">강종 및 재료 특성</div>
+            <div class="form-group">
+              <label class="form-label">항복강도 Fy (MPa)</label>
+              <input type="number" class="form-input" id="yieldStress" value="345" step="5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">탄성계수 E (MPa)</label>
+              <input type="number" class="form-input" id="elasticModulus" value="203000" disabled>
+            </div>
+          </div>
+
+          <!-- Member Length & Unbraced Length -->
+          <div class="card">
+            <div class="card-title">부재 길이 및 지점 조건</div>
+            <div class="form-group">
+              <label class="form-label">부재 비지지길이 L (mm)</label>
+              <input type="number" class="form-input" id="memberLength" value="3000" step="100">
+            </div>
+            <div class="grid-input-2">
+              <div class="form-group">
+                <label class="form-label">Kx (강축)</label>
+                <input type="number" class="form-input" id="kxVal" value="1.0" step="0.1">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ky (약축)</label>
+                <input type="number" class="form-input" id="kyVal" value="1.0" step="0.1">
+              </div>
+            </div>
+          </div>
+
+          <!-- Design Factored Loads -->
+          <div class="card">
+            <div class="card-title">설계 소요 하중 (Factored Loads)</div>
+            <div class="form-group">
+              <label class="form-label">축압축력 Pu (kN)</label>
+              <input type="number" class="form-input" id="loadPu" value="50.0" step="5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">휨모멘트 Mux (kN·m)</label>
+              <input type="number" class="form-input" id="loadMux" value="5.0" step="0.5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">전단력 Vu (kN)</label>
+              <input type="number" class="form-input" id="loadVu" value="15.0" step="1">
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ================= Center CAD & FSM Workspace ================= -->
+    <main class="center-workspace">
+      <!-- Top Viewer Area -->
+      <div style="display: flex; flex-direction: column; height: 100%; position: relative;">
+        <div class="viewer-header">
+          <div class="viewer-tab-group">
+            <button class="viewer-tab-btn active" data-mode="2d">📐 2D 단면 형상</button>
+            <button class="viewer-tab-btn" data-mode="3d">🌀 3D 좌굴 모드형상</button>
+          </div>
+
+          <!-- Mode Selector for 3D Viewer -->
+          <div id="modeSelectorBar" style="display: none; align-items: center; gap: 8px;">
+            <span style="font-size: 11.5px; color: var(--text-secondary);">모드:</span>
+            <button class="btn btn-outline btn-mode-select btn-primary" data-mode-key="local_mode" style="padding: 3px 8px; font-size: 11px;">국부(Local)</button>
+            <button class="btn btn-outline btn-mode-select" data-mode-key="dist_mode" style="padding: 3px 8px; font-size: 11px;">왜곡(Distortional)</button>
+            <button class="btn btn-outline btn-mode-select" data-mode-key="glob_mode" style="padding: 3px 8px; font-size: 11px;">전체(Global)</button>
+            <span style="font-size: 11.5px; color: var(--text-secondary); margin-left: 8px;">진폭:</span>
+            <input type="range" id="ampSlider" min="1" max="40" value="15" style="width: 70px;">
+          </div>
+        </div>
+
+        <div class="viewer-canvas-container">
+          <canvas id="canvas2d"></canvas>
+          <div id="viewer3dContainer" style="width: 100%; height: 100%; display: none;"></div>
+
+          <!-- 2D Overlay Tools -->
+          <div class="viewer-overlay-tools">
+            <button class="overlay-btn" id="btnFitView" title="화면 맞춤">⛶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom FSM Chart Area -->
+      <div class="chart-workspace">
+        <div class="chart-header">
+          <span>📈 FSM 탄성 좌굴곡선 (Signature Curve)</span>
+          <div style="display: flex; gap: 14px; font-size: 11.5px; font-weight: normal; color: var(--text-secondary);">
+            <span>국부(Pcrl): <strong id="valPcrl" style="color: #38bdf8;">-</strong></span>
+            <span>왜곡(Pcrd): <strong id="valPcrd" style="color: #818cf8;">-</strong></span>
+            <span>전체(Pcre): <strong id="valPcre" style="color: #10b981;">-</strong></span>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="fsmChartCanvas"></canvas>
+        </div>
+      </div>
+    </main>
+
+    <!-- ================= Right Results & D/C Dashboard ================= -->
+    <aside class="right-dashboard">
+      <!-- Section Gross & Principal Properties -->
+      <div class="card">
+        <div class="card-title">
+          <span>단면 기하학적 성질 (Gross)</span>
+        </div>
+        <table class="property-table">
+          <tr><td class="name">총단면적 (Ag)</td><td class="val" id="propAg">-</td><td class="unit">mm²</td></tr>
+          <tr><td class="name">단위중량 (Weight)</td><td class="val" id="propWeight">-</td><td class="unit">kg/m</td></tr>
+          <tr><td class="name">강축 2차모멘트 (Ix)</td><td class="val" id="propIx">-</td><td class="unit">mm⁴</td></tr>
+          <tr><td class="name">약축 2차모멘트 (Iy)</td><td class="val" id="propIy">-</td><td class="unit">mm⁴</td></tr>
+          <tr><td class="name">강축 단면2차반경 (rx)</td><td class="val" id="propRx">-</td><td class="unit">mm</td></tr>
+          <tr><td class="name">약축 단면2차반경 (ry)</td><td class="val" id="propRy">-</td><td class="unit">mm</td></tr>
+          <tr><td class="name">주축 회전각 (θp)</td><td class="val" id="propThetaP">-</td><td class="unit">deg</td></tr>
+          <tr><td class="name">비틀림상수 (J)</td><td class="val" id="propJ">-</td><td class="unit">mm⁴</td></tr>
+          <tr><td class="name">뒴(Warping)상수 (Cw)</td><td class="val" id="propCw">-</td><td class="unit">mm⁶</td></tr>
+          <tr><td class="name">전단중심 X0 / Y0</td><td class="val"><span id="propX0">-</span> / <span id="propY0">-</span></td><td class="unit">mm</td></tr>
+          <tr><td class="name">극단면2차반경 (ro)</td><td class="val" id="propRo">-</td><td class="unit">mm</td></tr>
+        </table>
+      </div>
+
+      <!-- KDS 14 31 10 Member Design Check Results -->
+      <div class="card">
+        <div class="card-title">
+          <span>KDS 14 31 10 부재 내력 검토</span>
+        </div>
+
+        <!-- 1. Compression -->
+        <div class="design-check-item">
+          <div class="check-item-header">
+            <span>축압축강도 (Compression)</span>
+            <span class="badge-status ok" id="compBadge">OK</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 3px;">
+            <span id="compCap">φPn = - kN</span>
+            <span>D/C = <strong id="compRatio" style="color: var(--text-primary);">-</strong></span>
+          </div>
+          <div class="gauge-track">
+            <div class="gauge-fill" id="compBar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- 2. Flexure -->
+        <div class="design-check-item">
+          <div class="check-item-header">
+            <span>휨모멘트강도 (Flexure X-X)</span>
+            <span class="badge-status ok" id="flexBadge">OK</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 3px;">
+            <span id="flexCap">φMn = - kN·m</span>
+            <span>D/C = <strong id="flexRatio" style="color: var(--text-primary);">-</strong></span>
+          </div>
+          <div class="gauge-track">
+            <div class="gauge-fill" id="flexBar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- 3. Shear -->
+        <div class="design-check-item">
+          <div class="check-item-header">
+            <span>웨브 전단강도 (Shear)</span>
+            <span class="badge-status ok" id="shearBadge">OK</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 3px;">
+            <span id="shearCap">φVn = - kN</span>
+            <span>D/C = <strong id="shearRatio" style="color: var(--text-primary);">-</strong></span>
+          </div>
+          <div class="gauge-track">
+            <div class="gauge-fill" id="shearBar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- 4. P-M Interaction -->
+        <div class="design-check-item">
+          <div class="check-item-header">
+            <span>P-M 조합응력 (Interaction)</span>
+            <span class="badge-status ok" id="interBadge">OK</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 3px;">
+            <span id="interCap">조합비</span>
+            <span>Ratio = <strong id="interRatio" style="color: var(--text-primary);">-</strong></span>
+          </div>
+          <div class="gauge-track">
+            <div class="gauge-fill" id="interBar" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ================= A4 Engineering Report Modal ================= -->
+  <div class="modal-backdrop" id="reportModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <strong style="font-size: 15px;">📄 A4 구조계산서 미리보기 (KDS 14 31 10)</strong>
+        <button class="btn btn-outline" id="btnCloseReport" style="padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <div class="modal-body">
+        <iframe id="reportIframe"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="/static/js/canvas_2d.js"></script>
+  <script src="/static/js/chart_fsm.js"></script>
+  <script src="/static/js/viewer_3d.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
