@@ -125,18 +125,21 @@ tests/test_z_section.py (1 test) .............................. PASSED [100%]
 
 ```plaintext
 CFDesigner/
+├── .agents/                          # 🤖 [에이전트 지침] AI 마스터 가이드(AGENTS.md) 및 스킬
 ├── docs/                             # 📑 [기술 문서 SSOT] 공학 수식집, 시스템 아키텍처, 파일 인벤토리
+├── 요구사항/                         # 📋 [요구사항 관리] 완료 아카이브(@@OLD/) 및 비긴급 백로그(보류/)
 ├── original_source/                  # 🏛️ [원본 바이너리] CFS 14.0 원본 실행 파일 및 표준 단면 DB (*.cfsl, *.mtl)
 ├── decompiled_src/                   # 💻 [추출 C# 소스] CFS.exe에서 복원한 108개 C# 소스코드 (Ground Truth)
 ├── src/                              # 🚀 [독립 패키지] Python 기반 핵심 해석/설계 엔진 및 AltDP 웹 UI
-│   ├── api/                          # - FastAPI REST 라우터 (routes.py, manual_routes.py)
-│   ├── cad/                          # - DXF 2D Polyline 파서 및 메셔 (dxf_parser.py)
-│   ├── geometry/                     # - 단면 기하, 요소 편집기, 라이브러리 파서, Winter 유효폭 해석
-│   ├── solver/                       # - FSM 탄성좌굴 솔버 (fsm.py) & 1D FEM 구조해석 솔버 (frame1d.py)
-│   ├── design/                       # - KDS/AISI DSM 부재설계 (dsm.py, shear_and_crippling.py, quick_design.py)
-│   ├── report/                       # - A4 표준 구조계산서 생성기 (generator.py)
+│   ├── api/                          # - FastAPI REST 라우터 (server.py, routes.py, manual_routes.py)
+│   ├── cad/                          # - DXF 2D Polyline 파서 및 메셔 (dxf_reader.py, part_mesher.py)
+│   ├── geometry/                     # - 단면 기하(gross_properties), 편집기, 라이브러리, Winter 유효폭
+│   ├── solver/                       # - FSM 탄성좌굴 솔버(strip_assembler) & 1D FEM 구조해석(frame1d)
+│   ├── design/                       # - KDS/AISI DSM 부재설계(dsm_compression), 전단/크리플링, 퀵디자인
+│   ├── report/                       # - A4 표준 구조계산서 렌더러 (html_report.py)
 │   └── web/                          # - 프론트엔드 (index.html, manual.html, static/js, static/css)
 ├── tests/                            # 🧪 [테스트] 55개 pytest 단위 및 통합 테스트 스위트
+├── scripts/                          # 🛠️ [빌드 & 유틸리티] 토픽 데이터셋 생성 및 관리 도구
 ├── requirements.txt                  # 📦 Python 의존성 명세
 └── run.ps1                           # ⚡ 원클릭 서버 실행 스크립트
 ```

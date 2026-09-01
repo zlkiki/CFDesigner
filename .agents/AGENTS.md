@@ -22,11 +22,11 @@
 
 | 도메인 / 기능 | 원본 레퍼런스 (C#) | 기술 문서 (SSOT) | 주요 심볼 및 역할 |
 |---|---|---|---|
-| **CAD / DXF 파싱** | [`RSG/CFS/DXF.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/DXF.cs)<br>[`RSG/CFS/Section.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/Section.cs#L1059) | [`docs/02_cad_dxf_specification.md`](file:///f:/PyProject/CFT/docs/02_cad_dxf_specification.md) | `ImportDXF`, `DXFPart` (Polyline, Arc, Width 메싱) |
-| **단면 기하학적 성질** | [`RSG/CFS/Section.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/Section.cs)<br>[`RSG/CFS/Part.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/Part.cs) | [`docs/03_section_properties.md`](file:///f:/PyProject/CFT/docs/03_section_properties.md) | `CalcProperties`, `Geometry` ($A, I, J, C_w, x_o, y_o$) |
-| **유한대판법 (FSM)** | [`RSG/CFS/FiniteStrip.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/FiniteStrip.cs)<br>[`RSG/Math/Sturm.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/Math/Sturm.cs) | [`docs/04_finite_strip_method.md`](file:///f:/PyProject/CFT/docs/04_finite_strip_method.md) | `FiniteStripAnalysis` ($[K_e], [K_g]$ 조립, 고유치 해석) |
-| **KDS / AISI 부재설계** | [`RSG/CFS/MemberCheck.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/MemberCheck.cs)<br>[`RSG/CFS/Section.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/Section.cs#L4080) | [`docs/05_kds_aisi_design_rules.md`](file:///f:/PyProject/CFT/docs/05_kds_aisi_design_rules.md)<br>[`docs/00_todo_and_roadmap.md`](file:///f:/PyProject/CFT/docs/00_todo_and_roadmap.md) | `MemberCheck` ($P_n, M_n, V_n, P_{nc}$, P-M 조합) |
-| **유효단면 응력해석** | [`RSG/CFS/EffectiveProperties.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/EffectiveProperties.cs) | [`docs/03_section_properties.md`](file:///f:/PyProject/CFT/docs/03_section_properties.md) | `EffectiveProperties` (Winter 유효폭 반복 계산) |
+| **CAD / DXF 파싱** | [`RSG/CFS/DXF.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/DXF.cs)<br>[`RSG/CFS/Section.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/Section.cs#L1059) | [`docs/02_cad_dxf_specification.md`](file:///f:/PyProject/CFDesigner/docs/02_cad_dxf_specification.md) | `ImportDXF`, `DXFPart` (Polyline, Arc, Width 메싱) |
+| **단면 기하학적 성질** | [`RSG/CFS/Section.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/Section.cs)<br>[`RSG/CFS/Part.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/Part.cs) | [`docs/03_section_properties.md`](file:///f:/PyProject/CFDesigner/docs/03_section_properties.md) | `CalcProperties`, `Geometry` ($A, I, J, C_w, x_o, y_o$) |
+| **유한대판법 (FSM)** | [`RSG/CFS/FiniteStrip.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/FiniteStrip.cs)<br>[`RSG/Math/Sturm.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/Math/Sturm.cs) | [`docs/04_finite_strip_method.md`](file:///f:/PyProject/CFDesigner/docs/04_finite_strip_method.md) | `FiniteStripAnalysis` ($[K_e], [K_g]$ 조립, 고유치 해석) |
+| **KDS / AISI 부재설계** | [`RSG/CFS/MemberCheck.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/MemberCheck.cs)<br>[`RSG/CFS/Section.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/Section.cs#L4080) | [`docs/05_kds_aisi_design_rules.md`](file:///f:/PyProject/CFDesigner/docs/05_kds_aisi_design_rules.md) | `MemberCheck` ($P_n, M_n, V_n, P_{nc}$, P-M 조합) |
+| **유효단면 응력해석** | [`RSG/CFS/EffectiveProperties.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/EffectiveProperties.cs) | [`docs/03_section_properties.md`](file:///f:/PyProject/CFDesigner/docs/03_section_properties.md) | `EffectiveProperties` (Winter 유효폭 반복 계산) |
 
 ---
 
@@ -75,13 +75,15 @@
 
 ## 4. 세부 기술 문서 및 인벤토리 맵 (Documentation References)
 
-* 📑 **[프로젝트 구조 및 파일 인벤토리 명세 (SSOT)](../docs/프로젝트_구조_및_파일_인벤토리_명세.md)**: 108개 복원 C# 클래스 및 파일별 역할 상세 명세
-* 📌 **[TODO 및 로드맵](../docs/00_todo_and_roadmap.md)**: AISI S100 복원 및 KDS 14 31 10 비교 로드맵
-* 📐 **[전체 시스템 아키텍처](../docs/01_system_architecture.md)**: 전체 시스템 구조 및 5대 계층 흐름도
-* 📏 **[CAD(DXF) 파싱 명세](../docs/02_cad_dxf_specification.md)**: 2D Polyline 규칙 및 `DXFPart` 메싱 알고리즘
-* ⚙️ **[단면 기하학적 성질 계산서](../docs/03_section_properties.md)**: Gross/Effective 특성치($A, I, J, C_w, x_o, y_o$) 수식집
-* 🔬 **[유한대판법(FSM) 해석 명세](../docs/04_finite_strip_method.md)**: $[K_e], [K_g]$ 강성행렬 및 좌굴 모드 판별 이론
-* 🏛️ **[KDS / AISI 부재설계 기준서](../docs/05_kds_aisi_design_rules.md)**: 직접강도법(DSM) 공칭강도 수식집
-* 🚀 **[Python 독립 엔진 개발 로드맵](../docs/06_python_engine_migration_plan.md)**: Python 포팅 전략 및 4대 계층 아키텍처 명세
-* 🔗 **[KDS 국가건설기준 연동 가이드 (kcsc2md)](../../kcsc2md/docs/외부프로젝트_연동_및_조회_가이드.md)**: KDS 기준 Ground Truth 조회 표준
+* 📑 **[프로젝트 구조 및 파일 인벤토리 명세 (SSOT)](file:///f:/PyProject/CFDesigner/docs/프로젝트_구조_및_파일_인벤토리_명세.md)**: 108개 복원 C# 클래스 및 파일별 역할 상세 명세
+* 📐 **[전체 시스템 아키텍처](file:///f:/PyProject/CFDesigner/docs/01_system_architecture.md)**: 전체 시스템 구조 및 5대 계층 흐름도
+* 📏 **[CAD(DXF) 파싱 명세](file:///f:/PyProject/CFDesigner/docs/02_cad_dxf_specification.md)**: 2D Polyline 규칙 및 `DXFPart` 메싱 알고리즘
+* ⚙️ **[단면 기하학적 성질 계산서](file:///f:/PyProject/CFDesigner/docs/03_section_properties.md)**: Gross/Effective 특성치($A, I, J, C_w, x_o, y_o$) 수식집
+* 🔬 **[유한대판법(FSM) 해석 명세](file:///f:/PyProject/CFDesigner/docs/04_finite_strip_method.md)**: $[K_e], [K_g]$ 강성행렬 및 좌굴 모드 판별 이론
+* 🏛️ **[KDS / AISI 부재설계 기준서](file:///f:/PyProject/CFDesigner/docs/05_kds_aisi_design_rules.md)**: 직접강도법(DSM) 공칭강도 수식집
+* 🚀 **[Python 독립 엔진 아키텍처 명세서](file:///f:/PyProject/CFDesigner/docs/06_python_engine_architecture_specification.md)**: 5대 계층 독립 Python 엔진 구조 및 API 사양
+* 💻 **[CFDesigner 웹 앱 UI/UX 명세서](file:///f:/PyProject/CFDesigner/docs/07_web_application_ui_ux_specification.md)**: 4대 화면, 10대 전문 모달, 2D/3D 인터랙션 및 UX 파이프라인 규약
+* 📖 **[온라인 도움말 시스템 통합 명세서](file:///f:/PyProject/CFDesigner/docs/08_online_help_manual_specification.md)**: 한·영 Bilingual 3-Way 뷰, 25개 토픽 및 다국어 검색 통합 SSOT
+* 🔍 **[CFS Legacy vs Web Gap 분석서](file:///f:/PyProject/CFDesigner/docs/10_cfs_legacy_ui_vs_web_gap_analysis.md)**: CFS 원본 기능 전수 대조 및 웹 구현 현황
+* 🔗 **[KDS 국가건설기준 연동 가이드 (kcsc2md)](file:///f:/PyProject/kcsc2md/docs/외부프로젝트_연동_및_조회_가이드.md)**: KDS 기준 Ground Truth 조회 표준
 
