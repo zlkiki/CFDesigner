@@ -1,15 +1,15 @@
 # [기술 문서 10] 기존 CFS UI/기능 vs 웹 CFDesigner 전수 비교 및 갭 분석서 (10_cfs_legacy_ui_vs_web_gap_analysis.md)
 
 > **문서 상태**: 🌟 Single Source of Truth (SSOT)  
-> **문서 버전**: v2.0 (Phase 1~5 웹 완전 포팅 완료 및 실시간 검증 반영판)  
+> **문서 버전**: v3.0 (Phase 1~8 전체 완료, 3열 퀵디자인 풀스펙, FSM 응력구배, 코너 Fillet 및 온라인 도움말 27개 토픽 100% 반영판)  
 > **최종 갱신일**: 2026-09-01  
-> **관련 요구사항**: Phase 1~5 전체 완료 ([`요구사항/@@OLD/`](file:///f:/PyProject/CFDesigner/요구사항/README.md)) & [`요구사항05.md`](file:///f:/PyProject/CFDesigner/요구사항/보류/요구사항05_사용자_단면_저장_내보내기_및_단위계_설계옵션_환경설정.md)
+> **관련 요구사항**: Phase 1~8 전체 완료 ([`요구사항/@@OLD/`](file:///f:/PyProject/CFDesigner/요구사항/@@OLD/)) & 신규 [`요구사항09.md`](file:///f:/PyProject/CFDesigner/요구사항/요구사항09_UI고도화_유효단면실시간오버레이_3D좌굴기능강화_계산서매뉴얼동기화.md)
 
 ---
 
 ## 1. 개요 및 목적
 
-본 문서는 **기존 상용 CFS 14.0 프로그램(`CFS.exe`, `CFS.chm` 95개 도움말, 43개 WinForms UI 폼)**의 모든 메뉴, 다이얼로그, 수치해석 및 부재설계 알고리즘과 **현재 개발된 CFDesigner 웹 시스템(`src/web/`, `src/api/`, `src/`)**을 1:1로 전수 대조하여, **웹 완전 포팅(Full Web Migration)의 달성도를 객관적으로 입증**하는 것을 목적으로 합니다.
+본 문서는 **기존 상용 CFS 14.0 프로그램(`CFS.exe`, `CFS.chm` 79개+ 도움말, 43개 WinForms UI 폼)**의 모든 메뉴, 다이얼로그, 수치해석 및 부재설계 알고리즘과 **현재 개발된 CFDesigner 웹 시스템(`src/web/`, `src/api/`, `src/`)**을 1:1로 전수 대조하여, **웹 완전 포팅(Full Web Migration)의 달성도를 객관적으로 입증**하는 것을 목적으로 합니다.
 
 ---
 
@@ -17,20 +17,20 @@
 
 ```mermaid
 pie title CFS 14.0 기능 웹 포팅 현황 (전체 43개 폼 / 95개 기능 기준)
-    "웹 구현 완료 (Fully Implemented)" : 96
-    "신규 요구사항05 대기 (Pending Preferences)" : 4
+    "웹 구현 완료 (Fully Implemented)" : 98
+    "환경설정 옵션 대기 (Pending Preferences)" : 2
 ```
 
 | 도메인 | CFS 14.0 원본 폼 / 도움말 자산 | 현재 웹 구현 상태 | 포팅 달성도 | 구현된 웹 컴포넌트 & 연계 모듈 |
 |---|---|---|:---:|---|
-| **1. 단면 모델링 & CAD** | `frmSctInp`, `frmSctWizard`, `frmRibs`, `frmAngle`, `frmLocation` | **구현 완료** | 100% | 6대 마법사, DXF 업로더, 요소 편집기(`elementEditorModal`), 회전/미러링, 보강 리브(`insertRibsModal`), 도심정렬 |
+| **1. 단면 모델링 & CAD** | `frmSctInp`, `frmSctWizard`, `frmRibs`, `frmAngle`, `frmLocation` | **구현 완료** | 100% | 6대 마법사, DXF 업로더, 요소 편집기(`elementEditorModal`), 코너 Fillet 곡선화, 회전/미러링, 보강 리브(`insertRibsModal`), 도심정렬 |
 | **2. 단면 성질 & 유효폭** | `frmEffProp`, `properties-report.htm` | **구현 완료** | 100% | 선적분 Gross/Torsion 성질, Mohr 주축, Winter 유효폭 반복 수치해석 모달(`effectiveModal`) & 2D 점선 오버레이 |
-| **3. FSM 좌굴해석** | `frmBuckleProfile`, `frmBuckleParam`, `frmBuckleValue` | **구현 완료** | 100% | Chart.js 시그니처 커브, Three.js 3D 모드 애니메이션, FSM 파라미터 모달(`fsmParamsModal`), 수치 그리드 & CSV 다운로드 |
-| **4. KDS/AISI 부재설계** | `frmMemberCheck`, `frmWebCrippling`, `frmQuickDesign` | **구현 완료** | 100% | KDS DSM $P_n, M_n, V_n$, P-M 조합응력 게이지, 웨브 크리플링 4대 지지조건 상세 폼, 최적 단면 자동 탐색(`quickDesignModal`) |
+| **3. FSM 좌굴해석** | `frmBuckleProfile`, `frmBuckleParam`, `frmBuckleValue` | **구현 완료** | 100% | Chart.js 시그니처 커브, Three.js 3D 모드 애니메이션, 휨/편심 응력구배 고유치 해석, FSM 파라미터 모달(`fsmParamsModal`), 수치 그리드 & CSV 다운로드 |
+| **4. KDS/AISI 부재설계** | `frmMemberCheck`, `frmWebCrippling`, `frmQuickDesign` | **구현 완료** | 100% | KDS DSM $P_n, M_n, V_n$, P-M 조합응력 게이지, 좌측 패널 웨브 크리플링 일원화 통합, CFS 원본 대화창 100% 풀스펙 3열 최적설계 모달(`quickDesignModal`) |
 | **5. 1D 뼈대 구조해석** | `frmAnlInp`, `frmAnlWizard`, `frmDiagrams`, `frmAnlPicMaster` | **구현 완료** | 100% | 1D 보/연속보 FEM 솔버(`frame1d.py`), 단순보/연속보/캔틸레버 마법사, SFD/BMD/처짐 4단 스택 차트, 부재설계 원클릭 연동 |
 | **6. 단면/재료 라이브러리** | `frmSctLib`, `frmOpenLibSct`, `frmMaterial` (`*.cfsl`, `*.mtl`) | **구현 완료** | 100% | `*.cfsl` 파서, 1,000+개 표준단면(SSMA, SFIA, AISI, LGSI, HUD) 브라우저, KS/ASTM 재료 DB, 코너 가공경화($F_{ya}$) 계산기 |
-| **7. 구조계산서 출력** | `frmReportMaster`, `frmReportDialog`, `frmPrint` | **구현 완료** | 100% | KDS 14 31 10 표준 A4 엔지니어링 계산서 Jinja2 HTML 템플릿, 인쇄 미리보기 및 브라우저 PDF 최적화 |
-| **8. 온라인 도움말** | `CFS.chm` (95개 HTML) $\rightarrow$ `/manual` | **구현 완료** | 100% | 6대 카테고리 25개 전수 토픽, 한·영 3-Way Bilingual 대조 뷰어, 전문 용어 툴팁, KaTeX 수식, 실시간 다국어 검색 |
+| **7. 구조계산서 출력** | `frmReportMaster`, `frmReportDialog`, `frmPrint` | **구현 완료** | 100% | KDS 14 31 10 요약/상세 듀얼 리포트 서식, Jinja2 HTML 템플릿, 인쇄 미리보기 및 브라우저 PDF 최적화 |
+| **8. 온라인 도움말** | `CFS.chm` (79개 HTML) $\rightarrow$ `/manual` | **구현 완료** | 100% | 8대 카테고리 27개 전수 토픽, 한·영 3-Way Bilingual 대조 뷰어, 전문 용어 툴팁, KaTeX 수식 1:1 대칭, 실시간 다국어 검색 |
 
 ---
 

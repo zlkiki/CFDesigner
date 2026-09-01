@@ -84,9 +84,10 @@ graph TD
   - 경사각 $\theta$에 대한 3차원 좌표변환 행렬 $[T]$ 적용 및 전체 구조 강성행렬 $[K_e], [K_g]$ 조립.
 * **[`eigen_solver.py`](file:///f:/PyProject/CFDesigner/src/solver/eigen_solver.py)**:
   - 일반화 고유치 문제 $[K_e] \mathbf{\phi} = \lambda [K_g] \mathbf{\phi}$에 대해 SciPy `eigh` 솔버를 활용한 최소 고유치 $\lambda_{min}$ 및 고유벡터(좌굴 모드형상) 해석.
+  - 순수 압축 외에 강축/약축 휨모멘트 및 편심 압축에 의한 비양정치(Indefinite) $[K_g]$ 기하강성행렬에 대해 양수 최소 고유치(좌굴 임계하중계수)를 선별 추출하는 수치 안정성 알고리즘 내장.
 * **[`signature_curve.py`](file:///f:/PyProject/CFDesigner/src/solver/signature_curve.py)**:
   - 반파장 스윕($L = 10 \sim 10,000\text{ mm}$, 로그 등간격) 실행 및 시그니처 커브 생성.
-  - 곡선의 변곡점/극소점을 자동 분석하여 국부좌굴($P_{crl}$), 왜곡좌굴($P_{crd}$), 전체좌굴($P_{cre}$) 3대 좌굴하중 판별.
+  - 곡선의 변곡점/극소점을 자동 분석하여 로컬 버클링($P_{crl}$), 디스토셔널 버클링($P_{crd}$), 글로벌 버클링($P_{cre}$) 3대 좌굴하중 판별.
 * **[`frame1d.py`](file:///f:/PyProject/CFDesigner/src/solver/frame1d.py)**:
   - 1D 보/연속보/캔틸레버에 대한 오일러-베르누이 보 요소 기반 직접강성법(Direct Stiffness Method) 구조해석.
   - 다중 경간, 힌지/고정/롤러 지점, 집중하중, 등분포하중, 단면 자중 자동 반영 및 SFD, BMD, 처짐($\delta$) 산정.
@@ -102,7 +103,8 @@ graph TD
 * **[`beam_column.py`](file:///f:/PyProject/CFDesigner/src/design/beam_column.py)**:
   - KDS 4.5 휨-압축 2축 조합응력 상관식 $\frac{P_u}{\phi_c P_n} + \frac{C_{mx} M_{ux}}{\phi_b M_{nx} (1 - P_u/P_{Ex})} + \frac{C_{my} M_{uy}}{\phi_b M_{ny} (1 - P_u/P_{Ey})} \le 1.0$ 검토.
 * **[`quick_design.py`](file:///f:/PyProject/CFDesigner/src/design/quick_design.py)**:
-  - 설계 소요 하중($P_u, M_u, V_u$) 및 비지지길이($L$) 입력 시 표준 단면 DB 전체를 스캔하여 모든 D/C $\le 1.0$을 만족하는 최경량 단면 자동 정렬 및 추천.
+  - CFS 원본 `frmQuickDesign.cs` 100% 완전 포팅: 6대 단면 형상 필터, 재료 강종, 소요 하중($P_u, M_{ux}, M_{uy}, V_u$), 경간 길이, 허용처짐 기준($L/240, L/360$ 등) 및 웨브 크리플링 지점반력 조건 입력.
+  - 강도 한계상태($D/C_{strength}$), 사용성 처짐 한계상태($D/C_{defl}$), 웨브 크리플링 지압 한계상태($D/C_{crip}$)의 3대 한계상태를 동시 검토하여 최대 D/C $\le 1.0$ 만족 최경량 단면 자동 정렬 및 추천.
 
 ### 3.5 리포트 및 웹 API 서브패키지 (`src/report/`, `src/api/`)
 * **[`html_report.py`](file:///f:/PyProject/CFDesigner/src/report/html_report.py)**:

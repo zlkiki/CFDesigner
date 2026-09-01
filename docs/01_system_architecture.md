@@ -1,7 +1,7 @@
 # [시스템 아키텍처] CFDesigner 전체 시스템 구조 및 5대 계층 설계서 (01_system_architecture.md)
 
 > **문서 상태**: 🌟 Single Source of Truth (SSOT)  
-> **문서 버전**: v2.0 (Phase 1~5 전체 구현 완료 및 실시간 파이프라인 통합판)  
+> **문서 버전**: v3.0 (Phase 1~8 전체 완료, 3열 퀵디자인, FSM 응력구배, 코너 Fillet 및 테마/로딩 반응형 UX 완전 통합판)  
 > **기술 스택**: Python 3.10+, FastAPI, NumPy, SciPy, ezdxf, Shapely, Vanilla JS/CSS (AltDP), Chart.js, Three.js WebGL, Jinja2
 
 ---
@@ -14,10 +14,10 @@ CFDesigner는 **프론트엔드 UI**, **비동기 REST API**, **CAD/기하 모�
 graph TD
     subgraph L1 ["1. 프론트엔드 웹 UI 계층 (src/web/)"]
         UI_Main["메인 대시보드 (index.html, app.js)<br>• 4분할 레이아웃 & 실시간 상태바<br>• 10대 전문 모달 다이얼로그"]
-        UI_2D["2D CAD 캔버스 (canvas_2d.js)<br>• 줌/팬, 도심/주축, Winter 유효단면"]
-        UI_3D["3D WebGL 뷰어 (viewer_3d.js)<br>• Three.js 국부/왜곡/전체 모드 애니메이션"]
+        UI_2D["2D CAD 캔버스 (canvas_2d.js)<br>• 줌/팬, 코너 Fillet, 도심/주축, Winter 유효단면"]
+        UI_3D["3D WebGL 뷰어 (viewer_3d.js)<br>• Three.js 로컬/디스토셔널/글로벌 모드 애니메이션"]
         UI_Charts["차트 엔진 (chart_fsm.js, chart_diagrams.js)<br>• FSM 시그니처 커브 / SFD / BMD / 처짐"]
-        UI_Manual["온라인 도움말 SPA (manual.html, manual.js)<br>• 3-Way Bilingual / 25개 토픽 / 실시간 검색"]
+        UI_Manual["온라인 도움말 SPA (manual.html, manual.js)<br>• 3-Way Bilingual / 8대 카테고리 27개 토픽 / 실시간 검색"]
     end
 
     subgraph L2 ["2. 백엔드 REST API 계층 (src/api/)"]
