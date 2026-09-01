@@ -31,6 +31,9 @@
 
     <div class="header-actions">
       <button class="btn btn-outline" id="btnThemeToggle" title="테마 전환">🌓 테마</button>
+      <button class="btn btn-outline" id="btnOpenFrameAnalysis" title="1D 보/연속보 FEM 구조해석 및 SFD/BMD/처짐 다이어그램">
+        🏗️ 1D 구조해석
+      </button>
       <button class="btn btn-primary" id="btnOpenQuickDesign" title="목표 하중 만족 최적 경량 단면 자동 탐색">
         ⚡ 퀵 디자인
       </button>
@@ -855,9 +858,146 @@
     </div>
   </div>
 
+  <!-- ================= Phase 4: 1D Frame & Beam FEM Analysis Modal ================= -->
+  <div class="modal-backdrop" id="frameAnalysisModal">
+    <div class="modal-dialog modal-dialog-lg" style="max-width: 1100px; width: 95vw;">
+      <div class="modal-header">
+        <strong style="font-size: 15px;">🏗️ 1D 보/연속보 FEM 구조해석 및 인터랙티브 다이어그램 (Beam & Frame Analysis)</strong>
+        <button class="btn btn-outline" id="btnCloseFrameAnalysisModal" style="padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <div class="modal-body" style="padding: 16px; display: flex; gap: 16px; max-height: 82vh; overflow-y: auto;">
+        
+        <!-- Left: Setup & Configuration Panel -->
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 320px;">
+          <div class="card" style="background: var(--bg-tertiary); padding: 12px;">
+            <div style="font-size: 12px; font-weight: 600; color: var(--accent-primary); margin-bottom: 8px;">
+              1. 해석 모델 프리셋 선택
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button class="btn btn-outline btn-frame-preset active" data-preset="simple">단순보 (Simple)</button>
+              <button class="btn btn-outline btn-frame-preset" data-preset="cont2">2경간 연속보</button>
+              <button class="btn btn-outline btn-frame-preset" data-preset="cont3">3경간 연속보</button>
+              <button class="btn btn-outline btn-frame-preset" data-preset="cantilever">캔틸레버</button>
+            </div>
+          </div>
+
+          <!-- Spans & Supports Configuration -->
+          <div class="card" style="background: var(--bg-tertiary); padding: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 12px; font-weight: 600; color: var(--text-primary);">2. 경간 및 지점 설정</span>
+            </div>
+            <div class="table-responsive">
+              <table class="editor-table" id="frameSpanTable" style="font-size: 11.5px;">
+                <thead>
+                  <tr>
+                    <th>경간 No</th>
+                    <th>길이 L (mm)</th>
+                    <th>좌측 지점</th>
+                    <th>우측 지점</th>
+                  </tr>
+                </thead>
+                <tbody id="frameSpanTableBody">
+                  <!-- Dynamically populated rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Loads Configuration -->
+          <div class="card" style="background: var(--bg-tertiary); padding: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 12px; font-weight: 600; color: var(--text-primary);">3. 재하 하중 설정</span>
+              <button class="btn btn-outline" id="btnAddFrameLoadRow" style="padding: 2px 8px; font-size: 11px;">+ 하중 추가</button>
+            </div>
+            <div class="table-responsive">
+              <table class="editor-table" id="frameLoadTable" style="font-size: 11.5px;">
+                <thead>
+                  <tr>
+                    <th>하중 유형</th>
+                    <th>크기 (kN, kN/m)</th>
+                    <th>시작 X (mm)</th>
+                    <th>종료 X (mm)</th>
+                    <th style="width: 35px;">삭제</th>
+                  </tr>
+                </thead>
+                <tbody id="frameLoadTableBody">
+                  <!-- Dynamically populated rows -->
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-top: 8px; font-size: 11.5px;">
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="frameSelfWeightCheck" checked> 단면 자중(Self-weight) 자동 반영
+              </label>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="btnExecuteFrameAnalysis" style="width: 100%; padding: 9px; font-size: 13px;">
+            ⚡ 1D 구조해석 실행 (Solve FEM)
+          </button>
+        </div>
+
+        <!-- Right: Results Dashboard & Diagrams -->
+        <div style="flex: 1.6; display: flex; flex-direction: column; gap: 10px;">
+          
+          <!-- Summary Cards -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+            <div class="card" style="padding: 8px; text-align: center; background: var(--bg-secondary);">
+              <div style="font-size: 10.5px; color: var(--text-muted);">최대 휨모멘트 (Mmax)</div>
+              <div style="font-size: 13px; font-weight: 700; color: #10b981;" id="diagMaxM">- kN·m</div>
+            </div>
+            <div class="card" style="padding: 8px; text-align: center; background: var(--bg-secondary);">
+              <div style="font-size: 10.5px; color: var(--text-muted);">최대 전단력 (Vmax)</div>
+              <div style="font-size: 13px; font-weight: 700; color: #38bdf8;" id="diagMaxV">- kN</div>
+            </div>
+            <div class="card" style="padding: 8px; text-align: center; background: var(--bg-secondary);">
+              <div style="font-size: 10.5px; color: var(--text-muted);">최대 처짐 (δmax)</div>
+              <div style="font-size: 13px; font-weight: 700; color: #f59e0b;" id="diagMaxDefl">- mm</div>
+            </div>
+            <div class="card" style="padding: 8px; text-align: center; background: var(--bg-secondary);">
+              <div style="font-size: 10.5px; color: var(--text-muted);">처짐 한계비</div>
+              <div style="font-size: 13px; font-weight: 700; color: var(--accent-primary);" id="diagDeflRatio">-</div>
+            </div>
+          </div>
+
+          <!-- 4-Stack Diagrams Container -->
+          <div style="display: flex; flex-direction: column; gap: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px;">
+            <!-- 1. Physical Beam Model View -->
+            <div style="height: 100px; position: relative;">
+              <canvas id="canvasBeamModel" style="width: 100%; height: 100%; display: block;"></canvas>
+            </div>
+            <!-- 2. SFD -->
+            <div style="height: 110px; position: relative;">
+              <canvas id="canvasSfd" style="width: 100%; height: 100%; display: block;"></canvas>
+            </div>
+            <!-- 3. BMD -->
+            <div style="height: 110px; position: relative;">
+              <canvas id="canvasBmd" style="width: 100%; height: 100%; display: block;"></canvas>
+            </div>
+            <!-- 4. Deflection -->
+            <div style="height: 110px; position: relative;">
+              <canvas id="canvasDefl" style="width: 100%; height: 100%; display: block;"></canvas>
+            </div>
+          </div>
+
+          <!-- Action: Transfer to Design Check -->
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary" id="btnTransferToDesign" style="flex: 1; padding: 8px; font-size: 12.5px;">
+              ⚡ 최대 부재력(Mmax, Vmax)을 단면 부재설계(Member Check)로 연동하기
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- Application Logic -->
   <script src="/static/js/canvas_2d.js"></script>
   <script src="/static/js/chart_fsm.js"></script>
+  <script src="/static/js/chart_diagrams.js"></script>
   <script src="/static/js/viewer_3d.js"></script>
   <script src="/static/js/app.js"></script>
 </body>
