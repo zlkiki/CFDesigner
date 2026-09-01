@@ -56,11 +56,26 @@ class StripAssembler:
     def _build_strip_mesh(self, max_strip_width: float = 5.0):
         """
         Discretizes each element into fine sub-strips to capture local/distortional buckling accurately.
+        Performs full coincident node detection to ensure closed sections (Tubes) and branching ribs
+        share nodes and exhibit seamless 3D integrated buckling behavior.
         """
         self.nodes = []
         self.strips = []
         node_idx = 0
         strip_idx = 0
+
+        def get_or_create_node(x: float, y: float) -> int:
+            nonlocal node_idx
+            # Search for coincident existing node within tolerance
+            for existing in self.nodes:
+                if math.hypot(x - existing.x, y - existing.y) < 1e-3:
+                    return existing.node_id
+            
+            # Create new node
+            new_id = node_idx
+            self.nodes.append(StripNode(node_id=new_id, x=x, y=y))
+            node_idx += 1
+            return new_id
 
         for elem in self.geom.elements:
             l = elem.length
@@ -75,27 +90,23 @@ class StripAssembler:
             sub_alpha = elem.angle
 
             for s in range(n_sub):
-                if s == 0 and node_idx == 0:
-                    self.nodes.append(StripNode(node_id=0, x=start_x, y=start_y))
-                    node_idx += 1
-                elif s == 0 and node_idx > 0:
-                    # Check if starting point matches previous node
-                    prev_node = self.nodes[-1]
-                    dist_to_prev = math.hypot(start_x - prev_node.x, start_y - prev_node.y)
-                    if dist_to_prev > 1e-4:
-                        self.nodes.append(StripNode(node_id=node_idx, x=start_x, y=start_y))
-                        node_idx += 1
+                seg_start_x = start_x + s * dx
+                seg_start_y = start_y + s * dy
+                seg_end_x = start_x + (s + 1) * dx
+                seg_end_y = start_y + (s + 1) * dy
 
-                curr_x = start_x + (s + 1) * dx
-                curr_y = start_y + (s + 1) * dy
-                self.nodes.append(StripNode(node_id=node_idx, x=curr_x, y=curr_y))
-                node_idx += 1
+                node_i = get_or_create_node(seg_start_x, seg_start_y)
+                node_j = get_or_create_node(seg_end_x, seg_end_y)
+
+                # Skip zero-width strip if nodes coincide
+                if node_i == node_j:
+                    continue
 
                 self.strips.append(
                     StripElement(
                         elem_id=strip_idx,
-                        node_i=node_idx - 2,
-                        node_j=node_idx - 1,
+                        node_i=node_i,
+                        node_j=node_j,
                         thickness=elem.thickness,
                         width=sub_w,
                         alpha=sub_alpha,
@@ -108,19 +119,27 @@ class StripAssembler:
         Calculates normal stress distribution across all nodes.
         :param load_type: 'compression', 'bending_x', 'bending_y', or 'combined'
         """
+        xcg = self.props.xcg if self.props else 0.0
+        ycg = self.props.ycg if self.props else 0.0
+
         for node in self.nodes:
             if load_type == "compression":
                 node.stress = 1.0
             elif load_type == "bending_x":
-                # Pure Major-axis bending (My): stress ~ y
-                c_y = max(abs(n.y) for n in self.nodes)
-                node.stress = node.y / c_y if c_y > 1e-6 else 0.0
+                # Pure Major-axis bending (My): stress proportional to (y - ycg)
+                # Top flange in compression (+1.0), bottom flange in tension (-1.0)
+                rel_y = node.y - ycg
+                max_rel_y = max(abs(n.y - ycg) for n in self.nodes)
+                node.stress = rel_y / max_rel_y if max_rel_y > 1e-6 else 0.0
             elif load_type == "bending_y":
-                # Minor-axis bending (Mx): stress ~ x
-                c_x = max(abs(n.x) for n in self.nodes)
-                node.stress = node.x / c_x if c_x > 1e-6 else 0.0
+                # Minor-axis bending (Mx): stress proportional to (x - xcg)
+                rel_x = node.x - xcg
+                max_rel_x = max(abs(n.x - xcg) for n in self.nodes)
+                node.stress = rel_x / max_rel_x if max_rel_x > 1e-6 else 0.0
             else:
-                node.stress = 1.0 + fbx * node.y + fby * node.x
+                rel_x = node.x - xcg
+                rel_y = node.y - ycg
+                node.stress = 1.0 + fbx * rel_y + fby * rel_x
 
     def assemble_matrices(self, half_wavelength: float) -> Tuple[np.ndarray, np.ndarray]:
         """

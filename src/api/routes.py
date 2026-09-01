@@ -424,12 +424,19 @@ async def solve_fsm(req: FSMRequest):
     return {
         "signature_curve": chart_points,
         "critical_modes": {
+            "load_type": req.load_type,
             "p_crl": round(result.p_crl / 1000.0, 2), # kN
             "l_local": round(result.l_local, 1),      # mm
             "p_crd": round(result.p_crd / 1000.0, 2), # kN
             "l_distortional": round(result.l_distortional, 1), # mm
             "p_cre": round(result.p_cre / 1000.0, 2), # kN
             "l_global": round(result.l_global, 1),    # mm
+            "m_crl": round(result.m_crl / 1e6, 3),    # kN·m
+            "m_crd": round(result.m_crd / 1e6, 3),    # kN·m
+            "m_cre": round(result.m_cre / 1e6, 3),    # kN·m
+            "lf_local": round(result.lf_local, 4),
+            "lf_distortional": round(result.lf_distortional, 4),
+            "lf_global": round(result.lf_global, 4),
         },
         "nodes": nodes_data,
         "strips": strips_data,
@@ -734,12 +741,45 @@ class WebCripplingDetailedRequest(BaseModel):
 
 
 class QuickDesignSearchRequest(BaseModel):
+    # Direct Force Overrides (Legacy & Advanced)
     pu: float = 0.0                 # Axial load Pu (kN)
     mux: float = 0.0                # Moment Mux (kNm)
     muy: float = 0.0                # Moment Muy (kNm)
     vu: float = 0.0                 # Shear force Vu (kN)
-    length: float = 3000.0          # Unbraced length L (mm)
-    fy: float = 300.0               # Yield strength (MPa)
+    length: float = 3000.0          # Span / Unbraced length (mm)
+    fy: float = 345.0               # Yield strength (MPa)
+    
+    # Section Filtering (CFS frmQuickDesign)
+    depth_filter: Optional[float] = None
+    shape_type_filter: str = "All"  # "All", "S", "T"
+    flange_filter: Optional[float] = None
+    thickness_filter: Optional[float] = None
+    punched: bool = False           # Web punching hole
+    config: str = "Single"          # "Single", "Back-to-Back", "Face-to-Face"
+    
+    # Material Options
+    cold_work: bool = False
+    reserve: bool = False
+    
+    # Span & Spacing & Bracing
+    span: Optional[float] = None    # Span length (mm)
+    spacing: float = 400.0          # Joist/Stud spacing (mm)
+    bracing: str = "Unbraced"       # "Unbraced", "Midpoint", "Third-point", "Quarter-point", "Fully Braced"
+    
+    # Applied Surface Loads
+    dead_load: float = 0.0          # kN/m2 (psf)
+    live_load: float = 0.0          # kN/m2 (psf)
+    wind_load: float = 0.0          # kN/m2 (psf)
+    dead_axial: float = 0.0         # kN (kips)
+    live_axial: float = 0.0         # kN (kips)
+    
+    # Deflection Limits & Bearing
+    deflection_live_limit: float = 360.0 # L/360
+    deflection_total_limit: float = 240.0 # L/240
+    bearing_length: float = 38.0    # mm (1.5" default)
+    bearing_condition: str = "EOF"  # "EOF", "IOF", "ETF", "ITF"
+    
+    # Limits & Result count
     max_depth: Optional[float] = None
     max_weight: Optional[float] = None
     library: Optional[str] = None
@@ -791,7 +831,8 @@ async def calculate_web_crippling_api(req: WebCripplingDetailedRequest):
 @router.post("/design/quick-design")
 async def quick_design_search_api(req: QuickDesignSearchRequest):
     """
-    Scans library sections, executes DSM compression, flexure, and shear design checks,
+    Scans library sections, executes DSM compression, flexure, shear,
+    serviceability deflection, and web crippling design checks,
     and returns top candidates sorted by weight ascending.
     """
     res = QuickDesignEngine.search_optimal_sections(
@@ -801,6 +842,26 @@ async def quick_design_search_api(req: QuickDesignSearchRequest):
         vu_kn=req.vu,
         length_mm=req.length,
         fy_mpa=req.fy,
+        depth_filter=req.depth_filter,
+        shape_type_filter=req.shape_type_filter,
+        flange_filter=req.flange_filter,
+        thickness_filter=req.thickness_filter,
+        punched=req.punched,
+        config=req.config,
+        cold_work=req.cold_work,
+        reserve=req.reserve,
+        span_mm=req.span if req.span is not None else req.length,
+        spacing_mm=req.spacing,
+        bracing=req.bracing,
+        dead_load_kpa=req.dead_load,
+        live_load_kpa=req.live_load,
+        wind_load_kpa=req.wind_load,
+        dead_axial_kn=req.dead_axial,
+        live_axial_kn=req.live_axial,
+        deflection_live_limit=req.deflection_live_limit,
+        deflection_total_limit=req.deflection_total_limit,
+        bearing_length_mm=req.bearing_length,
+        bearing_condition=req.bearing_condition,
         max_depth_mm=req.max_depth,
         max_weight_kgm=req.max_weight,
         library_filter=req.library,
@@ -850,12 +911,19 @@ async def fsm_custom_sweep_api(req: FSMCustomSweepRequest):
             ]
         },
         "modes": {
-            "p_crl": round(fsm_res.p_crl, 1),
+            "load_type": req.load_type,
+            "p_crl": round(fsm_res.p_crl / 1000.0, 2),
             "l_local": round(fsm_res.l_local, 1),
-            "p_crd": round(fsm_res.p_crd, 1),
+            "p_crd": round(fsm_res.p_crd / 1000.0, 2),
             "l_distortional": round(fsm_res.l_distortional, 1),
-            "p_cre": round(fsm_res.p_cre, 1),
-            "l_global": round(fsm_res.l_global, 1)
+            "p_cre": round(fsm_res.p_cre / 1000.0, 2),
+            "l_global": round(fsm_res.l_global, 1),
+            "m_crl": round(fsm_res.m_crl / 1e6, 3),
+            "m_crd": round(fsm_res.m_crd / 1e6, 3),
+            "m_cre": round(fsm_res.m_cre / 1e6, 3),
+            "lf_local": round(fsm_res.lf_local, 4),
+            "lf_distortional": round(fsm_res.lf_distortional, 4),
+            "lf_global": round(fsm_res.lf_global, 4),
         }
     }
 

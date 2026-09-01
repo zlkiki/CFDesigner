@@ -26,6 +26,10 @@ class BucklingViewer3D {
     this.rotX = 0.5;
     this.rotY = 0.6;
     this.cameraDistance = 400;
+    this.theme = 'dark';
+    this.ambientLight = null;
+    this.dirLight1 = null;
+    this.dirLight2 = null;
 
     this.initThree();
     this.initControls();
@@ -37,7 +41,7 @@ class BucklingViewer3D {
     const h = this.container.clientHeight || 400;
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x0f172a);
+    this.scene.background = new THREE.Color(this.theme === 'light' ? 0xf8fafc : 0x0f172a);
 
     this.camera = new THREE.PerspectiveCamera(45, w / h, 5, 3500);
     this.updateCamera();
@@ -48,18 +52,60 @@ class BucklingViewer3D {
     this.container.appendChild(this.renderer.domElement);
 
     // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.7);
-    this.scene.add(ambient);
+    this.ambientLight = new THREE.AmbientLight(0xffffff, this.theme === 'light' ? 0.9 : 0.7);
+    this.scene.add(this.ambientLight);
 
-    const dirLight1 = new THREE.DirectionalLight(0x38bdf8, 1.2);
-    dirLight1.position.set(200, 300, 400);
-    this.scene.add(dirLight1);
+    this.dirLight1 = new THREE.DirectionalLight(0x38bdf8, this.theme === 'light' ? 1.4 : 1.2);
+    this.dirLight1.position.set(200, 300, 400);
+    this.scene.add(this.dirLight1);
 
-    const dirLight2 = new THREE.DirectionalLight(0x818cf8, 0.8);
-    dirLight2.position.set(-200, -200, -300);
-    this.scene.add(dirLight2);
+    this.dirLight2 = new THREE.DirectionalLight(0x818cf8, this.theme === 'light' ? 0.9 : 0.8);
+    this.dirLight2.position.set(-200, -200, -300);
+    this.scene.add(this.dirLight2);
 
     window.addEventListener('resize', () => this.onResize());
+  }
+
+  setTheme(theme) {
+    this.theme = theme;
+    if (this.scene) {
+      this.scene.background = new THREE.Color(theme === 'light' ? 0xf8fafc : 0x0f172a);
+    }
+    if (this.ambientLight) {
+      this.ambientLight.intensity = theme === 'light' ? 0.9 : 0.7;
+    }
+    if (this.dirLight1) {
+      this.dirLight1.intensity = theme === 'light' ? 1.4 : 1.2;
+    }
+    if (this.dirLight2) {
+      this.dirLight2.intensity = theme === 'light' ? 0.9 : 0.8;
+    }
+  }
+
+  showLoading(message = '⏳ FSM 좌굴해석 재계산 중...') {
+    if (!this.loadingBadge) {
+      this.loadingBadge = document.createElement('div');
+      this.loadingBadge.className = 'viewer-3d-loading-badge';
+      if (this.container && this.container.parentElement) {
+        this.container.parentElement.appendChild(this.loadingBadge);
+      }
+    }
+    if (this.loadingBadge) {
+      this.loadingBadge.innerText = message;
+      this.loadingBadge.style.display = 'flex';
+    }
+    if (this.container) {
+      this.container.classList.add('canvas-blur-loading');
+    }
+  }
+
+  hideLoading() {
+    if (this.loadingBadge) {
+      this.loadingBadge.style.display = 'none';
+    }
+    if (this.container) {
+      this.container.classList.remove('canvas-blur-loading');
+    }
   }
 
   initControls() {
@@ -115,6 +161,7 @@ class BucklingViewer3D {
   }
 
   setData(nodes, strips, modeKey = 'local_mode') {
+    this.hideLoading();
     this.nodes = nodes || [];
     this.strips = strips || [];
     this.currentModeKey = modeKey;

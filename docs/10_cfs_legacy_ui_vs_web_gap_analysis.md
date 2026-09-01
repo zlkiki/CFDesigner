@@ -78,7 +78,7 @@ pie title CFS 14.0 기능 웹 포팅 현황 (전체 43개 폼 / 95개 기능 기
 |---|---|---|:---:|---|
 | **`frmMemberCheck.cs`** | DSM 압축($P_n$), 휨($M_n$), 전단($V_n$), P-M-V 검토 (`member-check-report.htm`) | 우측 **D/C Dashboard** & 실시간 게이지 | ✅ **완료** | KDS 14 31 10 직접강도법 기준 실시간 산정 및 D/C 바 표시 ([`dsm_compression.py`](file:///f:/PyProject/CFDesigner/src/design/dsm_compression.py)) |
 | **`frmWebCrippling.cs`** | 웨브 크리플링 지압 강도($P_{nc}$) 검토 (`web-crippling-parameters.htm`) | 좌측 **웨브 크리플링 전용 폼** (`#cripResultBox`) | ✅ **완료** | 지지길이 $N$, 4대 재하조건(IOF/EOF/ITF/ETF), 플랜지 체결/립 보강 실시간 계산 ([`shear_and_crippling.py`](file:///f:/PyProject/CFDesigner/src/design/shear_and_crippling.py)) |
-| **`frmQuickDesign.cs`** | 목표 하중에 대해 최적 단면 치수 자동 탐색 (`quick-design.htm`) | **퀵 디자인 모달** (`quickDesignModal`) | ✅ **완료** | $P_u, M_u, V_u$ 입력 시 D/C $\le 1.0$ 만족 최경량 단면 자동 탐색 ([`quick_design.py`](file:///f:/PyProject/CFDesigner/src/design/quick_design.py)) |
+| **`frmQuickDesign.cs`** | 목표 하중에 대해 최적 단면 치수 자동 탐색 (`quick-design.htm`) | **퀵 디자인 3열 풀스펙 모달** (`quickDesignModal`) | ✅ **완료** | 단면/재료 필터, 경간/하중/처짐/지압, 강도·처짐·웨브크리플링 3대 D/C 산정 & 최경량 단면 원클릭 로드 ([`quick_design.py`](file:///f:/PyProject/CFDesigner/src/design/quick_design.py)) |
 | **`frmBeamColumn.cs`** | 보-기둥(Beam-Column) 상호작용 세부 검토 | 우측 **P-M 조합응력 카드** | ✅ **완료** | 2축 휨-압축 상관식 및 모멘트 증대계수($B_1, B_2$) 검토 ([`beam_column.py`](file:///f:/PyProject/CFDesigner/src/design/beam_column.py)) |
 
 ---

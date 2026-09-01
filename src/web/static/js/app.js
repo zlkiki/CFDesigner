@@ -74,7 +74,7 @@ class CFDesignerApp {
       try {
         this.abortControllers[key].abort();
         if (cancelMessage) {
-          this.showStatus(cancelMessage, 'busy');
+          console.debug(`[AbortController] ${key}: ${cancelMessage}`);
         }
       } catch (e) {}
     }
@@ -181,7 +181,14 @@ class CFDesignerApp {
     // Theme Toggle
     document.getElementById('btnThemeToggle').addEventListener('click', () => {
       const isLight = document.body.getAttribute('data-theme') === 'light';
-      document.body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+      const newTheme = isLight ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', newTheme);
+      if (this.viewer3D && this.viewer3D.setTheme) {
+        this.viewer3D.setTheme(newTheme);
+      }
+      if (this.canvas2D && this.canvas2D.setTheme) {
+        this.canvas2D.setTheme(newTheme);
+      }
     });
 
     // Sidebar Tab Navigation
@@ -242,6 +249,30 @@ class CFDesignerApp {
       const el = document.getElementById(id);
       if (el) el.addEventListener('change', () => this.runDesignCheck());
     });
+
+    // Member Design Sub-tab Navigation (P-M vs Web Crippling)
+    document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.subtab-pane').forEach(p => p.style.display = 'none');
+        btn.classList.add('active');
+        const targetId = btn.getAttribute('data-subtab');
+        const targetPane = document.getElementById(targetId);
+        if (targetPane) targetPane.style.display = 'block';
+      });
+    });
+
+    // Web Crippling Load Auto-Sync with Vu
+    const loadVuEl = document.getElementById('loadVu');
+    if (loadVuEl) {
+      loadVuEl.addEventListener('input', (e) => {
+        const cripRuEl = document.getElementById('cripRuInput');
+        if (cripRuEl) {
+          cripRuEl.value = e.target.value;
+          this.calculateWebCrippling();
+        }
+      });
+    }
 
     // 3D Mode Selector Buttons
     document.querySelectorAll('.btn-mode-select').forEach(btn => {
@@ -473,6 +504,9 @@ class CFDesignerApp {
     const t = parseFloat(document.getElementById('wizT').value) || 2.0;
     const r = parseFloat(document.getElementById('wizR').value) || 2.0;
 
+    this.canvas2d.clearPropertiesMarkers();
+    this.canvas2d.showLoading('⏳ 단면 성질 계산 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
     this.showStatus('📐 단면 마법사 생성 및 기하 계산 중...', 'busy');
     const signal = this.getAbortSignal('wizard', '이전 마법사 생성 취소 후 재연산 중...');
 
@@ -490,6 +524,8 @@ class CFDesignerApp {
       if (err.name === 'AbortError') return;
       console.error('Wizard API error:', err);
       this.showStatus('단면 마법사 생성 실패', 'warning', 3000);
+      this.canvas2d.hideLoading();
+      if (this.viewer3d) this.viewer3d.hideLoading();
     }
   }
 
@@ -500,6 +536,9 @@ class CFDesignerApp {
     formData.append('default_thickness', t);
     formData.append('unit', 'mm');
 
+    this.canvas2d.clearPropertiesMarkers();
+    this.canvas2d.showLoading('⏳ DXF 단면 분석 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
     this.showStatus('📐 DXF 도면 파싱 및 중심선 메싱 중...', 'busy');
     const signal = this.getAbortSignal('wizard', '이전 DXF 파싱 취소 후 재연산 중...');
 
@@ -595,16 +634,23 @@ class CFDesignerApp {
         this.currentFsmResult = data;
 
         // Update FSM Signature Chart
-        this.fsmChart.updateData(data.signature_curve);
+        this.fsmChart.updateData(data.signature_curve, data.critical_modes.load_type);
 
         // Update 3D Viewer Mesh & Modes
         this.viewer3d.setData(data.nodes, data.strips, 'local_mode');
 
         // Update FSM Key Indicator Labels
         const modes = data.critical_modes;
-        document.getElementById('valPcrl').innerText = `${modes.p_crl} kN (${modes.l_local} mm)`;
-        document.getElementById('valPcrd').innerText = `${modes.p_crd} kN (${modes.l_distortional} mm)`;
-        document.getElementById('valPcre').innerText = `${modes.p_cre} kN (${modes.l_global} mm)`;
+        const isBending = modes.load_type && modes.load_type.startsWith('bending');
+        if (isBending) {
+          document.getElementById('valPcrl').innerText = `${modes.m_crl} kN·m (${modes.l_local} mm)`;
+          document.getElementById('valPcrd').innerText = `${modes.m_crd} kN·m (${modes.l_distortional} mm)`;
+          document.getElementById('valPcre').innerText = `${modes.m_cre} kN·m (${modes.l_global} mm)`;
+        } else {
+          document.getElementById('valPcrl').innerText = `${modes.p_crl} kN (${modes.l_local} mm)`;
+          document.getElementById('valPcrd').innerText = `${modes.p_crd} kN (${modes.l_distortional} mm)`;
+          document.getElementById('valPcre').innerText = `${modes.p_cre} kN (${modes.l_global} mm)`;
+        }
 
         const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
         this.showStatus(`✅ 해석 및 부재설계 완료 (${elapsed}s)`, 'success', 3500);
@@ -978,6 +1024,9 @@ class CFDesignerApp {
     };
     this.currentGeometry = optimisticGeom;
     this.canvas2d.setData(this.currentGeometry, this.currentProperties);
+    this.canvas2d.clearPropertiesMarkers();
+    this.canvas2d.showLoading('⏳ 단면 성질 재계산 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
 
     const typeNames = {
       rotate_90_cw: '90° 시계방향 회전',
@@ -1015,6 +1064,8 @@ class CFDesignerApp {
       if (err.name === 'AbortError') return;
       console.error('Transform error:', err);
       this.showStatus('단면 변환 오류 발생', 'warning', 3000);
+      this.canvas2d.hideLoading();
+      if (this.viewer3d) this.viewer3d.hideLoading();
     }
   }
 
@@ -1043,6 +1094,9 @@ class CFDesignerApp {
     };
     this.currentGeometry = optimisticGeom;
     this.canvas2d.setData(this.currentGeometry, this.currentProperties);
+    this.canvas2d.clearPropertiesMarkers();
+    this.canvas2d.showLoading('⏳ 단면 성질 재계산 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
     this.closeRotateModal();
 
     this.showStatus(`🔄 ${angle}° 임의각도 회전 적용 및 정밀 단면해석 중...`, 'busy');
@@ -1070,6 +1124,8 @@ class CFDesignerApp {
       if (err.name === 'AbortError') return;
       console.error('Rotate submit error:', err);
       this.showStatus('회전 연산 실패', 'warning', 3000);
+      this.canvas2d.hideLoading();
+      if (this.viewer3d) this.viewer3d.hideLoading();
     }
   }
 
@@ -1107,6 +1163,10 @@ class CFDesignerApp {
     const numRibs = parseInt(document.getElementById('ribCountInput').value) || 1;
     const ribRadius = parseFloat(document.getElementById('ribRadiusInput').value) || 0.0;
 
+    this.canvas2d.clearPropertiesMarkers();
+    this.canvas2d.showLoading('⏳ 리브 추가 계산 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
+
     const payload = {
       elements: this.currentGeometry.elements,
       thickness: this.currentGeometry.thickness || 2.0,
@@ -1129,6 +1189,8 @@ class CFDesignerApp {
       this.closeInsertRibsModal();
     } catch (err) {
       console.error('Insert Ribs error:', err);
+      this.canvas2d.hideLoading();
+      if (this.viewer3d) this.viewer3d.hideLoading();
     }
   }
 
@@ -1268,6 +1330,9 @@ class CFDesignerApp {
 
   loadSelectedLibSection() {
     if (!this.selectedLibSectionData) return;
+    this.canvas2d.clearPropertiesMarkers();
+    this.canvas2d.showLoading('⏳ 라이브러리 단면 로드 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
     this.updateSectionData(this.selectedLibSectionData);
     this.closeLibraryModal();
   }
@@ -1379,30 +1444,55 @@ class CFDesignerApp {
   async executeQuickDesign() {
     const btn = document.getElementById('btnExecuteQuickDesign');
     btn.disabled = true;
-    btn.textContent = '⏳ 최적 단면 탐색 중...';
+    btn.textContent = '⏳ 3대 한계상태 검토 및 최적 단면 탐색 중...';
 
-    const pu = parseFloat(document.getElementById('qdPu').value) || 0.0;
-    const mux = parseFloat(document.getElementById('qdMux').value) || 0.0;
-    const vu = parseFloat(document.getElementById('qdVu').value) || 0.0;
-    const length = parseFloat(document.getElementById('qdLength').value) || 3000.0;
-    const maxH = parseFloat(document.getElementById('qdMaxH').value) || null;
-    const maxW = parseFloat(document.getElementById('qdMaxW').value) || null;
-    const lib = document.getElementById('qdLibrarySelect').value || null;
-    const fy = parseFloat(document.getElementById('yieldStress').value) || 345.0;
+    const typeFilter = document.getElementById('qdTypeFilter') ? document.getElementById('qdTypeFilter').value : 'All';
+    const depthFilter = document.getElementById('qdDepthFilter') && document.getElementById('qdDepthFilter').value ? parseFloat(document.getElementById('qdDepthFilter').value) : null;
+    const flangeFilter = document.getElementById('qdFlangeFilter') && document.getElementById('qdFlangeFilter').value ? parseFloat(document.getElementById('qdFlangeFilter').value) : null;
+    const thicknessFilter = document.getElementById('qdThicknessFilter') && document.getElementById('qdThicknessFilter').value ? parseFloat(document.getElementById('qdThicknessFilter').value) : null;
+    const config = document.getElementById('qdConfigSelect') ? document.getElementById('qdConfigSelect').value : 'Single';
+    const punched = document.getElementById('qdPunchedCheck') ? document.getElementById('qdPunchedCheck').checked : false;
+    const coldWork = document.getElementById('qdColdWorkCheck') ? document.getElementById('qdColdWorkCheck').checked : false;
+    const reserve = document.getElementById('qdReserveCheck') ? document.getElementById('qdReserveCheck').checked : false;
+
+    const span = parseFloat(document.getElementById('qdSpanInput')?.value) || 3000.0;
+    const spacing = parseFloat(document.getElementById('qdSpacingInput')?.value) || 400.0;
+    const bracing = document.getElementById('qdBracingSelect') ? document.getElementById('qdBracingSelect').value : 'Unbraced';
+
+    const deadLoad = parseFloat(document.getElementById('qdDeadInput')?.value) || 0.0;
+    const liveLoad = parseFloat(document.getElementById('qdLiveInput')?.value) || 0.0;
+    const windLoad = parseFloat(document.getElementById('qdWindInput')?.value) || 0.0;
+    const deadAxial = parseFloat(document.getElementById('qdAxialInput')?.value) || 0.0;
+    const deflLimit = parseFloat(document.getElementById('qdDeflectionSelect')?.value) || 360.0;
+    const bearingLen = parseFloat(document.getElementById('qdBearingLength')?.value) || 38.0;
+    const lib = document.getElementById('qdLibrarySelect')?.value || null;
+    const fy = parseFloat(document.getElementById('qdYieldSelect')?.value) || 345.0;
 
     try {
       const res = await fetch('/api/design/quick-design', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pu: pu,
-          mux: mux,
-          vu: vu,
-          length: length,
-          fy: fy,
-          max_depth: maxH,
-          max_weight: maxW,
+          shape_type_filter: typeFilter,
+          depth_filter: depthFilter,
+          flange_filter: flangeFilter,
+          thickness_filter: thicknessFilter,
+          config: config,
+          punched: punched,
+          cold_work: coldWork,
+          reserve: reserve,
+          span: span,
+          length: span,
+          spacing: spacing,
+          bracing: bracing,
+          dead_load: deadLoad,
+          live_load: liveLoad,
+          wind_load: windLoad,
+          dead_axial: deadAxial,
+          deflection_live_limit: deflLimit,
+          bearing_length: bearingLen,
           library: lib,
+          fy: fy,
           max_results: 15
         })
       });
@@ -1415,7 +1505,7 @@ class CFDesignerApp {
       tbody.innerHTML = '';
 
       if (this.quickDesignCandidates.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color: var(--accent-warning); padding: 20px;">조건을 만족하는 단면이 없습니다. 하중이나 제약조건을 완화해 보세요.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color: var(--accent-warning); padding: 30px;">조건을 만족하는 단면이 없습니다. 하중이나 제약조건을 완화해 보세요.</td></tr>`;
         return;
       }
 
@@ -1424,18 +1514,23 @@ class CFDesignerApp {
         const rankBadge = cand.rank === 1 ? '🥇 1' : (cand.rank === 2 ? '🥈 2' : (cand.rank === 3 ? '🥉 3' : cand.rank));
         const savingsBadge = cand.weight_savings_pct > 0 ? `<span style="color: var(--accent-success); font-weight: 600;">-${cand.weight_savings_pct}%</span>` : '-';
         
+        const strengthDcColor = cand.dc_strength <= 1.0 ? 'var(--accent-success)' : 'var(--accent-danger)';
+        const deflDcColor = cand.dc_deflection <= 1.0 ? 'var(--accent-success)' : 'var(--accent-danger)';
+        const cripDcColor = cand.dc_crippling <= 1.0 ? 'var(--accent-success)' : 'var(--accent-danger)';
+        const maxDcColor = cand.max_dc <= 1.0 ? 'var(--accent-success)' : 'var(--accent-danger)';
+
         tr.innerHTML = `
-          <td style="text-align: center; font-weight: 600;">${rankBadge}</td>
+          <td style="text-align: center; font-weight: 700;">${rankBadge}</td>
           <td style="font-weight: 600; color: var(--accent-primary);">${cand.name}</td>
           <td><span class="brand-badge">${cand.library_name}</span></td>
           <td><strong>${cand.weight}</strong> kg/m</td>
           <td style="font-size: 11px;">${cand.depth} × ${cand.flange} × ${cand.thickness}</td>
-          <td>${cand.dc_axial}</td>
-          <td>${cand.dc_flexure}</td>
-          <td>${cand.dc_combined}</td>
-          <td style="font-weight: 600; color: ${cand.max_dc <= 1.0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">${cand.max_dc}</td>
+          <td style="color: ${strengthDcColor}; font-weight: 600;" title="P-M 및 전단 강도 D/C">${cand.dc_strength}</td>
+          <td style="color: ${deflDcColor}; font-weight: 600;" title="활하중/총하중 처짐 D/C (${cand.deflection_live_mm} mm)">${cand.dc_deflection}</td>
+          <td style="color: ${cripDcColor}; font-weight: 600;" title="웨브 크리플링 D/C (Ru=${cand.reaction_ru_kn} kN)">${cand.dc_crippling}</td>
+          <td style="font-weight: 700; color: ${maxDcColor};">${cand.max_dc}</td>
           <td>${savingsBadge}</td>
-          <td>
+          <td style="text-align: center;">
             <button class="btn btn-outline" onclick="window.app.applyQuickDesignCandidate(${idx})" style="padding: 3px 8px; font-size: 11px; width: 100%;">
               ⚡ 적용
             </button>
@@ -1448,7 +1543,7 @@ class CFDesignerApp {
       alert('퀵 디자인 탐색 중 오류가 발생했습니다.');
     } finally {
       btn.disabled = false;
-      btn.textContent = '⚡ 최적 경량 단면 자동 탐색 실행 (Find Lightest Sections)';
+      btn.textContent = '⚡ 최적 경량 단면 자동 탐색 실행';
     }
   }
 
@@ -1463,8 +1558,26 @@ class CFDesignerApp {
         is_closed: false,
         total_length: cand.depth * 2 + cand.flange * 2
       };
+      
+      // Update Span Lengths
+      const spanInput = document.getElementById('qdSpanInput');
+      if (spanInput && spanInput.value) {
+        const spanVal = parseFloat(spanInput.value);
+        const lx = document.getElementById('lengthX');
+        const ly = document.getElementById('lengthY');
+        const lt = document.getElementById('lengthT');
+        if (lx) lx.value = spanVal;
+        if (ly) ly.value = spanVal;
+        if (lt) lt.value = spanVal;
+      }
+
+      this.canvas2d.clearPropertiesMarkers();
+      this.canvas2d.showLoading('⏳ 퀵 디자인 단면 로드 중...');
+      if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
+
       this.updateSectionData({ geometry: geometry });
       this.closeQuickDesignModal();
+      this.showStatus(`퀵 디자인 단면 [${cand.name}] (${cand.weight} kg/m) 적용 완료`, 'success', 4000);
     }
   }
 
@@ -1520,6 +1633,25 @@ class CFDesignerApp {
 
       const formulaEl = document.getElementById('valCripFormula');
       if (formulaEl) formulaEl.textContent = data.formula || '';
+
+      // Update Right Dashboard Web Crippling Gauge
+      const dashRatioEl = document.getElementById('cripDashRatio');
+      const dashBadgeEl = document.getElementById('cripDashBadge');
+      const dashBarEl = document.getElementById('cripDashBar');
+      const dashCapEl = document.getElementById('cripDashCap');
+
+      if (dashRatioEl) dashRatioEl.innerText = data.dc_ratio.toFixed(3);
+      if (dashCapEl) dashCapEl.innerText = `φPnc = ${phiPncKn} kN (${cond})`;
+      if (dashBadgeEl) {
+        const isOk = data.dc_ratio <= 1.0;
+        dashBadgeEl.className = 'badge-status ' + (isOk ? 'ok' : 'ng');
+        dashBadgeEl.innerText = isOk ? 'OK' : 'NG';
+      }
+      if (dashBarEl) {
+        const pct = Math.min(data.dc_ratio * 100, 100);
+        dashBarEl.style.width = pct + '%';
+        dashBarEl.className = 'gauge-fill ' + (data.dc_ratio > 1.0 ? 'danger' : data.dc_ratio > 0.8 ? 'warning' : '');
+      }
     } catch (err) {
       console.error('Web crippling error:', err);
     }
@@ -1568,11 +1700,25 @@ class CFDesignerApp {
 
       const data = await res.json();
       this.lastFsmResult = data;
-      this.chartFsm.updateData(data.curve.lengths, data.curve.load_factors);
+      this.currentFsmResult = {
+        signature_curve: data.curve.points,
+        critical_modes: data.modes,
+        nodes: this.currentFsmResult ? this.currentFsmResult.nodes : [],
+        strips: this.currentFsmResult ? this.currentFsmResult.strips : []
+      };
+      this.fsmChart.updateData(data.curve.points, data.modes.load_type);
 
-      document.getElementById('valPcrl').innerText = `${(data.modes.p_crl / 1000.0).toFixed(1)} kN`;
-      document.getElementById('valPcrd').innerText = `${(data.modes.p_crd / 1000.0).toFixed(1)} kN`;
-      document.getElementById('valPcre').innerText = `${(data.modes.p_cre / 1000.0).toFixed(1)} kN`;
+      const modes = data.modes;
+      const isBending = modes.load_type && modes.load_type.startsWith('bending');
+      if (isBending) {
+        document.getElementById('valPcrl').innerText = `${modes.m_crl} kN·m (${modes.l_local} mm)`;
+        document.getElementById('valPcrd').innerText = `${modes.m_crd} kN·m (${modes.l_distortional} mm)`;
+        document.getElementById('valPcre').innerText = `${modes.m_cre} kN·m (${modes.l_global} mm)`;
+      } else {
+        document.getElementById('valPcrl').innerText = `${modes.p_crl} kN (${modes.l_local} mm)`;
+        document.getElementById('valPcrd').innerText = `${modes.p_crd} kN (${modes.l_distortional} mm)`;
+        document.getElementById('valPcre').innerText = `${modes.p_cre} kN (${modes.l_global} mm)`;
+      }
 
       this.closeFsmParamsModal();
     } catch (err) {
@@ -1976,7 +2122,11 @@ class CFDesignerApp {
 
     if (inpPu) inpPu.value = pu;
     if (inpMux) inpMux.value = mux;
-    if (inpVu) inpVu.value = vu;
+    if (inpVu) {
+      inpVu.value = vu;
+      const cripRu = document.getElementById('cripRuInput');
+      if (cripRu) cripRu.value = vu;
+    }
     if (inpL && this.frameSpans[0]) inpL.value = this.frameSpans[0].length;
 
     // Switch to Member Check Tab and Run Check
@@ -1986,7 +2136,7 @@ class CFDesignerApp {
     this.closeFrameAnalysisModal();
     await this.runDesignCheck();
 
-    alert(`✅ 구조해석 최대 부재력이 부재설계(Member Check)로 연동되었습니다!\n• Mux = ${mux} kN·m\n• Vu = ${vu} kN\n• Pu = ${pu} kN`);
+    alert(`✅ 구조해석 최대 부재력이 부재설계(Member Check) 및 웨브크리플링으로 연동되었습니다!\n• Mux = ${mux} kN·m\n• Vu = ${vu} kN (소요반력 Ru = ${vu} kN)\n• Pu = ${pu} kN`);
   }
 }
 

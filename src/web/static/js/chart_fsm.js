@@ -18,7 +18,7 @@ class FSMSignatureChart {
       data: {
         datasets: [
           {
-            label: 'FSM Signature Curve (Pcr)',
+            label: 'FSM Signature Curve',
             data: [],
             borderColor: '#38bdf8',
             backgroundColor: 'rgba(56, 189, 248, 0.1)',
@@ -95,7 +95,10 @@ class FSMSignatureChart {
             callbacks: {
               label: (context) => {
                 const pt = context.raw;
-                return `L = ${pt.x.toLocaleString()} mm : P_cr = ${pt.y.toFixed(2)} kN`;
+                const isBending = this.currentLoadType && this.currentLoadType.startsWith('bending');
+                const unit = isBending ? 'kN·m' : 'kN';
+                const varName = isBending ? 'M_cr' : 'P_cr';
+                return `L = ${pt.x.toLocaleString()} mm : ${varName} = ${pt.y.toFixed(3)} ${unit}`;
               }
             }
           }
@@ -104,14 +107,19 @@ class FSMSignatureChart {
     });
   }
 
-  updateData(points) {
+  updateData(points, loadType = 'compression') {
     if (!this.chart) return;
+    this.currentLoadType = loadType;
+    const isBending = loadType && loadType.startsWith('bending');
+
     const formatted = (points || []).map(p => ({
       x: p.length,
-      y: p.p_cr
+      y: isBending ? (p.m_cr !== undefined ? p.m_cr : p.critical_moment) : (p.p_cr !== undefined ? p.p_cr : (p.critical_load / 1000.0))
     }));
 
     this.chart.data.datasets[0].data = formatted;
+    this.chart.data.datasets[0].label = isBending ? 'FSM Signature Curve (Mcr)' : 'FSM Signature Curve (Pcr)';
+    this.chart.options.scales.y.title.text = isBending ? '탄성 좌굴모멘트 M_cr (kN·m)' : '탄성 좌굴하중 P_cr (kN)';
     this.chart.update();
   }
 }

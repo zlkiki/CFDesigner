@@ -28,9 +28,31 @@ class SectionCanvas2D {
     this.highlightElemId = null;
     this.showEffective = false;
     this.effectiveSegments = [];
+    this.theme = 'dark';
+    this.loadingMessage = null;
 
     this.initEvents();
     this.resize();
+  }
+
+  setTheme(theme) {
+    this.theme = theme;
+    this.render();
+  }
+
+  clearPropertiesMarkers() {
+    this.properties = null;
+    this.render();
+  }
+
+  showLoading(message = '⏳ 단면 성질 계산 중...') {
+    this.loadingMessage = message;
+    this.render();
+  }
+
+  hideLoading() {
+    this.loadingMessage = null;
+    this.render();
   }
 
   setHighlightElement(elemId) {
@@ -96,6 +118,7 @@ class SectionCanvas2D {
   }
 
   setData(geometryData, propertiesData) {
+    this.hideLoading();
     this.elements = geometryData.elements || [];
     this.thickness = geometryData.thickness || 2.0;
     this.properties = propertiesData;
@@ -154,27 +177,39 @@ class SectionCanvas2D {
     // 1. Draw Global Axes Origin with Arrows & Labels
     this.drawOriginAxes(ctx);
 
-    // 2. Draw Thickness Outlines
+    // 2. Draw Thickness Outlines (Cold-formed rounded corner representation)
     if (this.showThickness) {
       ctx.strokeStyle = 'rgba(59, 130, 246, 0.35)';
       ctx.lineWidth = this.thickness;
       ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
       ctx.beginPath();
+      let lastX = null, lastY = null;
       this.elements.forEach(e => {
-        ctx.moveTo(e.x0, e.y0);
+        if (lastX === null || Math.hypot(e.x0 - lastX, e.y0 - lastY) > 1e-3) {
+          ctx.moveTo(e.x0, e.y0);
+        }
         ctx.lineTo(e.x1, e.y1);
+        lastX = e.x1;
+        lastY = e.y1;
       });
       ctx.stroke();
     }
 
-    // 3. Draw Centerlines
+    // 3. Draw Centerlines (Smooth continuous path with round joints)
     ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 1.6 / this.scale;
     ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.beginPath();
+    let lastCx = null, lastCy = null;
     this.elements.forEach(e => {
-      ctx.moveTo(e.x0, e.y0);
+      if (lastCx === null || Math.hypot(e.x0 - lastCx, e.y0 - lastCy) > 1e-3) {
+        ctx.moveTo(e.x0, e.y0);
+      }
       ctx.lineTo(e.x1, e.y1);
+      lastCx = e.x1;
+      lastCy = e.y1;
     });
     ctx.stroke();
 
@@ -321,6 +356,34 @@ class SectionCanvas2D {
 
     // 10. Fixed Viewport Coordinate Compass (WCS / UCS Widget at bottom-left)
     this.drawCoordinateCompass(ctx);
+
+    // 11. Floating Loading Badge Overlay
+    if (this.loadingMessage) {
+      const badgeW = 200;
+      const badgeH = 34;
+      const bx = (w - badgeW) / 2;
+      const by = 20;
+
+      ctx.save();
+      ctx.fillStyle = this.theme === 'light' ? 'rgba(255, 255, 255, 0.94)' : 'rgba(15, 23, 42, 0.90)';
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(bx, by, badgeW, badgeH, 17);
+      } else {
+        ctx.rect(bx, by, badgeW, badgeH);
+      }
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = this.theme === 'light' ? '#1e293b' : '#f8fafc';
+      ctx.font = '600 12px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(this.loadingMessage, w / 2, by + badgeH / 2);
+      ctx.restore();
+    }
   }
 
   drawOriginAxes(ctx) {
@@ -385,8 +448,8 @@ class SectionCanvas2D {
     ctx.save();
     
     // Background badge
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.fillStyle = this.theme === 'light' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(15, 23, 42, 0.75)';
+    ctx.strokeStyle = this.theme === 'light' ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.1)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(ox, oy, 26, 0, Math.PI * 2);
@@ -431,7 +494,7 @@ class SectionCanvas2D {
     ctx.fillText('Y', ox - 4, oy - len - 8);
 
     // Center dot (0,0)
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = this.theme === 'light' ? '#0f172a' : '#ffffff';
     ctx.beginPath();
     ctx.arc(ox, oy, 2.5, 0, Math.PI * 2);
     ctx.fill();
@@ -446,7 +509,7 @@ class SectionCanvas2D {
     const gridSize = 30;
 
     ctx.lineWidth = 0.5;
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+    ctx.strokeStyle = this.theme === 'light' ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.03)';
     ctx.beginPath();
     for (let x = 0; x < w; x += gridSize) {
       ctx.moveTo(x, 0); ctx.lineTo(x, h);

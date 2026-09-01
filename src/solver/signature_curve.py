@@ -24,16 +24,25 @@ class BucklingCurveResult:
     lengths: List[float] = field(default_factory=list)
     load_factors: List[float] = field(default_factory=list)
     points: List[BucklingPoint] = field(default_factory=list)
+    load_type: str = "compression"
 
-    # Key Buckling Modes
+    # Key Buckling Modes (Loads in N)
     p_crl: float = 0.0  # Elastic local buckling load
     l_local: float = 0.0 # Half-wavelength for local mode
+    lf_local: float = 0.0
     
     p_crd: float = 0.0  # Elastic distortional buckling load
     l_distortional: float = 0.0 # Half-wavelength for distortional mode
+    lf_distortional: float = 0.0
 
     p_cre: float = 0.0  # Elastic global buckling load (at specified member length)
     l_global: float = 0.0
+    lf_global: float = 0.0
+
+    # Key Buckling Moments (N-mm)
+    m_crl: float = 0.0
+    m_crd: float = 0.0
+    m_cre: float = 0.0
 
 
 class SignatureCurveAnalyzer:
@@ -59,9 +68,14 @@ class SignatureCurveAnalyzer:
         self.assembler.apply_loading(load_type=load_type)
         sweep_lengths = np.logspace(np.log10(l_min), np.log10(l_max), num_points)
 
-        res = BucklingCurveResult()
-        p_y = self.assembler.props.area * yield_stress
-        m_y = self.assembler.props.sx_top * yield_stress
+        res = BucklingCurveResult(load_type=load_type)
+        p_y = self.assembler.props.area * yield_stress if self.assembler.props else 1000.0
+        
+        # Determine Reference Yield Moment My based on load_type
+        if load_type == "bending_y":
+            m_y = (self.assembler.props.sy_right if (self.assembler.props and self.assembler.props.sy_right > 0) else (self.assembler.props.iy / max(1.0, self.assembler.props.xcg))) * yield_stress
+        else:
+            m_y = (self.assembler.props.sx_top if (self.assembler.props and self.assembler.props.sx_top > 0) else (self.assembler.props.ix / max(1.0, self.assembler.props.ycg))) * yield_stress
 
         for l_val in sweep_lengths:
             ke, kg = self.assembler.assemble_matrices(half_wavelength=float(l_val))
@@ -76,10 +90,10 @@ class SignatureCurveAnalyzer:
                 res.points.append(pt)
 
         # Detect Local and Distortional minima
-        self._classify_modes(res, p_y, member_length)
+        self._classify_modes(res, p_y, m_y, member_length)
         return res
 
-    def _classify_modes(self, res: BucklingCurveResult, p_y: float, target_l_global: float):
+    def _classify_modes(self, res: BucklingCurveResult, p_y: float, m_y: float, target_l_global: float):
         """
         Identifies local (1st valley), distortional (2nd valley), and global buckling values.
         """
@@ -97,32 +111,44 @@ class SignatureCurveAnalyzer:
 
         if len(minima_indices) == 0:
             # Monotonically increasing or decreasing
+            res.lf_local = float(lfs[0])
             res.p_crl = float(lfs[0] * p_y)
+            res.m_crl = float(lfs[0] * m_y)
             res.l_local = float(lens[0])
+
+            res.lf_distortional = float(lfs[0])
             res.p_crd = float(lfs[0] * p_y)
+            res.m_crd = float(lfs[0] * m_y)
             res.l_distortional = float(lens[0])
         elif len(minima_indices) == 1:
             idx = minima_indices[0]
+            res.lf_local = float(lfs[idx])
             res.p_crl = float(lfs[idx] * p_y)
+            res.m_crl = float(lfs[idx] * m_y)
             res.l_local = float(lens[idx])
-            # If length is large, it could be distortional; if small, local
-            if lens[idx] < 150.0:
-                res.p_crd = float(lfs[idx] * p_y)
-                res.l_distortional = float(lens[idx])
-            else:
-                res.p_crd = float(lfs[idx] * p_y)
-                res.l_distortional = float(lens[idx])
+
+            res.lf_distortional = float(lfs[idx])
+            res.p_crd = float(lfs[idx] * p_y)
+            res.m_crd = float(lfs[idx] * m_y)
+            res.l_distortional = float(lens[idx])
         else:
             # 1st minimum: Local, 2nd minimum: Distortional
             idx1 = minima_indices[0]
             idx2 = minima_indices[1]
+            res.lf_local = float(lfs[idx1])
             res.p_crl = float(lfs[idx1] * p_y)
+            res.m_crl = float(lfs[idx1] * m_y)
             res.l_local = float(lens[idx1])
+
+            res.lf_distortional = float(lfs[idx2])
             res.p_crd = float(lfs[idx2] * p_y)
+            res.m_crd = float(lfs[idx2] * m_y)
             res.l_distortional = float(lens[idx2])
 
         # Global buckling at member length
         ke_g, kg_g = self.assembler.assemble_matrices(half_wavelength=target_l_global)
         lf_g, _ = FSMEigenSolver.solve_min_eigenvalue(ke_g, kg_g)
+        res.lf_global = float(lf_g) if not np.isinf(lf_g) else 1.0
         res.p_cre = float(lf_g * p_y) if not np.isinf(lf_g) else float(p_y)
+        res.m_cre = float(lf_g * m_y) if not np.isinf(lf_g) else float(m_y)
         res.l_global = target_l_global

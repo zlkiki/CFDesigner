@@ -45,7 +45,7 @@
 
 ## 3. 1:1 수용 기준 (Acceptance Criteria)
 
-- [ ] **AC 4-1**: FSM 세부설정 모달에서 [강축 휨 (Major Bending X-X)] 선택 후 [재해석 실행] 시 오류 팝업 없이 시그니처 커브가 즉시 렌더링되는가?
-- [ ] **AC 4-2**: [약축 휨 (Minor Bending Y-Y)] 선택 후에도 고유치 발산 없이 안정적으로 곡선과 $M_{crl}, M_{crd}, M_{cre}$가 계산되는가?
-- [ ] **AC 4-3**: 휨 모드 시 UI 상단 배지에 "국부좌굴 $M_{crl}$", "왜곡좌굴 $M_{crd}$", "전역좌굴 $M_{cre}$" 지표가 $\text{kN}\cdot\text{m}$ 단위로 정상 표시되는가?
-- [ ] **AC 4-4**: `pytest tests/engine/test_fsm_engine.py` 테스트가 100% Pass 통과하는가?
+- [x] **AC 4-1**: FSM 세부설정 모달에서 [강축 휨 (Major Bending X-X)] 선택 후 [재해석 실행] 시 오류 팝업 없이 시그니처 커브가 즉시 렌더링되는가?
+- [x] **AC 4-2**: [약축 휨 (Minor Bending Y-Y)] 선택 후에도 고유치 발산 없이 안정적으로 곡선과 $M_{crl}, M_{crd}, M_{cre}$가 계산되는가?
+- [x] **AC 4-3**: 휨 모드 시 UI 상단 배지에 "국부좌굴 $M_{crl}$", "왜곡좌굴 $M_{crd}$", "전역좌굴 $M_{cre}$" 지표가 $\text{kN}\cdot\text{m}$ 단위로 정상 표시되는가?
+- [x] **AC 4-4**: `pytest tests/engine/test_fsm_engine.py` 테스트가 100% Pass 통과하는가?

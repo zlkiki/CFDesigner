@@ -348,6 +348,7 @@ class ManualViewer {
       this.bindGlossaryTooltips(this.splitContentEn);
       this.setupLightbox(this.splitContentKo);
       this.setupLightbox(this.splitContentEn);
+      this.setupSplitScrollSync();
     } else {
       this.splitView.style.display = "none";
       this.articleContent.style.display = "block";
@@ -363,6 +364,36 @@ class ManualViewer {
       this.bindGlossaryTooltips(this.articleContent);
       this.setupLightbox(this.articleContent);
     }
+  }
+
+  setupSplitScrollSync() {
+    if (!this.splitContentKo || !this.splitContentEn) return;
+    const colKo = this.splitContentKo.closest(".split-column");
+    const colEn = this.splitContentEn.closest(".split-column");
+    if (!colKo || !colEn) return;
+
+    let isSyncingKo = false;
+    let isSyncingEn = false;
+
+    colKo.onscroll = () => {
+      if (isSyncingKo) {
+        isSyncingKo = false;
+        return;
+      }
+      isSyncingEn = true;
+      const ratio = colKo.scrollTop / (colKo.scrollHeight - colKo.clientHeight || 1);
+      colEn.scrollTop = ratio * (colEn.scrollHeight - colEn.clientHeight || 1);
+    };
+
+    colEn.onscroll = () => {
+      if (isSyncingEn) {
+        isSyncingEn = false;
+        return;
+      }
+      isSyncingKo = true;
+      const ratio = colEn.scrollTop / (colEn.scrollHeight - colEn.clientHeight || 1);
+      colKo.scrollTop = ratio * (colKo.scrollHeight - colKo.clientHeight || 1);
+    };
   }
 
   setupLightbox(container) {

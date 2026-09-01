@@ -300,6 +300,71 @@ def test_manual_phase6_3_fsm_design_and_frame_english_symmetry():
     assert "Page 4" in aw["content_en_html"]
 
 
+def test_manual_phase8_6_ui_layout_and_11_topics_bilingual_sync():
+    """Phase 8-6 AC 6-1 ~ AC 6-3: Verify 4-quadrant layout guide, real-time pipeline, and 11 topics 1:1 symmetry."""
+    # 1. UI Layout 4-quadrant guide
+    ui = TOPICS["ui_layout"]
+    assert "좌측 제어 패널" in ui["content_html"]
+    assert "2D/3D 단면 뷰어" in ui["content_html"]
+    assert "FSM 시그니처 커브" in ui["content_html"]
+    assert "Section Properties & Design D/C Gauges" in ui["content_html"] or "D/C 게이지" in ui["content_html"]
+    assert "무중단 연산 아키텍처" in ui["content_html"] or "데이터 연동 파이프라인" in ui["content_html"]
+    
+    # 2. Check 11 target topics have robust Korean and English content
+    target_11 = [
+        "intro", "dxf_import", "geom_transform", "material_db",
+        "principal_axes", "fsm_theory", "kds_dsm_comp", "kds_dsm_flex",
+        "kds_shear_crip", "kds_interaction", "analysis_wizard"
+    ]
+    for tid in target_11:
+        t = TOPICS[tid]
+        assert len(t["content_html"]) > 200, f"Topic {tid} KO content too short"
+        assert len(t["content_en_html"]) > 200, f"Topic {tid} EN content too short"
+        assert "manual-article" in t["content_html"]
+        assert "manual-article" in t["content_en_html"]
+
+
+def test_manual_phase8_7_diagrams_tables_and_kds_aisi_symmetry():
+    """Phase 8-7 AC 7-1 ~ AC 7-6: Verify diagrams, table/math symmetry, walkthrough subsections, and KDS/AISI."""
+    # 1. SFD/BMD/Deflection caption in 1-2
+    ui = TOPICS["ui_layout"]
+    assert "SFD / BMD / 처짐 다이어그램" in ui["content_html"]
+    assert "web-analysis-ui.png" in ui["content_html"]
+
+    # 2. Table & KaTeX math symmetry in 3-3, 5-4, 2-3
+    cw = TOPICS["cold_work"]
+    assert "<table" in cw["content_html"] and "<table" in cw["content_en_html"]
+    assert "B_c" in cw["content_html"] and "B_c" in cw["content_en_html"]
+
+    fp = TOPICS["fsm_params"]
+    assert "<table" in fp["content_html"] and "<table" in fp["content_en_html"]
+    assert "L_{min}" in fp["content_html"] and "L_{min}" in fp["content_en_html"]
+
+    eg = TOPICS["element_grid"]
+    assert "$$" in eg["content_html"] and "$$" in eg["content_en_html"]
+    assert "\\int" in eg["content_html"] and "\\int" in eg["content_en_html"]
+
+    # 3. Walkthrough subsections in 2-1, 2-2, 7-1
+    for tid in ["wizard", "dxf_import", "analysis_wizard"]:
+        t = TOPICS[tid]
+        assert "Step-by-Step Walkthrough" in t["content_html"] or "실무 적용 튜토리얼 예제" in t["content_html"]
+        assert "Step-by-Step Walkthrough" in t["content_en_html"]
+
+    # 4. KDS vs AISI factors in compression & flexure
+    comp = TOPICS["kds_dsm_comp"]
+    assert "\\phi_c" in comp["content_html"]
+    assert "\\Omega_c" in comp["content_html"]
+    assert "\\phi_c" in comp["content_en_html"]
+    assert "\\Omega_c" in comp["content_en_html"]
+
+    flex = TOPICS["kds_dsm_flex"]
+    assert "\\phi_b" in flex["content_html"]
+    assert "\\Omega_b" in flex["content_html"]
+    assert "\\phi_b" in flex["content_en_html"]
+    assert "\\Omega_b" in flex["content_en_html"]
+
+
+
 
 
 
