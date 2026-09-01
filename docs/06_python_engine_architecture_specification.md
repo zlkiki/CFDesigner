@@ -122,10 +122,12 @@ graph LR
     CrossCheck --> PyTest["pytest 테스트 스위트<br>(55개 단위/통합 테스트 100% 통과)"]
 ```
 
-* **테스트 디렉토리 (`tests/`)**:
-  - `test_section_properties.py`: C, Z, Hat 단면 기하특성 $0.01\%$ 오차 검증.
-  - `test_fsm_solver.py`: FSM 8x8 행렬 조립 및 CUFSM 벤치마크 비교 검증.
-  - `test_kds_dsm.py`: KDS 14 31 10 직접강도법(DSM) $P_n, M_n$ 설계식 검증.
-  - `test_shear_crippling.py`: 웨브 전단 및 크리플링 4대 지지조건 산정 검증.
-  - `test_web_api.py`, `test_manual_api.py`: FastAPI 엔드포인트 및 다국어 검색 E2E 검증.
+* **테스트 디렉토리 (`tests/`) - 10개 테스트 파일 (55개 전수 테스트 100% 통과)**:
+  - [`tests/test_c_section.py`](file:///f:/PyProject/CFDesigner/tests/test_c_section.py), [`tests/test_z_section.py`](file:///f:/PyProject/CFDesigner/tests/test_z_section.py): C/Z단면 기하특성 $0.01\%$ 오차 및 FSM 고유치 검증.
+  - [`tests/test_dxf_integration.py`](file:///f:/PyProject/CFDesigner/tests/test_dxf_integration.py): DXF 폴리라인 파싱 및 메싱 검증.
+  - [`tests/test_phase1_geometry_edit.py`](file:///f:/PyProject/CFDesigner/tests/test_phase1_geometry_edit.py): 요소 테이블 편집, 회전, 대칭, 리브 삽입 검증.
+  - [`tests/test_phase2_library_material.py`](file:///f:/PyProject/CFDesigner/tests/test_phase2_library_material.py): `*.cfsl` 단면 DB 파서 및 코너 가공경화($F_{ya}$) 검증.
+  - [`tests/test_phase3_advanced_design.py`](file:///f:/PyProject/CFDesigner/tests/test_phase3_advanced_design.py): KDS 웨브 크리플링, 퀵 디자인, Winter 유효단면 반복해석 검증.
+  - [`tests/test_phase4_frame1d_analysis.py`](file:///f:/PyProject/CFDesigner/tests/test_phase4_frame1d_analysis.py): 1D FEM 구조해석, SFD/BMD/처짐 검증.
+  - [`tests/test_web_api.py`](file:///f:/PyProject/CFDesigner/tests/test_web_api.py), [`tests/test_manual_api.py`](file:///f:/PyProject/CFDesigner/tests/test_manual_api.py): FastAPI 엔드포인트 및 다국어 검색 E2E 검증.
 * **현재 검증 현황**: **55개 전수 테스트 100% Pass**
