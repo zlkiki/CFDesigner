@@ -17,6 +17,10 @@ htmlcov/
 # Scratch directory (temporary)
 scratch/
 
+# PyInstaller build artifacts
+build/
+dist/
+
 # IDE & Editor files
 .vscode/
 .idea/

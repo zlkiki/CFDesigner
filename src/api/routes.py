@@ -608,7 +608,17 @@ async def get_library_files():
     """
     Returns the list of available .cfsl library files in original_source.
     """
-    lib_dir = "original_source"
+from src.resource_helper import get_resource_path
+
+@router.get("/library/list")
+async def get_libraries():
+    """
+    Returns the list of available section library files (*.cfsl).
+    """
+    lib_dir = get_resource_path("original_source")
+    if not os.path.exists(lib_dir) and os.path.exists("original_source"):
+        lib_dir = "original_source"
+
     libs = []
     if os.path.exists(lib_dir):
         for f in sorted(os.listdir(lib_dir)):
@@ -623,7 +633,10 @@ async def get_library_sections(lib: str = "SSMA", type: Optional[str] = None, qu
     """
     Returns sections in the specified library, with optional type and text filtering.
     """
-    file_path = os.path.join("original_source", f"{lib}.cfsl")
+    lib_dir = get_resource_path("original_source")
+    file_path = os.path.join(lib_dir, f"{lib}.cfsl")
+    if not os.path.exists(file_path):
+        file_path = os.path.join("original_source", f"{lib}.cfsl")
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f"Library file {lib}.cfsl not found.")
 
@@ -661,7 +674,10 @@ async def load_library_section(lib_name: str, offset: int):
     """
     Loads full geometric and mechanical properties of a library section by offset.
     """
-    file_path = os.path.join("original_source", f"{lib_name}.cfsl")
+    lib_dir = get_resource_path("original_source")
+    file_path = os.path.join(lib_dir, f"{lib_name}.cfsl")
+    if not os.path.exists(file_path):
+        file_path = os.path.join("original_source", f"{lib_name}.cfsl")
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f"Library {lib_name}.cfsl not found.")
 

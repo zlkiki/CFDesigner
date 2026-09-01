@@ -7,12 +7,12 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import HTMLResponse, FileResponse
 import os
 from typing import Optional, List, Dict, Any
+from src.resource_helper import get_resource_path
 from src.web.manual.topics import CATEGORIES, TOPICS
 
 router = APIRouter(tags=["Manual"])
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-web_dir = os.path.join(os.path.dirname(current_dir), "web")
+web_dir = get_resource_path("src", "web")
 manual_html_path = os.path.join(web_dir, "manual.html")
 
 

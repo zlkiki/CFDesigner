@@ -66,7 +66,9 @@ class QuickDesignEngine:
             return cls._SECTION_CACHE
 
         if not lib_dir:
+            from src.resource_helper import get_resource_path
             possible_dirs = [
+                get_resource_path("original_source"),
                 "original_source",
                 os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "original_source")),
                 os.path.join(os.getcwd(), "original_source")

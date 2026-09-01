@@ -30,9 +30,10 @@ app.add_middleware(
 app.include_router(router)
 app.include_router(manual_router)
 
+from src.resource_helper import get_resource_path
+
 # Mount Static Assets
-current_dir = os.path.dirname(os.path.abspath(__file__))
-web_dir = os.path.join(os.path.dirname(current_dir), "web")
+web_dir = get_resource_path("src", "web")
 static_dir = os.path.join(web_dir, "static")
 
 if os.path.exists(static_dir):
