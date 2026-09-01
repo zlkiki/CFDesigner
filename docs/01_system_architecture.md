@@ -1,79 +1,69 @@
-# [기술 문서 01] 전체 시스템 아키텍처 및 역공학 분석 명세 (01_system_architecture.md)
+# [시스템 아키텍처] CFDesigner 전체 시스템 구조 및 계층도
+
+> **문서 상태**: 🌟 Single Source of Truth (SSOT)  
+> **최종 갱신일**: 2026-09-01 (Phase 1~5 통합 완료)  
+> **기술 스택**: Python 3.10+, FastAPI, NumPy, SciPy, ezdxf, HTML5, Vanilla CSS (AltDP), Chart.js, Three.js
 
 ---
 
-## 1. 개요 및 복원 시스템 개요
-
-본 프로젝트는 상용 냉간성형강(Cold-Formed Steel) 해석·설계 프로그램인 **CFS.exe (Version 14.0)**의 전체 바이너리를 역공학하여 **108개 전체 C# 소스 파일 및 솔루션(.sln, .csproj)**으로 100% 복원하고, 독자적인 Python 기반의 CAD 연동 구조해석 및 KDS/AISI 부재설계 엔진으로 전환하기 위한 기반을 제공합니다.
-
----
-
-## 2. 전체 시스템 아키텍처 및 데이터 흐름도
+## 1. 전체 시스템 5대 계층 구조도
 
 ```mermaid
 graph TD
-    subgraph Input_Layer ["1. 입력 및 모델링 계층"]
-        DXF_File["CAD DXF 파일 (.dxf)"] --> DXF_Parser["DXF 파서 (RSG.CFS.DXF / Section.ImportDXF)"]
-        LIB_File["단면/재료 DB (*.cfsl, *.mtl)"] --> DB_Parser["라이브러리 I/O (RSG.Data / CFSInterface)"]
-        Wizard["단면 마법사 (SectionWizard)"] --> Geom_Builder["형상 생성기 (Part.Geometry)"]
+    subgraph Client["🌐 프론트엔드 UI 계층 (AltDP Web Client)"]
+        UI_2D["2D CAD 캔버스<br>(단면/유효단면/리브/스프레드시트)"]
+        UI_3D["3D 좌굴모드 뷰어<br>(Three.js 렌더러)"]
+        UI_Chart["차트 & 다이어그램<br>(FSM 시그니처 커브 / SFD / BMD / 처짐)"]
+        UI_Manual["온라인 도움말 SPA<br>(25개 토픽 / 3-Way Bilingual / 실시간 검색)"]
+        UI_Report["A4 표준 구조계산서<br>(인쇄 미리보기 / PDF)"]
     end
 
-    subgraph Geom_Layer ["2. 단면 기하학적 성질 해석 계층"]
-        DXF_Parser --> Section_Model["단면 모델 (RSG.CFS.Section / Part)"]
-        DB_Parser --> Section_Model
-        Geom_Builder --> Section_Model
-        Section_Model --> Gross_Props["총단면 성능 (A, Ix, Iy, Ixy, J, Cw, x0, y0)"]
-        Section_Model --> Eff_Props["유효단면 성능 (EffectiveProperties: Ae, Ixe, Iye)"]
+    subgraph API["⚡ 백엔드 REST API 계층 (FastAPI)"]
+        R_Sect["단면 & CAD API<br>(/section/wizard, /upload-dxf, /geometry/transform)"]
+        R_Lib["라이브러리 & 재료 API<br>(/library/sections, /material/presets, /material/cold-work)"]
+        R_Solve["수치해석 API<br>(/fsm/solve, /fsm/export-csv, /analysis/run)"]
+        R_Design["부재설계 & 퀵디자인 API<br>(/design/check, /design/quick-design)"]
+        R_Manual["온라인 도움말 API<br>(/api/manual/categories, /topic/{id}, /search)"]
     end
 
-    subgraph Analysis_Layer ["3. 수치해석 엔진 계층 (Solvers)"]
-        Gross_Props --> FSM_Engine["유한대판법 (FSM: RSG.CFS.FiniteStrip)"]
-        Gross_Props --> Torsion_Engine["비틀림 해석 (RSG.CFS.TorsionSegment)"]
-        FSM_Engine --> Buckle_Modes["탄성 좌굴하중 곡선 (P_crl, P_crd, P_cre, M_crl, M_crd, M_cre)"]
-        Torsion_Engine --> Warping_Stress["뒴 비틀림 및 전단응력 분포"]
+    subgraph Core["🚀 핵심 공학 연산 엔진 (Python Core Engine)"]
+        M_CAD["CAD 파서 & 메셔<br>(dxf_parser.py)"]
+        M_Geom["기하 성질 & 편집기<br>(section.py, geometry_editor.py, effective_width.py)"]
+        M_Lib["라이브러리 & 가공경화<br>(library_parser.py, *.cfsl)"]
+        M_FSM["FSM 탄성좌굴 솔버<br>(fsm.py, Ke/Kg 조립, 고유치)"]
+        M_1D["1D FEM 구조해석 솔버<br>(frame1d.py, SFD/BMD/처짐)"]
+        M_DSM["KDS 부재설계 & 최적화<br>(dsm.py, shear_and_crippling.py, quick_design.py)"]
     end
 
-    subgraph Design_Layer ["4. 설계 및 부재 검토 계층"]
-        Buckle_Modes --> Member_Check["부재 검토 엔진 (RSG.CFS.MemberCheck)"]
-        Gross_Props --> Member_Check
-        Eff_Props --> Member_Check
-        Member_Check --> DSM["직접강도법 (DSM: Pnl, Pnd, Pne / Mnl, Mnd, Mne)"]
-        Member_Check --> EWM["유효폭법 (EWM) & 전단(Vn) & 웨브 크리플링(Pnc)"]
-        Member_Check --> PM_Inter["휨-압축 P-M 조합응력 검토"]
-    end
+    UI_2D <--> R_Sect & R_Lib
+    UI_3D <--> R_Solve
+    UI_Chart <--> R_Solve
+    UI_Manual <--> R_Manual
+    UI_Report <--> R_Design
 
-    subgraph Output_Layer ["5. 출력 및 보고서 계층"]
-        DSM --> Report_Gen["계산서 생성기 (RSG.CFS.Report / PrintRoutines)"]
-        EWM --> Report_Gen
-        PM_Inter --> Report_Gen
-        Report_Gen --> A4_Sheet["A4 단면성능 및 구조계산서 출력"]
-    end
+    R_Sect <--> M_CAD & M_Geom
+    R_Lib <--> M_Lib
+    R_Solve <--> M_FSM & M_1D
+    R_Design <--> M_DSM
 ```
 
 ---
 
-## 3. 핵심 네임스페이스 및 파일 인벤토리
+## 2. 데이터 흐름 및 파이프라인 (Data Pipeline)
 
-| 네임스페이스 | 주요 클래스 | 파일 위치 | 핵심 역할 및 알고리즘 |
-|---|---|---|---|
-| **`RSG.CFS`** | `DXF` | [`RSG/CFS/DXF.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/DXF.cs) | AutoCAD DXF 파일 I/O, 좌표 스케일링, 원점 정렬 |
-| | `Section` | [`RSG/CFS/Section.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/Section.cs) | 단면 형상 정의, Gross/Effective 특성치 계산, MemberCheck |
-| | `Part` | [`RSG/CFS/Part.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/Part.cs) | 개별 파트 형상, 코너 Fillet R 분할, 두께 오프셋 |
-| | `FiniteStrip` | [`RSG/CFS/FiniteStrip.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/FiniteStrip.cs) | **유한대판법(FSM)** $[K_e], [K_g]$ 조립, 고유치 해석, 좌굴하중 곡선 산정 |
-| | `MemberCheck` | [`RSG/CFS/MemberCheck.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/MemberCheck.cs) | 부재 설계 결과 데이터 구조체 |
-| | `EffectiveProperties` | [`RSG/CFS/EffectiveProperties.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/EffectiveProperties.cs) | 유효폭법(Winter 식) 기반 응력 반복 수치해석 |
-| | `Analysis` | [`RSG/CFS/Analysis.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/Analysis.cs) | 기둥/보 1D 유한요소 뼈대 해석 및 하중조합 |
-| | `Report` | [`RSG/CFS/Report.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/CFS/Report.cs) | 구조계산서 RTF 포맷 생성 및 결과 테이블 빌더 |
-| **`RSG.Math`** | `Sturm` | [`RSG/Math/Sturm.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/Math/Sturm.cs) | 스텀 시퀀스(Sturm sequence) 기반 다항식/고유치 수치해석 솔버 |
-| **`RSG.Data`** | `DataAnalysis` | [`RSG/Data/DataAnalysis.cs`](file:///f:/PyProject/CFT/decompiled_src/RSG/Data/DataAnalysis.cs) | 단면 DB 파일 데이터 처리 |
-| **`_Global`** | `frm*` (43개) | [`_Global/`](file:///f:/PyProject/CFT/decompiled_src/_Global/) | Windows Forms UI 대화상자 및 뷰어 |
-
----
-
-## 4. 빌드 환경 및 프로젝트 복원 상태
-
-* **솔루션 파일**: [`decompiled_src/CFS.sln`](file:///f:/PyProject/CFT/decompiled_src/CFS.sln)
-* **프로젝트 파일**: [`decompiled_src/CFS.csproj`](file:///f:/PyProject/CFT/decompiled_src/CFS.csproj) (.NET Framework 4.8 / Windows Forms, x86 타겟)
-* **외부 종속 DLL**:
-  - `FlexCell.dll` (UI 그리드 컨트롤)
-  - `PLUSManaged.dll` (소프트웨어 보호 라이브러리)
+1. **단면 생성 & 기하 조작**:
+   - 2D DXF 업로드, 6대 표준 단면 마법사, 1,000+개 표준 라이브러리 로드, 스프레드시트 요소 직접 편집.
+   - 단면 기하 변환(회전, 대칭, 원점 정렬) 및 중간 보강 리브(V형, U형) 자동 생성.
+2. **단면 성질 해석 (Gross & Effective)**:
+   - 총단면($A_g, I_x, I_y, J, C_w, x_o, y_o$) 선적분 계산.
+   - Winter 유효폭 반복 계산을 통한 유효단면($A_{eff}, I_{eff}$) 및 2D 캔버스 점선 시각화.
+3. **FSM 탄성 좌굴해석**:
+   - 부재 반파장 $L$에 따른 $[K_e], [K_g]$ 강성행렬 조립 및 일반화 고유치 수치해석.
+   - 국부($P_{crl}$), 왜곡($P_{crd}$), 전체($P_{cre}$) 좌굴하중 판별 및 Three.js 3D 실시간 형상 렌더링.
+4. **1D 뼈대 구조해석 & 단면력 산정**:
+   - 단순보, 다경간 연속보, 캔틸레버 FEM 해석을 통한 SFD, BMD, 처짐 다이어그램 생성.
+   - 최대 소요 모멘트($M_u$), 전단력($V_u$) 추출 후 부재설계 모듈로 자동 연동.
+5. **KDS 14 31 10 / AISI S100 부재설계 & A4 계산서**:
+   - 직접강도법(DSM) 기반 압축($P_n$), 휨($M_n$), 전단($V_n$), 웨브 크리플링($P_{nc}$) 및 P-M 조합응력 판정.
+   - 퀵 디자인(Quick Design) 목표 하중 최적 단면 자동 추천.
+   - A4 규격 인쇄/PDF 저장용 구조계산서 원클릭 생성.
