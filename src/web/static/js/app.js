@@ -385,6 +385,69 @@ class CFDesignerApp {
 
     document.getElementById('btnOpenReport').addEventListener('click', () => this.openReportModal());
     document.getElementById('btnCloseReport').addEventListener('click', () => this.closeReportModal());
+
+    // Report Dual Mode Buttons
+    const btnModeSummary = document.getElementById('btnReportModeSummary');
+    const btnModeDetailed = document.getElementById('btnReportModeDetailed');
+    if (btnModeSummary && btnModeDetailed) {
+      btnModeSummary.addEventListener('click', () => {
+        btnModeSummary.classList.add('active');
+        btnModeDetailed.classList.remove('active');
+        this.reportMode = 'summary';
+        this.refreshReport();
+      });
+      btnModeDetailed.addEventListener('click', () => {
+        btnModeDetailed.classList.add('active');
+        btnModeSummary.classList.remove('active');
+        this.reportMode = 'detailed';
+        this.refreshReport();
+      });
+    }
+
+    // Toggle Config Drawer
+    const btnToggleConfig = document.getElementById('btnToggleReportConfig');
+    if (btnToggleConfig) {
+      btnToggleConfig.addEventListener('click', () => {
+        const drawer = document.getElementById('reportConfigDrawer');
+        if (drawer) {
+          drawer.style.display = drawer.style.display === 'none' ? 'block' : 'none';
+        }
+      });
+    }
+
+    // Select All / Unselect All
+    const btnRptSelectAll = document.getElementById('btnRptSelectAll');
+    const btnRptUnselectAll = document.getElementById('btnRptUnselectAll');
+    if (btnRptSelectAll && btnRptUnselectAll) {
+      btnRptSelectAll.addEventListener('click', () => {
+        ['chkRptInputs', 'chkRptGross', 'chkRptTorsion', 'chkRptEffective', 'chkRptStrength', 'chkRptFSM', 'chkRptMember', 'chkRptCrippling'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.checked = true;
+        });
+      });
+      btnRptUnselectAll.addEventListener('click', () => {
+        ['chkRptInputs', 'chkRptGross', 'chkRptTorsion', 'chkRptEffective', 'chkRptStrength', 'chkRptFSM', 'chkRptMember', 'chkRptCrippling'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.checked = false;
+        });
+      });
+    }
+
+    // Apply Config & Print from Modal
+    const btnApplyRpt = document.getElementById('btnApplyReportConfig');
+    if (btnApplyRpt) {
+      btnApplyRpt.addEventListener('click', () => this.refreshReport());
+    }
+
+    const btnPrintModal = document.getElementById('btnPrintReportFromModal');
+    if (btnPrintModal) {
+      btnPrintModal.addEventListener('click', () => {
+        const iframe = document.getElementById('reportIframe');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.print();
+        }
+      });
+    }
   }
 
   switchViewerMode(mode) {
@@ -635,19 +698,76 @@ class CFDesignerApp {
   }
 
   async openReportModal() {
+    this.reportMode = this.reportMode || 'detailed';
+    document.getElementById('reportModal').classList.add('active');
+    await this.refreshReport();
+  }
+
+  async refreshReport() {
     if (!this.currentGeometry || !this.currentProperties) return;
 
-    const shape = document.getElementById('wizardShape').value;
-    const pu = parseFloat(document.getElementById('loadPu').value) || 50;
-    const mux = parseFloat(document.getElementById('loadMux').value) || 5.0;
-    const vu = parseFloat(document.getElementById('loadVu').value) || 15.0;
+    const shape = document.getElementById('wizardShape') ? document.getElementById('wizardShape').value : 'C';
+    const pu = parseFloat(document.getElementById('loadPu') ? document.getElementById('loadPu').value : 50) || 50;
+    const mux = parseFloat(document.getElementById('loadMux') ? document.getElementById('loadMux').value : 5.0) || 5.0;
+    const vu = parseFloat(document.getElementById('loadVu') ? document.getElementById('loadVu').value : 15.0) || 15.0;
+
+    const defaultSecName = `CFS-${shape.toUpperCase()}-${document.getElementById('wizH') ? document.getElementById('wizH').value : 150}x${document.getElementById('wizB') ? document.getElementById('wizB').value : 50}x${document.getElementById('wizT') ? document.getElementById('wizT').value : 2.0}`;
+    
+    const meta = {
+      project_name: document.getElementById('rptProjectName') ? document.getElementById('rptProjectName').value : "CFDesigner Project",
+      section_name: document.getElementById('rptSectionName') ? (document.getElementById('rptSectionName').value || defaultSecName) : defaultSecName,
+      doc_number: document.getElementById('rptDocNumber') ? document.getElementById('rptDocNumber').value : "CALC-CFS-001",
+      company: document.getElementById('rptCompany') ? document.getElementById('rptCompany').value : "Structural Engineering Corp.",
+      designed_by: document.getElementById('rptDesignedBy') ? document.getElementById('rptDesignedBy').value : "설계자",
+      checked_by: document.getElementById('rptCheckedBy') ? document.getElementById('rptCheckedBy').value : "검토자",
+      approved_by: document.getElementById('rptApprovedBy') ? document.getElementById('rptApprovedBy').value : "책임기술사",
+      remarks: document.getElementById('rptRemarks') ? document.getElementById('rptRemarks').value : "KDS 14 31 10 직접강도법",
+      file_name: `${shape.toUpperCase()}_Section.cfs`
+    };
+
+    const options = {
+      report_mode: this.reportMode || 'detailed',
+      include_section_inputs: document.getElementById('chkRptInputs') ? document.getElementById('chkRptInputs').checked : true,
+      include_gross_properties: document.getElementById('chkRptGross') ? document.getElementById('chkRptGross').checked : true,
+      include_torsion_properties: document.getElementById('chkRptTorsion') ? document.getElementById('chkRptTorsion').checked : true,
+      include_effective_properties: document.getElementById('chkRptEffective') ? document.getElementById('chkRptEffective').checked : true,
+      include_fully_braced_strength: document.getElementById('chkRptStrength') ? document.getElementById('chkRptStrength').checked : true,
+      include_fsm_buckling: document.getElementById('chkRptFSM') ? document.getElementById('chkRptFSM').checked : true,
+      include_member_design: document.getElementById('chkRptMember') ? document.getElementById('chkRptMember').checked : true,
+      include_web_crippling: document.getElementById('chkRptCrippling') ? document.getElementById('chkRptCrippling').checked : true,
+    };
+
+    // Material info
+    const mat = {
+      name: document.getElementById('matName') ? document.getElementById('matName').value : "SS275 / ASTM A1008",
+      fy: parseFloat(document.getElementById('matFy') ? document.getElementById('matFy').value : 275.0) || 275.0,
+      fu: parseFloat(document.getElementById('matFu') ? document.getElementById('matFu').value : 410.0) || 410.0,
+      e: parseFloat(document.getElementById('matE') ? document.getElementById('matE').value : 205000.0) || 205000.0,
+      cold_work: document.getElementById('chkColdWork') ? document.getElementById('chkColdWork').checked : false,
+      inelastic_reserve: document.getElementById('chkInelasticReserve') ? document.getElementById('chkInelasticReserve').checked : false
+    };
 
     const payload = {
-      section_name: `CFS-${shape.toUpperCase()}-${document.getElementById('wizH').value}x${document.getElementById('wizB').value}x${document.getElementById('wizT').value}`,
-      project_name: "CFDesigner 구조계산서",
+      section_name: meta.section_name,
+      project_name: meta.project_name,
+      metadata: meta,
+      options: options,
       geometry: this.currentGeometry,
       properties: this.currentProperties,
-      fsm: this.currentFsmResult ? this.currentFsmResult.critical_modes : {},
+      material: mat,
+      fsm: this.currentFsmResult ? {
+        ...(this.currentFsmResult.critical_modes || {}),
+        signature_curve: this.currentFsmResult.signature_curve || [],
+        l_local: this.currentFsmResult.critical_modes?.l_local || 60.0,
+        p_crl: this.currentFsmResult.critical_modes?.p_crl || 45.0,
+        p_crl_ratio: this.currentFsmResult.critical_modes?.p_crl_ratio || 0.85,
+        l_distortional: this.currentFsmResult.critical_modes?.l_distortional || 350.0,
+        p_crd: this.currentFsmResult.critical_modes?.p_crd || 38.0,
+        p_crd_ratio: this.currentFsmResult.critical_modes?.p_crd_ratio || 0.72,
+        l_global: this.currentFsmResult.critical_modes?.l_global || 1500.0,
+        p_cre: this.currentFsmResult.critical_modes?.p_cre || 25.0,
+        p_cre_ratio: this.currentFsmResult.critical_modes?.p_cre_ratio || 0.47,
+      } : {},
       design: this.currentDesignResult || {},
       loads: { pu, mux, vu }
     };
@@ -661,9 +781,9 @@ class CFDesignerApp {
       const data = await res.json();
 
       const iframe = document.getElementById('reportIframe');
-      iframe.srcdoc = data.html;
-
-      document.getElementById('reportModal').classList.add('active');
+      if (iframe) {
+        iframe.srcdoc = data.html;
+      }
     } catch (err) {
       console.error('Report generation error:', err);
     }

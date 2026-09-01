@@ -75,7 +75,21 @@
   3. 완료 즉시 다음 Phase로 중단 없이 자율 진입하여 마스터 요구사항의 모든 Phase가 끝날 때까지 연속 작업.
   4. 모든 하위 Phase 완료 후 마스터 요구사항의 종합 수용 기준을 최종 전수 검증하고 완수 보고.
 
-### 3.6. 작업별 모델 활용 전략 (Model Tier Guidelines)
+### 3.6. 버그 수정 및 개별 이슈 대응 규약 (Bug Fix & Issue Resolution Protocol)
+* **1이슈 1Phase 원칙 (One-by-One Resolution)**:
+  * 버그 픽스 및 결함 조치는 원인 규명과 영향도 검증의 정확성을 위해 되도록 **1가지 이슈마다 독립된 Phase(또는 독립 작업 단위)로 구별**하여 구현 계획을 수립하고, 1가지씩 해결 및 동작 확인(`pytest`/UI 검증)을 완료합니다.
+* **복잡도 기반 묶음 처리 제한**:
+  * 복잡도가 매우 낮고 상호 연관성이 높은 경미한 버그의 경우 예외적으로 1~3개 정도를 한꺼번에 계획할 수 있으나, **원칙적으로는 개별 아이템으로 분리하여 순차 처리**합니다.
+* **요구사항 내 버그 픽스 동일 적용**:
+  * 일반 기능 요구사항 문서 내에 버그 수정(Bug Fix) 또는 오동작 개선 항목이 포함되어 있는 경우에도 동일하게 적용하여, 하위 Phase 분할 시 독립된 실행 단위로 분리하여 계획하고 검증합니다.
+
+### 3.7. 도메인별 3대 Pytest 초고속 검증 규약 (Domain-Specific Pytest Protocol)
+* **도메인별 타겟 테스트 원칙**:
+  * 전체 테스트를 매번 실행하지 않고, 작업 도메인에 부합하는 디렉토리(`engine/`, `ui/`, `manual/`)만 타겟팅하여 0.5~1.5초 내에 신속 검증합니다.
+  * 상세한 도메인별 테스트 목록 및 작성 규칙은 **[`docs/11_pytest_testing_guide.md`](file:///f:/PyProject/CFDesigner/docs/11_pytest_testing_guide.md)**를 참조합니다.
+  * **엔진 작업 시**: `pytest tests/engine/` | **UI/API 작업 시**: `pytest tests/ui/` | **도움말 작업 시**: `pytest tests/manual/` | **마스터 완료 시**: `pytest`
+
+### 3.8. 작업별 모델 활용 전략 (Model Tier Guidelines)
 1. **High 모델 (Flash High / Pro)**: FSM 수치해석 행렬 분석, 비정형 CAD 메싱 알고리즘 역추적, KDS DSM 설계식 유도
 2. **Medium 모델 (Flash Medium)**: 파이썬 모듈 구현, 단위 테스트 작성, 디컴파일/데이터 파싱
 3. **Low 모델 (Flash Low / Lite)**: 단순 파일 조회, Git 커밋/푸시 명령 실행
@@ -95,5 +109,7 @@
 * 📖 **[온라인 도움말 시스템 통합 명세서](file:///f:/PyProject/CFDesigner/docs/08_online_help_manual_specification.md)**: 한·영 Bilingual 3-Way 뷰, 25개 토픽 및 다국어 검색 통합 SSOT
 * 📊 **[CFS 레거시 도움말 vs 웹 Gap 분석서](file:///f:/PyProject/CFDesigner/docs/09_cfs_legacy_help_manual_vs_web_gap_analysis.md)**: 원본 도움말 79개 토픽 + 13종 이미지 vs 웹 25개 토픽 1:1 전수 대조 매트릭스
 * 🔍 **[CFS Legacy UI vs Web Gap 분석서](file:///f:/PyProject/CFDesigner/docs/10_cfs_legacy_ui_vs_web_gap_analysis.md)**: CFS 원본 UI 기능 전수 대조 및 웹 구현 현황
+* 🧪 **[Pytest 도메인별 3대 테스트 가이드](file:///f:/PyProject/CFDesigner/docs/11_pytest_testing_guide.md)**: 엔진 / UI / 도움말 3대 영역 분리 구조, 초고속 실행 치트시트 및 검증 규칙
 * 🔗 **[KDS 국가건설기준 연동 가이드 (kcsc2md)](file:///f:/PyProject/kcsc2md/docs/외부프로젝트_연동_및_조회_가이드.md)**: KDS 기준 Ground Truth 조회 표준
+
 

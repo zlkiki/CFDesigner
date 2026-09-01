@@ -1,32 +1,37 @@
 """
 CFDesigner Online Help Manual Content Dataset
-KDS 14 31 10 & AISI S100 based Engineering Manual (27 Topics across 7 Categories)
+KDS 14 31 10 & AISI S100 based Engineering Manual (27 Topics across 8 Categories matching CFS.chm)
 Bilingual Dataset: Korean (KDS Modernized & AltDP Web UX) & English (CFS 14.0 Ground Truth Reference)
 """
 
 CATEGORIES = [{'id': 'getting_started',
-  'title': '1. 시작하기 & 웹 UI 가이드',
-  'title_en': '1. Getting Started & Web UI Guide',
+  'title': '1. 시작하기 & 일반 정보',
+  'title_en': '1. Getting Started & General Info',
   'icon': '🚀',
-  'topics': ['intro', 'ui_layout', 'wizard', 'dxf_import', 'element_grid', 'geom_transform']},
+  'topics': ['intro', 'ui_layout']},
+ {'id': 'section_modeling',
+  'title': '2. 단면 모델링 & 마법사',
+  'title_en': '2. Section Modeling & Wizards',
+  'icon': '📐',
+  'topics': ['wizard', 'dxf_import', 'element_grid', 'geom_transform']},
  {'id': 'section_library',
-  'title': '2. 단면 라이브러리 & 재료 물성치',
-  'title_en': '2. Section Library & Material DB',
+  'title': '3. 단면 라이브러리 & 재료',
+  'title_en': '3. Section Libraries & Materials',
   'icon': '📚',
   'topics': ['section_lib', 'material_db', 'cold_work']},
  {'id': 'section_properties',
-  'title': '3. 단면 기하학적 성질 & 유효단면',
-  'title_en': '3. Section Properties & Effective Stress',
-  'icon': '📐',
+  'title': '4. 단면 성질 & 유효단면',
+  'title_en': '4. Section Properties & Effective Stress',
+  'icon': '⚙️',
   'topics': ['gross_props', 'torsion_props', 'principal_axes', 'effective_props']},
  {'id': 'fsm_buckling',
-  'title': '4. FSM 탄성 좌굴해석 이론',
-  'title_en': '4. Finite Strip Method (FSM) Buckling',
+  'title': '5. FSM 탄성 좌굴해석',
+  'title_en': '5. Finite Strip Buckling Analysis',
   'icon': '🔬',
   'topics': ['fsm_theory', 'buckling_modes', 'signature_curve', 'fsm_params']},
  {'id': 'kds_design',
-  'title': '5. KDS 14 31 10 부재설계 & 계산서',
-  'title_en': '5. KDS 14 31 10 Member Design & Reports',
+  'title': '6. KDS / AISI 부재설계',
+  'title_en': '6. KDS & AISI Member Design',
   'icon': '🏛️',
   'topics': ['kds_dsm_comp',
              'kds_dsm_flex',
@@ -35,19 +40,19 @@ CATEGORIES = [{'id': 'getting_started',
              'kds_interaction',
              'report_guide']},
  {'id': 'frame_analysis',
-  'title': '6. 1D 뼈대 구조해석',
-  'title_en': '6. 1D Frame Structural Analysis',
+  'title': '7. 1D 구조해석',
+  'title_en': '7. 1D Frame Analysis',
   'icon': '🌉',
   'topics': ['analysis_wizard', 'diagrams_viewer']},
  {'id': 'appendix',
-  'title': '7. 부록: 전문 용어사전 & 기호집',
-  'title_en': '7. Appendix: Glossary & Symbols',
+  'title': '8. 부록: 용어사전 & 기호집',
+  'title_en': '8. Appendix: Glossary & Symbols',
   'icon': '📖',
   'topics': ['glossary', 'symbols']}]
 
 TOPICS = {'intro': {'id': 'intro',
            'category_id': 'getting_started',
-           'category_title': '1. 시작하기 & 웹 UI 가이드',
+           'category_title': '1. 시작하기 & 일반 정보',
            'title': '시스템 소개 및 특징',
            'title_en': 'System Overview & Features',
            'summary': 'CFDesigner는 냉간성형강 비정형 단면 CAD 연동 구조해석 및 KDS 14 31 10 / AISI S100 부재설계 클라우드 '
@@ -143,7 +148,7 @@ TOPICS = {'intro': {'id': 'intro',
                               '</div>\n'},
  'ui_layout': {'id': 'ui_layout',
                'category_id': 'getting_started',
-               'category_title': '1. 시작하기 & 웹 UI 가이드',
+               'category_title': '1. 시작하기 & 일반 정보',
                'title': '웹 UI 4분할 레이아웃 가이드',
                'title_en': 'Web UI 4-Quadrant Layout Guide',
                'summary': 'CFDesigner 메인 대시보드의 반응형 4분할 워크스페이스 레이아웃 구성 및 조작법을 설명합니다.',
@@ -153,8 +158,8 @@ TOPICS = {'intro': {'id': 'intro',
                'content_html': '<div class="manual-article">\n'
                                '  <h1>웹 UI 4분할 레이아웃 가이드</h1>\n'
                                '  <p class="lead">CFDesigner는 엔지니어링 작업 효율을 극대화하기 위해 <strong>반응형 '
-                               '4분할 워크스페이스(4-Quadrant Layout)</strong> 구조를 채택하고 있으며, 상용 CFS 14.0의 '
-                               '단면 윈도우와 해석 윈도우를 모던 AltDP 웹 환경으로 100% 통합하였습니다.</p>\n'
+                               '4분할 워크스페이스(4-Quadrant Layout)</strong> 구조를 채택하고 있으며, 단면 모델링, FSM '
+                               '좌굴해석, 부재설계 및 1D 구조해석을 모던 AltDP 웹 환경으로 완전 통합하였습니다.</p>\n'
                                '\n'
                                '  <div class="en-toggle-wrapper">\n'
                                '    <button class="btn-toggle-en" '
@@ -164,46 +169,21 @@ TOPICS = {'intro': {'id': 'intro',
                                '      <div class="en-box-header"><span class="en-badge">ORIGINAL '
                                'REFERENCE (CFS 14.0)</span></div>\n'
                                '      <div class="en-box-content">\n'
-                               '        <p>The CFS interface is divided into primary workspace '
-                               'areas: the Section Window for geometry and properties, the '
-                               'Analysis Window for buckling curves, and Member Check panels for '
-                               'design results.</p>\n'
+                               '        <p>The CFS interface is organized into dedicated '
+                               'functional workspace areas: the Section Window for geometry and '
+                               'properties, the Analysis Window for buckling curves and frame '
+                               'results, and Member Check panels for design evaluations.</p>\n'
                                '      </div>\n'
                                '    </div>\n'
                                '  </div>\n'
                                '\n'
-                               '  <h2>🏛️ 레거시 CFS 14.0 vs 🌐 CFDesigner 모던 웹 UI 대조</h2>\n'
+                               '  <h2>CFDesigner AltDP 모던 4분할 작업 영역</h2>\n'
                                '  \n'
-                               '  <h3>1. 단면 모델링 & 검토 화면</h3>\n'
-                               '  <div class="img-comparison-grid">\n'
-                               '    <div class="manual-img-card">\n'
-                               '      <img src="/static/images/manual/section.png" alt="CFS 14.0 '
-                               '레거시 단면 메인 윈도우">\n'
-                               '      <div class="img-caption">🏛️ CFS 14.0 레거시 단면 윈도우 (Section '
-                               'Window)</div>\n'
-                               '    </div>\n'
-                               '    <div class="manual-img-card">\n'
-                               '      <img src="/static/images/manual/web-section-ui.png" '
+                               '  <div class="manual-img-card">\n'
+                               '    <img src="/static/images/manual/web-section-ui.png" '
                                'alt="CFDesigner AltDP 모던 4분할 레이아웃">\n'
-                               '      <div class="img-caption">🌐 CFDesigner AltDP 모던 4분할 통합 '
-                               '레이아웃</div>\n'
-                               '    </div>\n'
-                               '  </div>\n'
-                               '\n'
-                               '  <h3>2. 1D 구조해석 & 다이어그램 화면</h3>\n'
-                               '  <div class="img-comparison-grid">\n'
-                               '    <div class="manual-img-card">\n'
-                               '      <img src="/static/images/manual/analysis.png" alt="CFS 14.0 '
-                               '레거시 해석 메인 윈도우">\n'
-                               '      <div class="img-caption">🏛️ CFS 14.0 레거시 해석 윈도우 (Analysis '
-                               'Window)</div>\n'
-                               '    </div>\n'
-                               '    <div class="manual-img-card">\n'
-                               '      <img src="/static/images/manual/web-analysis-ui.png" '
-                               'alt="CFDesigner 모던 1D 해석 다이어그램 모달">\n'
-                               '      <div class="img-caption">🌐 CFDesigner 모던 1D 뼈대해석 & '
-                               'SFD/BMD/처짐 다이어그램</div>\n'
-                               '    </div>\n'
+                               '    <div class="img-caption">🌐 CFDesigner AltDP 모던 4분할 통합 레이아웃 '
+                               '(2D/3D 캔버스, 제어패널, FSM 차트, D/C 패널)</div>\n'
                                '  </div>\n'
                                '\n'
                                '  <h2>4대 핵심 작업 영역 상세 조작법</h2>\n'
@@ -241,65 +221,85 @@ TOPICS = {'intro': {'id': 'intro',
                                '      </ul>\n'
                                '    </li>\n'
                                '  </ul>\n'
+                               '\n'
+                               '  <h2>1D 구조해석 & 다이어그램 모달</h2>\n'
+                               '  <div class="manual-img-card">\n'
+                               '    <img src="/static/images/manual/web-analysis-ui.png" '
+                               'alt="CFDesigner 모던 1D 해석 다이어그램 모달">\n'
+                               '    <div class="img-caption">🌐 CFDesigner 1D 뼈대 구조해석 & SFD / BMD / '
+                               '처짐 다이어그램 모달</div>\n'
+                               '  </div>\n'
                                '</div>',
                'content_en_html': '<div class="manual-article en-article">\n'
-                                  '  <h1>Web UI 4-Quadrant Layout Guide</h1>\n'
+                                  '  <h1>Web UI 4-Quadrant Layout & Windows Guide</h1>\n'
                                   '  <p class="lead">CFDesigner organizes structural engineering '
                                   'tasks into a high-productivity <strong>4-Quadrant '
                                   'Layout</strong> responsive workspace, integrating legacy CFS '
-                                  'Section and Analysis windows into a unified modern web '
-                                  'experience.</p>\n'
-                                  '  \n'
-                                  '  <h2>Legacy CFS 14.0 vs Modern CFDesigner Web Comparison</h2>\n'
-                                  '  <div class="img-comparison-grid">\n'
-                                  '    <div class="manual-img-card">\n'
-                                  '      <img src="/static/images/manual/section.png" alt="CFS '
-                                  '14.0 Legacy Section Window">\n'
-                                  '      <div class="img-caption">🏛️ CFS 14.0 Legacy Section '
-                                  'Window</div>\n'
-                                  '    </div>\n'
-                                  '    <div class="manual-img-card">\n'
-                                  '      <img src="/static/images/manual/web-section-ui.png" '
-                                  'alt="CFDesigner Modern 4-Quadrant Workspace">\n'
-                                  '      <div class="img-caption">🌐 CFDesigner Modern 4-Quadrant '
-                                  'Workspace</div>\n'
-                                  '    </div>\n'
+                                  'Section and Analysis windows into a unified modern cloud '
+                                  'interface.</p>\n'
+                                  '\n'
+                                  '  <h2>CFS 14.0 Legacy Main Section Window</h2>\n'
+                                  '  <div class="manual-img-card">\n'
+                                  '    <img src="/static/images/manual/section.png" alt="CFS 14.0 '
+                                  'Legacy Section Window">\n'
+                                  '    <div class="img-caption">🏛️ CFS 14.0 Legacy Section Window '
+                                  '(Geometry, Elements & Properties)</div>\n'
                                   '  </div>\n'
                                   '\n'
-                                  '  <div class="img-comparison-grid">\n'
-                                  '    <div class="manual-img-card">\n'
-                                  '      <img src="/static/images/manual/analysis.png" alt="CFS '
-                                  '14.0 Legacy Analysis Window">\n'
-                                  '      <div class="img-caption">🏛️ CFS 14.0 Legacy Analysis '
-                                  'Window</div>\n'
-                                  '    </div>\n'
-                                  '    <div class="manual-img-card">\n'
-                                  '      <img src="/static/images/manual/web-analysis-ui.png" '
-                                  'alt="CFDesigner Modern 1D Frame Analysis & SFD/BMD">\n'
-                                  '      <div class="img-caption">🌐 CFDesigner Modern 1D Frame '
-                                  'Analysis & SFD/BMD</div>\n'
-                                  '    </div>\n'
-                                  '  </div>\n'
-                                  '\n'
-                                  '  <h2>4-Quadrant Functional Areas</h2>\n'
+                                  '  <h2>4-Quadrant Functional Layout</h2>\n'
                                   '  <ul>\n'
-                                  '    <li><strong>1. Left Control Panel</strong>: Section '
-                                  'creation wizard, DXF upload, spreadsheet editor, material '
-                                  'database, and FSM sweep parameters.</li>\n'
-                                  '    <li><strong>2. Center Top (2D/3D Canvas)</strong>: '
-                                  'Real-time 2D drafting with centroid/shear center markers, and '
-                                  'Three.js 3D buckling mode rendering.</li>\n'
-                                  '    <li><strong>3. Center Bottom (FSM Chart)</strong>: '
-                                  'Interactive signature curve plotting critical buckling load '
-                                  'factors with mode point selection.</li>\n'
-                                  '    <li><strong>4. Right Summary Panel</strong>: Section '
-                                  'properties summary and live KDS 14 31 10 Demand/Capacity (D/C) '
-                                  'ratio meters.</li>\n'
+                                  '    <li><strong>1. Left Control Panel</strong>:\n'
+                                  '      <ul>\n'
+                                  '        <li><strong>Section Wizard & DXF</strong>: Parametric '
+                                  'generation of 6 standard shapes and CAD 2D Polyline DXF '
+                                  'import.</li>\n'
+                                  '        <li><strong>Element Spreadsheet</strong>: Direct '
+                                  'spreadsheet modal editing of coordinates, segment lengths, '
+                                  'angles, and thicknesses.</li>\n'
+                                  '        <li><strong>Material & FSM Inputs</strong>: Yield '
+                                  'strength ($F_y$), elastic modulus ($E$), and half-wavelength '
+                                  'sweep range ($L_{min} \\sim L_{max}$).</li>\n'
+                                  '      </ul>\n'
+                                  '    </li>\n'
+                                  '    <li><strong>2. Center Top (2D/3D Canvas)</strong>:\n'
+                                  '      <ul>\n'
+                                  '        <li><strong>2D Canvas</strong>: Real-time drafting with '
+                                  'mouse wheel zoom, pan, centroid ($C_G$), and shear center '
+                                  '($S_C$) markers.</li>\n'
+                                  '        <li><strong>3D Buckling Viewer</strong>: Three.js WebGL '
+                                  'interactive 360° rotation and 3D buckling mode wave '
+                                  'rendering.</li>\n'
+                                  '      </ul>\n'
+                                  '    </li>\n'
+                                  '    <li><strong>3. Center Bottom (FSM Chart)</strong>:\n'
+                                  '      <ul>\n'
+                                  '        <li>Chart.js signature curve plotting critical buckling '
+                                  'load factors ($P_{cr}$) across half-wavelengths ($L$).</li>\n'
+                                  '      </ul>\n'
+                                  '    </li>\n'
+                                  '    <li><strong>4. Right Summary Panel</strong>:\n'
+                                  '      <ul>\n'
+                                  '        <li><strong>Section Properties Table</strong>: Gross '
+                                  '($A_g, I_x, I_y$) and Torsional ($J, C_w, x_o, y_o$) '
+                                  'properties.</li>\n'
+                                  '        <li><strong>Design & D/C Gauges</strong>: Real-time '
+                                  'AISI S100 / KDS Demand/Capacity meters for axial, flexural, and '
+                                  'shear checks.</li>\n'
+                                  '      </ul>\n'
+                                  '    </li>\n'
                                   '  </ul>\n'
+                                  '\n'
+                                  '  <h2>CFS 14.0 Legacy Analysis Window</h2>\n'
+                                  '  <div class="manual-img-card">\n'
+                                  '    <img src="/static/images/manual/analysis.png" alt="CFS 14.0 '
+                                  'Legacy Analysis Window">\n'
+                                  '    <div class="img-caption">🏛️ CFS 14.0 Legacy Analysis Window '
+                                  '(Spans, Loadings & Member Verification)</div>\n'
+                                  '  </div>\n'
                                   '</div>'},
  'wizard': {'id': 'wizard',
-            'category_id': 'getting_started',
-            'category_title': '1. 시작하기 & 웹 UI 가이드',
+            'category_id': 'section_modeling',
+            'category_title': '2. 단면 모델링 & 마법사',
             'title': '단면 마법사 파라메트릭 생성',
             'title_en': 'Parametric Section Wizard',
             'summary': 'C형, Z형, 모자형, 각형관, L형강, 데크 플레이트 등 6대 표준 단면의 파라메트릭 생성 절차를 안내합니다.',
@@ -401,47 +401,105 @@ TOPICS = {'intro': {'id': 'intro',
                             '  </div>\n'
                             '</div>',
             'content_en_html': '<div class="manual-article en-article">\n'
-                               '  <h1>Parametric Section Wizard</h1>\n'
-                               '  <p class="lead">The Section Wizard rapidly generates continuous '
-                               'centerline elements and exact corner bend radii for the <strong>6 '
-                               'most common cold-formed steel shapes</strong>: Cee, Zee, Hat, '
-                               'Closed Tube, Angle, and Deck Panels.</p>\n'
+                               '  <h1>Parametric Section Wizard (Section Wizard)</h1>\n'
+                               '  <p class="lead">The Section Wizard is used to easily create the '
+                               'geometry for the <strong>6 most common cold-formed steel '
+                               'shapes</strong> (Cee, Zee, Hat, Closed Tube, Angle, Deck Panels), '
+                               'automatically generating continuous centerline elements and exact '
+                               'corner bend radii.</p>\n'
                                '\n'
-                               '  <h2>2-Step Generation Workflow</h2>\n'
-                               '  <h3>Page 1: Shape Selection</h3>\n'
-                               '  <p>Select from standardized profile families: Cee '
-                               '(studs/joists), Zee (purlins), Hat (furring), Tube (columns), '
-                               'Angle (braces), or Deck (corrugated floor/roof panels).</p>\n'
+                               '  <h2>2-Page Section Wizard Workflow</h2>\n'
                                '\n'
-                               '  <h3>Page 2: Dimensional Parameters</h3>\n'
-                               '  <ul>\n'
-                               '    <li><strong>Section Depth ($H$)</strong>: Overall vertical '
-                               'out-to-out dimension.</li>\n'
-                               '    <li><strong>Flange Width ($B$)</strong>: Width of horizontal '
-                               'flanges.</li>\n'
-                               '    <li><strong>Lip Length ($D$)</strong>: Out-to-out length of '
-                               'edge stiffeners.</li>\n'
-                               '    <li><strong>Bend Radius ($R$)</strong>: Inside corner bend '
-                               'radius (defaults to thickness $t$).</li>\n'
-                               '    <li><strong>Design Thickness ($t$)</strong>: Base metal design '
-                               'thickness.</li>\n'
-                               '  </ul>\n'
+                               '  <h3>Page 1: Base Shape Selection</h3>\n'
+                               '  <table class="manual-table">\n'
+                               '    <thead>\n'
+                               '      <tr><th>Shape Category</th><th>Shape Name</th><th>Structural '
+                               'Features & Typical Applications</th></tr>\n'
+                               '    </thead>\n'
+                               '    <tbody>\n'
+                               '      <tr><td><strong>Cee</strong></td><td>Cee '
+                               '(Channel)</td><td>Most versatile shape for studs, joists, purlins, '
+                               'and rafters with edge stiffeners.</td></tr>\n'
+                               '      <tr><td><strong>Zee</strong></td><td>Zee</td><td>Used '
+                               'primarily for roof purlins and wall girts capable of continuous '
+                               'lapping over supports.</td></tr>\n'
+                               '      <tr><td><strong>Hat</strong></td><td>Hat (Furring '
+                               'Channel)</td><td>Furring and framing members attached to walls, '
+                               'ceilings, and structural ribs.</td></tr>\n'
+                               '      <tr><td><strong>Tube</strong></td><td>Closed Box / '
+                               'Tube</td><td>High torsional stiffness closed profile used for '
+                               'compression columns and beam-columns.</td></tr>\n'
+                               '      <tr><td><strong>Angle</strong></td><td>Angle '
+                               '(L-Shape)</td><td>Equal and unequal leg angles for truss web '
+                               'members, bracing, and connection clips.</td></tr>\n'
+                               '      <tr><td><strong>Deck</strong></td><td>Panel / '
+                               'Deck</td><td>Repetitive multi-rib profiled panel sections for '
+                               'metal roof deck and composite floor slabs.</td></tr>\n'
+                               '    </tbody>\n'
+                               '  </table>\n'
                                '\n'
-                               '  <h2>Step-by-Step Walkthrough Example</h2>\n'
+                               '  <h3>Page 2: Geometric Dimensions & Inputs</h3>\n'
+                               '  <table class="manual-table">\n'
+                               '    <thead>\n'
+                               '      <tr><th>Input '
+                               'Parameter</th><th>Symbol</th><th>Units</th><th>Description & '
+                               'Boundary Conditions</th></tr>\n'
+                               '    </thead>\n'
+                               '    <tbody>\n'
+                               '      <tr><td><strong>Section '
+                               'Depth</strong></td><td>$H$</td><td>mm</td><td>Overall vertical '
+                               'out-to-out dimension of the web element.</td></tr>\n'
+                               '      <tr><td><strong>Flange '
+                               'Width</strong></td><td>$B$</td><td>mm</td><td>Overall horizontal '
+                               'out-to-out dimension of top and bottom flanges.</td></tr>\n'
+                               '      <tr><td><strong>Lip '
+                               'Length</strong></td><td>$D$</td><td>mm</td><td>Out-to-out length '
+                               'of the edge stiffener lips.</td></tr>\n'
+                               '      <tr><td><strong>Inside Bend '
+                               'Radius</strong></td><td>$R$</td><td>mm</td><td>Inside corner '
+                               'radius of all bends (defaults to design thickness $t$).</td></tr>\n'
+                               '      <tr><td><strong>Design '
+                               'Thickness</strong></td><td>$t$</td><td>mm</td><td>Base metal '
+                               'thickness excluding protective galvanizing coatings.</td></tr>\n'
+                               '      <tr><td><strong>Lip '
+                               'Angle</strong></td><td>$\\theta_{lip}$</td><td>deg</td><td>Angle '
+                               'of the lip measured from the horizontal flange (defaults to '
+                               '90°).</td></tr>\n'
+                               '      <tr><td><strong>Web '
+                               'Angle</strong></td><td>$\\theta_{web}$</td><td>deg</td><td>Slope '
+                               'angle of the web measured from horizontal for Zee and Deck '
+                               'profiles.</td></tr>\n'
+                               '    </tbody>\n'
+                               '  </table>\n'
+                               '\n'
+                               '  <h2>Step-by-Step Walkthrough Tutorials</h2>\n'
                                '  <div class="callout callout-info">\n'
-                               '    <h4>Example: Generating C150x50x20x2.3</h4>\n'
-                               '    <p>1. Open Section Wizard from Left Control Panel.<br>\n'
-                               '    2. Select <strong>Cee Shape</strong>.<br>\n'
-                               '    3. Input Depth = 150 mm, Flange = 50 mm, Lip = 20 mm, '
-                               'Thickness = 2.3 mm, Radius = 2.3 mm.<br>\n'
-                               '    4. Click <strong>Generate Section</strong>. Centerline '
-                               'elements and corner arcs are automatically constructed, computing '
-                               'gross properties instantly.</p>\n'
+                               '    <h4>📝 Walkthrough 1: Standard Cee Section C150x50x20x2.3</h4>\n'
+                               '    <p>1. Open [Section Wizard] from the Left Control Panel.<br>\n'
+                               '    2. Select <strong>[Cee Shape]</strong>.<br>\n'
+                               '    3. Enter dimensions: Depth $H = 150\\text{ mm}$, Flange $B = '
+                               '50\\text{ mm}$, Lip $D = 20\\text{ mm}$, Thickness $t = 2.3\\text{ '
+                               'mm}$, Radius $R = 2.3\\text{ mm}$.<br>\n'
+                               '    4. Click [Generate Section]. 7 straight elements and 4 corner '
+                               'arcs are constructed automatically, computing section properties '
+                               'in real-time.</p>\n'
+                               '  </div>\n'
+                               '\n'
+                               '  <div class="callout callout-info">\n'
+                               '    <h4>📝 Walkthrough 2: Standard Zee Section Z200x65x20x3.2</h4>\n'
+                               '    <p>1. Open Section Wizard and select <strong>[Zee '
+                               'Shape]</strong>.<br>\n'
+                               '    2. Enter: Depth $H = 200\\text{ mm}$, Flanges $B = 65\\text{ '
+                               'mm}$, Lip $D = 20\\text{ mm}$, Thickness $t = 3.2\\text{ '
+                               'mm}$.<br>\n'
+                               '    3. Click [Generate Section]. Asymmetric principal angle '
+                               '($\\theta_p$) and warping constant ($C_w$) are calculated '
+                               'instantly.</p>\n'
                                '  </div>\n'
                                '</div>'},
  'dxf_import': {'id': 'dxf_import',
-                'category_id': 'getting_started',
-                'category_title': '1. 시작하기 & 웹 UI 가이드',
+                'category_id': 'section_modeling',
+                'category_title': '2. 단면 모델링 & 마법사',
                 'title': 'AutoCAD DXF 가져오기 & 메싱',
                 'title_en': 'AutoCAD DXF Import & Auto-Meshing',
                 'summary': 'AutoCAD 2D DXF 도면 파일의 폴리라인을 파싱하여 비정형 냉간성형강 단면으로 자동 메싱하는 방법을 안내합니다.',
@@ -502,31 +560,58 @@ TOPICS = {'intro': {'id': 'intro',
                                 '  </ul>\n'
                                 '</div>',
                 'content_en_html': '<div class="manual-article en-article">\n'
-                                   '  <h1>AutoCAD DXF Import & Auto-Meshing</h1>\n'
-                                   '  <p class="lead">Imports arbitrary cross-section geometries '
-                                   'from CAD DXF files using 2D continuous centerlines and '
-                                   'polyline width thicknesses.</p>\n'
+                                   '  <h1>AutoCAD DXF Import & Meshing Guide (Import DXF)</h1>\n'
+                                   '  <p class="lead">When you select Import DXF, section geometry '
+                                   'from an AutoCAD or CAD DXF file is imported directly, '
+                                   'extracting continuous 2D polyline vertices, auto-meshing '
+                                   'corner arcs, and assigning design thicknesses.</p>\n'
                                    '\n'
-                                   '  <h2>5 Mandatory CAD Modeling Rules</h2>\n'
-                                   '  <ol>\n'
-                                   '    <li><strong>Centerline</strong>: Draw the single '
-                                   'continuous 2D Polyline (LWPOLYLINE) at the <strong>material '
-                                   'centerline</strong>.</li>\n'
-                                   '    <li><strong>Polyline Width</strong>: Set the CAD global '
-                                   'polyline width equal to the design thickness (e.g., 2.3 '
-                                   'mm).</li>\n'
-                                   '    <li><strong>Arc Segments</strong>: Corner bends are '
-                                   'represented by polyline bulge arcs and auto-meshed into 3-6 '
-                                   'discrete strips.</li>\n'
-                                   '    <li><strong>2D Plane</strong>: Vertices must lie in the XY '
-                                   'plane ($Z=0$).</li>\n'
-                                   '    <li><strong>Units</strong>: Ensure drawing units are '
-                                   'millimeters ($INSUNITS = 4).</li>\n'
-                                   '  </ol>\n'
+                                   '  <h2>5 Mandatory CAD Modeling Specifications</h2>\n'
+                                   '  <table class="manual-table">\n'
+                                   '    <thead>\n'
+                                   '      <tr><th>Specification</th><th>Rule</th><th>Description & '
+                                   'Modeling Criteria</th></tr>\n'
+                                   '    </thead>\n'
+                                   '    <tbody>\n'
+                                   '      '
+                                   '<tr><td><strong>Centerline</strong></td><td><strong>Material '
+                                   'Centerline</strong></td><td>Each part must be defined by a '
+                                   'single continuous 2D Polyline (LWPOLYLINE) at the '
+                                   '<strong>centerline</strong> of the material '
+                                   'thickness.</td></tr>\n'
+                                   '      '
+                                   '<tr><td><strong>Thickness</strong></td><td><strong>Polyline '
+                                   'Width</strong></td><td>The global line <strong>Width</strong> '
+                                   'property of the polyline defines the design plate thickness '
+                                   '(e.g., <code>2.3</code>).</td></tr>\n'
+                                   '      <tr><td><strong>Corner '
+                                   'Bends</strong></td><td><strong>Arc '
+                                   'Bulge</strong></td><td>Corner bends may be drawn as polyline '
+                                   'arc segments (bulges) or sharp corners to be filleted '
+                                   'later.</td></tr>\n'
+                                   '      <tr><td><strong>Plane</strong></td><td><strong>XY Plane '
+                                   '($Z=0$)</strong></td><td>All polyline vertices must lie on the '
+                                   '2D plane where $Z=0$.</td></tr>\n'
+                                   '      '
+                                   '<tr><td><strong>Units</strong></td><td><strong>Millimeters '
+                                   '(mm)</strong></td><td>DXF unit header should match metric '
+                                   'units ($INSUNITS = 4$).</td></tr>\n'
+                                   '    </tbody>\n'
+                                   '  </table>\n'
+                                   '\n'
+                                   '  <h2>Corner Arc Auto-Meshing & Geometric Precision</h2>\n'
+                                   '  <ul>\n'
+                                   '    <li>The CFDesigner mesher detects polyline arc segments '
+                                   'and discretizes each curved bend into <strong>3 to 6 '
+                                   'micro-strip linear elements</strong>.</li>\n'
+                                   "    <li>Each discretized strip's cross-sectional area, "
+                                   'centroid, and torsional properties are integrated to match '
+                                   'exact curvilinear integrals within 0.01% error.</li>\n'
+                                   '  </ul>\n'
                                    '</div>'},
  'element_grid': {'id': 'element_grid',
-                  'category_id': 'getting_started',
-                  'category_title': '1. 시작하기 & 웹 UI 가이드',
+                  'category_id': 'section_modeling',
+                  'category_title': '2. 단면 모델링 & 마법사',
                   'title': '단면 요소 테이블 직접 편집',
                   'title_en': 'Element Table Spreadsheet Editor',
                   'summary': '단면을 구성하는 절점 좌표, 요소 길이, 경사각, 두께를 스프레드시트 테이블에서 직접 추가·수정·삭제하는 편집기 '
@@ -586,29 +671,51 @@ TOPICS = {'intro': {'id': 'intro',
                                   '성질 계산에 즉시 동기화됩니다.</li>\n'
                                   '  </ul>\n'
                                   '</div>\n',
-                  'content_en_html': '\n'
-                                     '<div class="manual-article en-article">\n'
-                                     '  <h1>Element Table Spreadsheet Editor</h1>\n'
-                                     '  <p class="lead">Directly inspect and modify nodal '
-                                     'connectivity, segment lengths, angles, and individual '
-                                     'thickness values using a spreadsheet-style interface.</p>\n'
-                                     '  <h2>Spreadsheet Columns</h2>\n'
-                                     '  <ul>\n'
-                                     '    <li><strong>Element ID</strong>: Sequential index of the '
-                                     'cross-section strip element.</li>\n'
-                                     '    <li><strong>Nodes I & J</strong>: Start and end node '
-                                     'connectivity.</li>\n'
-                                     '    <li><strong>Length (L)</strong>: Centerline element '
-                                     'length in millimeters.</li>\n'
-                                     '    <li><strong>Angle (&theta;)</strong>: Element '
-                                     'orientation angle in degrees.</li>\n'
-                                     '    <li><strong>Thickness (t)</strong>: Design thickness '
-                                     'assigned to the specific strip.</li>\n'
-                                     '  </ul>\n'
-                                     '</div>\n'},
+                  'content_en_html': '<div class="manual-article en-article">\n'
+                                     '  <h1>Element Table Spreadsheet Editor (Section '
+                                     'Inputs)</h1>\n'
+                                     '  <p class="lead">The Element Table spreadsheet allows '
+                                     'direct tabular manipulation of cross-section geometry, '
+                                     'defining start/end nodes, segment lengths, Cartesian '
+                                     'coordinates, inclinations, and thickness overrides.</p>\n'
+                                     '\n'
+                                     '  <h2>Spreadsheet Column Specifications</h2>\n'
+                                     '  <table class="manual-table">\n'
+                                     '    <thead>\n'
+                                     '      <tr><th>Column Name</th><th>Format / '
+                                     'Units</th><th>Description & Function</th></tr>\n'
+                                     '    </thead>\n'
+                                     '    <tbody>\n'
+                                     '      <tr><td><strong>Element '
+                                     '#</strong></td><td>Integer</td><td>Sequential identifier of '
+                                     'the linear or curved strip element.</td></tr>\n'
+                                     '      <tr><td><strong>Part '
+                                     '#</strong></td><td>Integer</td><td>Part ID to which the '
+                                     'element belongs (supports multi-part built-up '
+                                     'sections).</td></tr>\n'
+                                     '      <tr><td><strong>Start Node ($X_1, '
+                                     'Y_1$)</strong></td><td>mm</td><td>Cartesian start coordinate '
+                                     'of the element centerline.</td></tr>\n'
+                                     '      <tr><td><strong>End Node ($X_2, '
+                                     'Y_2$)</strong></td><td>mm</td><td>Cartesian end coordinate '
+                                     'of the element centerline.</td></tr>\n'
+                                     '      <tr><td><strong>Length '
+                                     '($L$)</strong></td><td>mm</td><td>Length of the linear '
+                                     'segment: $L = \\sqrt{(X_2 - X_1)^2 + (Y_2 - '
+                                     'Y_1)^2}$.</td></tr>\n'
+                                     '      <tr><td><strong>Angle '
+                                     '($\\theta$)</strong></td><td>deg</td><td>Orientation angle '
+                                     'measured counter-clockwise from the positive '
+                                     'X-axis.</td></tr>\n'
+                                     '      <tr><td><strong>Thickness '
+                                     '($t$)</strong></td><td>mm</td><td>Design plate thickness '
+                                     'assigned to the element.</td></tr>\n'
+                                     '    </tbody>\n'
+                                     '  </table>\n'
+                                     '</div>'},
  'geom_transform': {'id': 'geom_transform',
-                    'category_id': 'getting_started',
-                    'category_title': '1. 시작하기 & 웹 UI 가이드',
+                    'category_id': 'section_modeling',
+                    'category_title': '2. 단면 모델링 & 마법사',
                     'title': '단면 기하 변환 및 중간 리브',
                     'title_en': 'Geometric Transforms & Intermediate Ribs',
                     'summary': '단면 전체의 회전, 대칭 미러링, 원점 정렬 및 플랜지/웨브 중간 보강 리브(V형·U형) 자동 삽입 기능을 설명합니다.',
@@ -658,17 +765,46 @@ TOPICS = {'intro': {'id': 'intro',
                                     '벽을 갖는 사다리꼴 형상 리브 생성.</li>\n'
                                     '  </ul>\n'
                                     '</div>\n',
-                    'content_en_html': '\n'
-                                       '<div class="manual-article en-article">\n'
-                                       '  <h1>Geometric Transforms & Intermediate Ribs</h1>\n'
-                                       '  <p class="lead">Provides powerful tools to rotate, '
-                                       'mirror, and center sections, as well as automatically '
-                                       'generate intermediate stiffening ribs along flat '
-                                       'elements.</p>\n'
-                                       '</div>\n'},
+                    'content_en_html': '<div class="manual-article en-article">\n'
+                                       '  <h1>Geometric Transforms & Intermediate Stiffeners</h1>\n'
+                                       '  <p class="lead">Provides matrix-based coordinate '
+                                       'transformations including 90° and arbitrary angle '
+                                       'rotations, axial reflections (mirroring), centroid '
+                                       'centering, and automatic V/U-shaped intermediate stiffener '
+                                       'insertions.</p>\n'
+                                       '\n'
+                                       '  <h2>Supported Geometric Operations</h2>\n'
+                                       '  <table class="manual-table">\n'
+                                       '    <thead>\n'
+                                       '      <tr><th>Transform Operation</th><th>Mathematical '
+                                       'Formulation</th><th>Description</th></tr>\n'
+                                       '    </thead>\n'
+                                       '    <tbody>\n'
+                                       '      '
+                                       '<tr><td><strong>Rotate</strong></td><td>$$\\begin{bmatrix} '
+                                       "X' \\\\ Y' \\end{bmatrix} = \\begin{bmatrix} \\cos\\theta "
+                                       '& -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta '
+                                       '\\end{bmatrix} \\begin{bmatrix} X \\\\ Y '
+                                       '\\end{bmatrix}$$</td><td>Rotates entire section or '
+                                       'selected parts about origin by angle $\\theta$.</td></tr>\n'
+                                       "      <tr><td><strong>Mirror X / Y</strong></td><td>$$X' = "
+                                       "-X \\quad \\text{or} \\quad Y' = -Y$$</td><td>Reflects "
+                                       'elements across the vertical or horizontal '
+                                       'axes.</td></tr>\n'
+                                       "      <tr><td><strong>Center Section</strong></td><td>$$X' "
+                                       "= X - X_c, \\quad Y' = Y - Y_c$$</td><td>Translates "
+                                       'section centroid ($C_G$) directly to origin $(0, '
+                                       '0)$.</td></tr>\n'
+                                       '      <tr><td><strong>Intermediate '
+                                       'Ribs</strong></td><td>V-Rib / U-Rib '
+                                       'Insertion</td><td>Subdivides wide plate elements with '
+                                       'intermediate longitudinal stiffeners.</td></tr>\n'
+                                       '    </tbody>\n'
+                                       '  </table>\n'
+                                       '</div>'},
  'section_lib': {'id': 'section_lib',
                  'category_id': 'section_library',
-                 'category_title': '2. 단면 라이브러리 & 재료 물성치',
+                 'category_title': '3. 단면 라이브러리 & 재료',
                  'title': '표준 단면 라이브러리 브라우저',
                  'title_en': 'Section Library Browser (AISI/SSMA)',
                  'summary': '1,000개 이상의 북미 및 국내 표준 냉간성형강(SSMA, SFIA, LGSI) 라이브러리 검색 및 원클릭 로드 '
@@ -714,16 +850,37 @@ TOPICS = {'intro': {'id': 'intro',
                                  '    </ul>\n'
                                  '  </div>\n'
                                  '</div>\n',
-                 'content_en_html': '\n'
-                                    '<div class="manual-article en-article">\n'
-                                    '  <h1>Section Library Browser (AISI/SSMA)</h1>\n'
-                                    '  <p class="lead">Access over 1,000 pre-defined cold-formed '
-                                    'steel framing sections conforming to standard AISI/SSMA/SFIA '
-                                    'nomenclature.</p>\n'
-                                    '</div>\n'},
+                 'content_en_html': '<div class="manual-article en-article">\n'
+                                    '  <h1>Section Library Browser (AISI / SSMA / SFIA)</h1>\n'
+                                    '  <p class="lead">Browses, searches, filters, and imports '
+                                    'from standard cold-formed steel section databases containing '
+                                    'over <strong>1,000+ pre-compiled structural profiles</strong> '
+                                    'from SSMA, SFIA, LGSI, and custom user libraries.</p>\n'
+                                    '\n'
+                                    '  <h2>Standard Library Organizations</h2>\n'
+                                    '  <table class="manual-table">\n'
+                                    '    <thead>\n'
+                                    '      <tr><th>Standard Group</th><th>Profile Types '
+                                    'Included</th><th>Designation Format Example</th></tr>\n'
+                                    '    </thead>\n'
+                                    '    <tbody>\n'
+                                    '      <tr><td><strong>SSMA '
+                                    '(Structural)</strong></td><td>Studs (S), Tracks (T), '
+                                    'U-Channels (U), Furring (F)</td><td><code>600S162-54</code> '
+                                    '(6" depth, 1.62" flange, 54 mil thickness)</td></tr>\n'
+                                    '      <tr><td><strong>SFIA '
+                                    '(Industry)</strong></td><td>Standard North American Stud & '
+                                    'Joist framing shapes</td><td><code>800S200-68</code> (8" '
+                                    'depth, 2.00" flange, 68 mil thickness)</td></tr>\n'
+                                    '      <tr><td><strong>LGSI (Light '
+                                    'Gauge)</strong></td><td>Metric / Imperial Cee & Zee roof '
+                                    'purlins</td><td><code>Z 200 x 65 x 2.0</code></td></tr>\n'
+                                    '    </tbody>\n'
+                                    '  </table>\n'
+                                    '</div>'},
  'material_db': {'id': 'material_db',
                  'category_id': 'section_library',
-                 'category_title': '2. 단면 라이브러리 & 재료 물성치',
+                 'category_title': '3. 단면 라이브러리 & 재료',
                  'title': '강재 재료 DB 및 물성치 설정',
                  'title_en': 'Material Properties & Custom Steel',
                  'summary': 'KS 규격(SSC275, SSC355, SSC400 등) 및 ASTM(A1008, A653) 강종 프리셋 선택과 '
@@ -772,16 +929,43 @@ TOPICS = {'intro': {'id': 'intro',
                                  '    </tbody>\n'
                                  '  </table>\n'
                                  '</div>\n',
-                 'content_en_html': '\n'
-                                    '<div class="manual-article en-article">\n'
-                                    '  <h1>Material Properties & Custom Steel</h1>\n'
-                                    '  <p class="lead">Configure design mechanical properties '
-                                    'including yield stress ($F_y$), tensile strength ($F_u$), and '
-                                    'elastic modulus ($E$).</p>\n'
-                                    '</div>\n'},
+                 'content_en_html': '<div class="manual-article en-article">\n'
+                                    '  <h1>Material Properties & Custom Steel Database</h1>\n'
+                                    '  <p class="lead">Manages structural steel material presets '
+                                    'per ASTM (A653, A1008, A1011) and KS (SSC275, SGC, SPA-H) '
+                                    'standards, and configures user-defined mechanical '
+                                    'properties.</p>\n'
+                                    '\n'
+                                    '  <h2>Standard Material Presets</h2>\n'
+                                    '  <table class="manual-table">\n'
+                                    '    <thead>\n'
+                                    '      <tr><th>Steel Specification</th><th>Yield Strength '
+                                    '($F_y$)</th><th>Tensile Strength ($F_u$)</th><th>Elastic '
+                                    'Modulus ($E$)</th><th>Poisson Ratio ($\\nu$)</th></tr>\n'
+                                    '    </thead>\n'
+                                    '    <tbody>\n'
+                                    '      <tr><td><strong>KS SSC275</strong></td><td>$275\\text{ '
+                                    'MPa}$</td><td>$410\\text{ MPa}$</td><td>$205,000\\text{ '
+                                    'MPa}$</td><td>$0.30$</td></tr>\n'
+                                    '      <tr><td><strong>KS SSC355</strong></td><td>$355\\text{ '
+                                    'MPa}$</td><td>$490\\text{ MPa}$</td><td>$205,000\\text{ '
+                                    'MPa}$</td><td>$0.30$</td></tr>\n'
+                                    '      <tr><td><strong>ASTM A653 Gr '
+                                    '33</strong></td><td>$230\\text{ MPa}$ ($33\\text{ '
+                                    'ksi}$)</td><td>$310\\text{ MPa}$ ($45\\text{ '
+                                    'ksi}$)</td><td>$203,000\\text{ '
+                                    'MPa}$</td><td>$0.30$</td></tr>\n'
+                                    '      <tr><td><strong>ASTM A653 Gr '
+                                    '50</strong></td><td>$345\\text{ MPa}$ ($50\\text{ '
+                                    'ksi}$)</td><td>$450\\text{ MPa}$ ($65\\text{ '
+                                    'ksi}$)</td><td>$203,000\\text{ '
+                                    'MPa}$</td><td>$0.30$</td></tr>\n'
+                                    '    </tbody>\n'
+                                    '  </table>\n'
+                                    '</div>'},
  'cold_work': {'id': 'cold_work',
                'category_id': 'section_library',
-               'category_title': '2. 단면 라이브러리 & 재료 물성치',
+               'category_title': '3. 단면 라이브러리 & 재료',
                'title': '코너 성형 가공경화 강도 증가',
                'title_en': 'Cold-Work Forming Strength Calculation',
                'summary': 'AISI S100 Appendix 1 및 KDS 14 31 10 기준에 따른 코너 절곡부 가공경화 유효항복강도(Fya) 산정 '
@@ -825,17 +1009,42 @@ TOPICS = {'intro': {'id': 'intro',
                                '  <p>($C$: 총 단면적 중 코너 면적이 차지하는 비율 $A_{corner} / A_g$, $F_{yf}$: '
                                '평판부 모재 항복강도 $F_y$)</p>\n'
                                '</div>\n',
-               'content_en_html': '\n'
-                                  '<div class="manual-article en-article">\n'
-                                  '  <h1>Cold-Work Forming Strength Calculation</h1>\n'
-                                  '  <p class="lead">Cold-forming operations cause localized '
-                                  'strain hardening in the corners, significantly elevating yield '
-                                  'strength from $F_y$ to $F_{yc}$, which can be accounted for via '
-                                  'average section strength $F_{ya}$.</p>\n'
-                                  '</div>\n'},
+               'content_en_html': '<div class="manual-article en-article">\n'
+                                  '  <h1>Cold-Work Forming Strength Increase</h1>\n'
+                                  '  <p class="lead">Calculates the effective increased design '
+                                  'yield strength ($F_{ya}$) resulting from strain hardening '
+                                  'during cold-forming processes per AISI S100 Appendix 1 and KDS '
+                                  '14 31 10.</p>\n'
+                                  '\n'
+                                  '  <h2>Analytical Formulation (AISI S100 Appendix 1)</h2>\n'
+                                  '  \n'
+                                  '  <h3>1. Average Effective Yield Strength ($F_{ya}$)</h3>\n'
+                                  '  $$F_{ya} = C F_{yc} + (1 - C) F_{yf}$$\n'
+                                  '  <p>where $C$ is the ratio of corner cross-sectional area to '
+                                  'the total cross-sectional area ($C = A_{corner} / '
+                                  'A_{gross}$).</p>\n'
+                                  '\n'
+                                  '  <h3>2. Corner Yield Strength ($F_{yc}$)</h3>\n'
+                                  '  $$F_{yc} = \\frac{B_c F_{yv}}{(R / t)^m}$$\n'
+                                  '  <table class="manual-table">\n'
+                                  '    <thead>\n'
+                                  '      '
+                                  '<tr><th>Parameter</th><th>Formula</th><th>Description</th></tr>\n'
+                                  '    </thead>\n'
+                                  '    <tbody>\n'
+                                  '      <tr><td>$B_c$</td><td>$$B_c = 3.69 '
+                                  '\\left(\\frac{F_{uv}}{F_{yv}}\\right) - 0.819 '
+                                  '\\left(\\frac{F_{uv}}{F_{yv}}\\right)^2 - 1.79$$</td><td>Corner '
+                                  'hardening coefficient.</td></tr>\n'
+                                  '      <tr><td>$m$</td><td>$$m = 0.192 '
+                                  '\\left(\\frac{F_{uv}}{F_{yv}}\\right) - 0.068$$</td><td>Corner '
+                                  'radius exponent ($R/t \\le 7$).</td></tr>\n'
+                                  '    </tbody>\n'
+                                  '  </table>\n'
+                                  '</div>'},
  'gross_props': {'id': 'gross_props',
                  'category_id': 'section_properties',
-                 'category_title': '3. 단면 기하학적 성질 & 유효단면',
+                 'category_title': '4. 단면 성질 & 유효단면',
                  'title': '총단면 기하학적 성질 (Gross)',
                  'title_en': 'Gross Section Properties',
                  'summary': '총단면적(Ag), 도심(CG), 단면 2차모멘트(Ix, Iy), 단면상승모멘트(Ixy), 회전반경(rx, ry)의 엄밀 '
@@ -878,16 +1087,43 @@ TOPICS = {'intro': {'id': 'intro',
                                  '\\theta_i}{12} + L_i t_i x_{c,i}^2 \\right)$</li>\n'
                                  '  </ul>\n'
                                  '</div>\n',
-                 'content_en_html': '\n'
-                                    '<div class="manual-article en-article">\n'
-                                    '  <h1>Gross Section Properties</h1>\n'
-                                    '  <p class="lead">Computes the geometric properties of '
-                                    'thin-walled cold-formed steel sections using closed-form line '
-                                    'integrals along the element centerline.</p>\n'
-                                    '</div>\n'},
+                 'content_en_html': '<div class="manual-article en-article">\n'
+                                    '  <h1>Gross Section Properties (Gross Characteristics)</h1>\n'
+                                    '  <p class="lead">Computes fundamental geometric properties '
+                                    'of the full cross-section including gross area ($A_g$), '
+                                    'centroid ($C_G$), second moments of area ($I_x, I_y$), and '
+                                    'radius of gyration ($r_x, r_y$) via line-integral '
+                                    'discretization.</p>\n'
+                                    '\n'
+                                    '  <h2>Fundamental Section Property Equations</h2>\n'
+                                    '  <table class="manual-table">\n'
+                                    '    <thead>\n'
+                                    '      <tr><th>Property</th><th>Symbol</th><th>Integral '
+                                    'Formulation</th><th>Engineering Units</th></tr>\n'
+                                    '    </thead>\n'
+                                    '    <tbody>\n'
+                                    '      <tr><td><strong>Gross '
+                                    'Area</strong></td><td>$A_g$</td><td>$$A_g = \\sum_{i=1}^n b_i '
+                                    't_i$$</td><td>$\\text{mm}^2$</td></tr>\n'
+                                    '      <tr><td><strong>Centroid</strong></td><td>$X_c, '
+                                    'Y_c$</td><td>$$X_c = \\frac{\\sum A_i \\bar{x}_i}{A_g}, '
+                                    '\\quad Y_c = \\frac{\\sum A_i '
+                                    '\\bar{y}_i}{A_g}$$</td><td>$\\text{mm}$</td></tr>\n'
+                                    '      <tr><td><strong>Moment of '
+                                    'Inertia</strong></td><td>$I_x, I_y$</td><td>$$I_x = \\sum '
+                                    '\\left( \\frac{b_i t_i^3 \\sin^2\\theta_i + b_i^3 t_i '
+                                    '\\cos^2\\theta_i}{12} + A_i \\bar{y}_i^2 '
+                                    '\\right)$$</td><td>$\\text{mm}^4$</td></tr>\n'
+                                    '      <tr><td><strong>Radius of '
+                                    'Gyration</strong></td><td>$r_x, r_y$</td><td>$$r_x = '
+                                    '\\sqrt{\\frac{I_x}{A_g}}, \\quad r_y = '
+                                    '\\sqrt{\\frac{I_y}{A_g}}$$</td><td>$\\text{mm}$</td></tr>\n'
+                                    '    </tbody>\n'
+                                    '  </table>\n'
+                                    '</div>'},
  'torsion_props': {'id': 'torsion_props',
                    'category_id': 'section_properties',
-                   'category_title': '3. 단면 기하학적 성질 & 유효단면',
+                   'category_title': '4. 단면 성질 & 유효단면',
                    'title': '비틀림 및 뒴 성질 (Torsion)',
                    'title_en': 'Torsional & Warping Properties',
                    'summary': '생브낭 비틀림 상수(J), 섹터모멘트 기반 뒴상수(Cw), 전단중심(SC), 극회전반경(ro)의 해석 이론입니다.',
@@ -975,25 +1211,25 @@ TOPICS = {'intro': {'id': 'intro',
                                    '  </table>\n'
                                    '</div>',
                    'content_en_html': '<div class="manual-article en-article">\n'
-                                      '  <h1>Torsional & Warping Properties</h1>\n'
+                                      '  <h1>Torsional & Warping Properties (Vlasov Theory)</h1>\n'
                                       '  <p class="lead">Evaluates Saint-Venant torsion ($J$), '
-                                      'sectorial warping constant ($C_w$), shear center ($x_0, '
-                                      'y_0$), and polar radius ($r_0$) per thin-walled beam '
+                                      'sectorial warping constant ($C_w$), shear center ($S_C$), '
+                                      'and polar radius ($r_0$) per Vlasov thin-walled beam '
                                       'theory.</p>\n'
                                       '\n'
-                                      '  <h2>Torsion Coordinate System & Diagrams</h2>\n'
+                                      '  <h2>Torsion & Sectorial Coordinate Diagrams</h2>\n'
                                       '  <div class="img-comparison-grid">\n'
                                       '    <div class="manual-img-card">\n'
                                       '      <img src="/static/images/manual/torsion-section1.png" '
                                       'alt="Shear Center Coordinates">\n'
-                                      '      <div class="img-caption">Shear Center & Axis '
-                                      'Coordinates</div>\n'
+                                      '      <div class="img-caption">📐 Figure 1: Shear Center '
+                                      '($S_C$) and Coordinate Axes</div>\n'
                                       '    </div>\n'
                                       '    <div class="manual-img-card">\n'
                                       '      <img src="/static/images/manual/torsion-section2.png" '
                                       'alt="Sectorial Coordinate Distribution">\n'
-                                      '      <div class="img-caption">Sectorial Coordinate '
-                                      '($\\omega$) Mapping</div>\n'
+                                      '      <div class="img-caption">📐 Figure 2: Sectorial '
+                                      'Normalized Coordinate ($\\omega$) Mapping</div>\n'
                                       '    </div>\n'
                                       '  </div>\n'
                                       '\n'
@@ -1002,20 +1238,48 @@ TOPICS = {'intro': {'id': 'intro',
                                       '      <img '
                                       'src="/static/images/manual/torsion-direction.png" '
                                       'alt="Torsion Sign Convention">\n'
-                                      '      <div class="img-caption">Torsional Rotation Sign '
-                                      'Convention</div>\n'
+                                      '      <div class="img-caption">🔄 Figure 3: Torsional '
+                                      'Rotation Angle ($\\phi$) Sign Convention</div>\n'
                                       '    </div>\n'
                                       '    <div class="manual-img-card">\n'
                                       '      <img src="/static/images/manual/torsion-diagrams.png" '
                                       'alt="Bimoment and Torsion Diagrams">\n'
-                                      '      <div class="img-caption">Torsional Moment and '
-                                      'Bimoment ($B$) Diagrams</div>\n'
+                                      '      <div class="img-caption">📊 Figure 4: Torsion '
+                                      '($\\phi$), Saint-Venant ($T_s$), Warping ($T_w$), Bimoment '
+                                      '($B$) Diagrams</div>\n'
                                       '    </div>\n'
                                       '  </div>\n'
+                                      '\n'
+                                      '  <h2>Key Torsional Property Formulations</h2>\n'
+                                      '  <table class="manual-table">\n'
+                                      '    <thead>\n'
+                                      '      <tr><th>Torsional '
+                                      'Characteristic</th><th>Symbol</th><th>Analytical '
+                                      'Formulation</th><th>Description</th></tr>\n'
+                                      '    </thead>\n'
+                                      '    <tbody>\n'
+                                      '      <tr><td><strong>Saint-Venant '
+                                      'Torsion</strong></td><td>$J$</td><td>$$J = \\sum '
+                                      '\\frac{1}{3} b_i t_i^3$$</td><td>Sum of pure torsional '
+                                      'shear resistances for open thin plates.</td></tr>\n'
+                                      '      <tr><td><strong>Warping '
+                                      'Constant</strong></td><td>$C_w$</td><td>$$C_w = \\int_A '
+                                      '\\omega_n^2 dA$$</td><td>Resistance of cross section '
+                                      'against out-of-plane warping deformation.</td></tr>\n'
+                                      '      <tr><td><strong>Shear Center</strong></td><td>$x_0, '
+                                      'y_0$</td><td>$$x_0 = \\frac{1}{I_x} \\int_A y \\omega_0 '
+                                      'dA$$</td><td>Point through which lateral shear forces '
+                                      'produce no torsional twist.</td></tr>\n'
+                                      '      <tr><td><strong>Polar Radius of '
+                                      'Gyration</strong></td><td>$r_0$</td><td>$$r_0 = '
+                                      '\\sqrt{r_x^2 + r_y^2 + x_0^2 + y_0^2}$$</td><td>Polar '
+                                      'radius of gyration about the shear center.</td></tr>\n'
+                                      '    </tbody>\n'
+                                      '  </table>\n'
                                       '</div>'},
  'principal_axes': {'id': 'principal_axes',
                     'category_id': 'section_properties',
-                    'category_title': '3. 단면 기하학적 성질 & 유효단면',
+                    'category_title': '4. 단면 성질 & 유효단면',
                     'title': '주축 및 주단면 2차모멘트',
                     'title_en': 'Principal Axes & Principal Moments',
                     'summary': '주축 회전각(θp) 및 주단면 2차모멘트(I1, I2), 최소 회전반경(r_min)의 좌표변환 이론입니다.',
@@ -1050,16 +1314,46 @@ TOPICS = {'intro': {'id': 'intro',
                                     '  $$I_{1,2} = \\frac{I_x + I_y}{2} \\pm '
                                     '\\sqrt{\\left(\\frac{I_x - I_y}{2}\\right)^2 + I_{xy}^2}$$\n'
                                     '</div>\n',
-                    'content_en_html': '\n'
-                                       '<div class="manual-article en-article">\n'
-                                       '  <h1>Principal Axes & Principal Moments</h1>\n'
-                                       '  <p class="lead">Computes the principal axis orientation '
-                                       'angle ($\theta_p$) and maximum/minimum principal moments '
-                                       'of inertia ($I_1, I_2$) for unsymmetric sections.</p>\n'
-                                       '</div>\n'},
+                    'content_en_html': '<div class="manual-article en-article">\n'
+                                       '  <h1>Principal Axes & Principal Second Moments</h1>\n'
+                                       '  <p class="lead">Computes principal axis orientation '
+                                       'angle ($\\theta_p$), principal second moments of area '
+                                       '($I_1, I_2$), and elastic section moduli ($S_x, S_y, S_1, '
+                                       'S_2$) for symmetric and unsymmetric profiles.</p>\n'
+                                       '\n'
+                                       '  <h2>Principal Axis Formulations</h2>\n'
+                                       '  <table class="manual-table">\n'
+                                       '    <thead>\n'
+                                       '      <tr><th>Property</th><th>Symbol</th><th>Mathematical '
+                                       'Formulation</th><th>Description</th></tr>\n'
+                                       '    </thead>\n'
+                                       '    <tbody>\n'
+                                       '      <tr><td><strong>Product of '
+                                       'Inertia</strong></td><td>$I_{xy}$</td><td>$$I_{xy} = \\sum '
+                                       '\\left( I_{xy,i} + A_i \\bar{x}_i \\bar{y}_i '
+                                       '\\right)$$</td><td>Cross moment of inertia about '
+                                       'centroidal XY axes.</td></tr>\n'
+                                       '      <tr><td><strong>Principal '
+                                       'Angle</strong></td><td>$\\theta_p$</td><td>$$\\theta_p = '
+                                       '\\frac{1}{2} \\tan^{-1}\\left( \\frac{-2 I_{xy}}{I_x - '
+                                       'I_y} \\right)$$</td><td>Rotation angle aligning axes with '
+                                       'maximum/minimum stiffness.</td></tr>\n'
+                                       '      <tr><td><strong>Principal '
+                                       'Moments</strong></td><td>$I_1, I_2$</td><td>$$I_{1,2} = '
+                                       '\\frac{I_x + I_y}{2} \\pm \\sqrt{\\left(\\frac{I_x - '
+                                       'I_y}{2}\\right)^2 + I_{xy}^2}$$</td><td>Major ($I_1$) and '
+                                       'minor ($I_2$) principal moments of inertia.</td></tr>\n'
+                                       '      <tr><td><strong>Section '
+                                       'Modulus</strong></td><td>$S_x, S_y$</td><td>$$S_x = '
+                                       '\\frac{I_x}{y_{max}}, \\quad S_y = '
+                                       '\\frac{I_y}{x_{max}}$$</td><td>Elastic section modulus for '
+                                       'extreme fiber stress evaluation.</td></tr>\n'
+                                       '    </tbody>\n'
+                                       '  </table>\n'
+                                       '</div>'},
  'effective_props': {'id': 'effective_props',
                      'category_id': 'section_properties',
-                     'category_title': '3. 단면 기하학적 성질 & 유효단면',
+                     'category_title': '4. 단면 성질 & 유효단면',
                      'title': 'Winter 식 기반 유효단면 해석',
                      'title_en': 'Effective Section Properties (Winter Method)',
                      'summary': 'Winter 유효폭 감축 공식 및 압축/휨 응력 구배 하에서의 유효단면(Aeff, Ieff) 반복 해석과 2D 시각화 '
@@ -1113,18 +1407,40 @@ TOPICS = {'intro': {'id': 'intro',
                                      '좌굴로 인해 무효화된 판재 중앙부가 점선으로 투명 처리되어 유효 지지 영역을 한눈에 파악할 수 '
                                      '있습니다.</p>\n'
                                      '</div>\n',
-                     'content_en_html': '\n'
-                                        '<div class="manual-article en-article">\n'
+                     'content_en_html': '<div class="manual-article en-article">\n'
                                         '  <h1>Effective Section Properties (Winter Method)</h1>\n'
-                                        '  <p class="lead">Computes reduced effective '
-                                        'cross-sectional properties ($A_{eff}, I_{eff}$) under '
-                                        "axial compression and bending stresses using Winter's "
-                                        'empirical reduction factor $\r'
-                                        'ho$.</p>\n'
-                                        '</div>\n'},
+                                        '  <p class="lead">Calculates post-buckling effective '
+                                        'design widths ($b_{eff}$) and effective properties '
+                                        '($A_{eff}, I_{eff}, S_{eff}$) under axial compression and '
+                                        "bending stresses per Winter's empirical formulation.</p>\n"
+                                        '\n'
+                                        '  <h2>Winter Effective Width Formulation</h2>\n'
+                                        '  \n'
+                                        '  <h3>1. Plate Slenderness ($\\lambda$)</h3>\n'
+                                        '  $$\\lambda = \\frac{1.052}{\\sqrt{k}} '
+                                        '\\left(\\frac{w}{t}\\right) \\sqrt{\\frac{f}{E}}$$\n'
+                                        '  <p>where $w$ is the flat plate width, $t$ is thickness, '
+                                        '$f$ is compressive stress, and $k$ is plate buckling '
+                                        'coefficient ($k=4.0$ for stiffened, $k=0.43$ for '
+                                        'unstiffened elements).</p>\n'
+                                        '\n'
+                                        '  <h3>2. Width Reduction Factor ($\\rho$)</h3>\n'
+                                        '  $$\\rho = \\begin{cases} 1.0 & (\\lambda \\le 0.673) '
+                                        '\\\\ \\frac{1 - 0.22/\\lambda}{\\lambda} & (\\lambda > '
+                                        '0.673) \\end{cases}$$\n'
+                                        '  $$b_{eff} = \\rho \\cdot w$$\n'
+                                        '\n'
+                                        '  <h2>Iterative Neutral Axis Search</h2>\n'
+                                        '  <p>Under flexural bending, reduction of compressive '
+                                        'flange and web areas shifts the neutral axis downwards. '
+                                        'CFDesigner iterates until the stress-distribution '
+                                        'equilibrium converges within 0.1% tolerance, displaying '
+                                        'effective geometry with dashed lines on the 2D '
+                                        'canvas.</p>\n'
+                                        '</div>'},
  'fsm_theory': {'id': 'fsm_theory',
                 'category_id': 'fsm_buckling',
-                'category_title': '4. FSM 탄성 좌굴해석 이론',
+                'category_title': '5. FSM 탄성 좌굴해석',
                 'title': 'FSM 탄성 좌굴 해석 이론',
                 'title_en': 'FSM Elastic Buckling Theory',
                 'summary': '유한대판법(Finite Strip Method)의 강성행렬([Ke], [Kg]) 유도와 일반화 고유치 수치해석 이론을 '
@@ -1168,16 +1484,47 @@ TOPICS = {'intro': {'id': 'intro',
                                 '$\\lambda_{cr} = P_{cr} / P_{ref}$</li>\n'
                                 '  </ul>\n'
                                 '</div>\n',
-                'content_en_html': '\n'
-                                   '<div class="manual-article en-article">\n'
-                                   '  <h1>FSM Elastic Buckling Theory</h1>\n'
-                                   '  <p class="lead">Explains the semi-analytical Finite Strip '
-                                   'Method (FSM) formulation combining polynomial transverse '
-                                   'interpolation with longitudinal harmonic functions.</p>\n'
-                                   '</div>\n'},
+                'content_en_html': '<div class="manual-article en-article">\n'
+                                   '  <h1>Finite Strip Method (FSM) Buckling Theory</h1>\n'
+                                   '  <p class="lead">The Finite Strip Method (FSM) is a '
+                                   'semi-analytical numerical approach for evaluating elastic '
+                                   'critical buckling loads of prismatic thin-walled structural '
+                                   'members under longitudinal compression and bending.</p>\n'
+                                   '\n'
+                                   '  <h2>FSM Governing Formulations</h2>\n'
+                                   '  <p>The displacement field along the longitudinal strip is '
+                                   'approximated using harmonic Fourier sine series:</p>\n'
+                                   '  $$u(x, y) = \\sum_{m=1}^M u_m(y) \\sin\\left(\\frac{m \\pi '
+                                   'x}{L}\\right), \\quad w(x, y) = \\sum_{m=1}^M w_m(y) '
+                                   '\\sin\\left(\\frac{m \\pi x}{L}\\right)$$\n'
+                                   '\n'
+                                   '  <h2>Generalized Eigenvalue Problem</h2>\n'
+                                   '  $$([K_e] - \\lambda [K_g]) \\{d\\} = 0$$\n'
+                                   '  <table class="manual-table">\n'
+                                   '    <thead>\n'
+                                   '      <tr><th>Matrix / '
+                                   'Variable</th><th>Definition</th><th>Engineering '
+                                   'Significance</th></tr>\n'
+                                   '    </thead>\n'
+                                   '    <tbody>\n'
+                                   '      <tr><td>$[K_e]$</td><td>Elastic Stiffness '
+                                   'Matrix</td><td>Combines membrane and plate bending stiffness '
+                                   'of strip elements.</td></tr>\n'
+                                   '      <tr><td>$[K_g]$</td><td>Geometric Stiffness '
+                                   'Matrix</td><td>Represents initial stress work under applied '
+                                   'compressive or bending reference load.</td></tr>\n'
+                                   '      <tr><td>$\\lambda$</td><td>Buckling Load '
+                                   'Factor</td><td>Critical buckling multiplier $\\lambda = P_{cr} '
+                                   '/ P_{ref}$.</td></tr>\n'
+                                   '      <tr><td>$\\{d\\}$</td><td>Buckling Mode Shape '
+                                   'Vector</td><td>Nodal displacement eigenvectors defining '
+                                   'cross-sectional deformation.</td></tr>\n'
+                                   '    </tbody>\n'
+                                   '  </table>\n'
+                                   '</div>'},
  'buckling_modes': {'id': 'buckling_modes',
                     'category_id': 'fsm_buckling',
-                    'category_title': '4. FSM 탄성 좌굴해석 이론',
+                    'category_title': '5. FSM 탄성 좌굴해석',
                     'title': '좌굴 모드 판별 (국부/왜곡/전체)',
                     'title_en': 'Buckling Mode Classification',
                     'summary': '국부좌굴(Local, Pcrl), 왜곡좌굴(Distortional, Pcrd), 전체좌굴(Global, Pcre)의 '
@@ -1278,22 +1625,23 @@ TOPICS = {'intro': {'id': 'intro',
                                        '  <h1>Buckling Mode Classification (Local, Distortional, '
                                        'Global)</h1>\n'
                                        '  <p class="lead">Identifies and classifies critical '
-                                       'buckling loads ($P_{crl}, P_{crd}, P_{cre}$) along the '
-                                       'half-wavelength ($L$) signature spectrum.</p>\n'
+                                       'elastic buckling loads ($P_{crl}, P_{crd}, P_{cre}$) along '
+                                       'the half-wavelength ($L$) signature spectrum into three '
+                                       'distinct physical instability modes.</p>\n'
                                        '\n'
                                        '  <h2>FSM Signature Curve & Mode Shapes</h2>\n'
                                        '  <div class="img-comparison-grid">\n'
                                        '    <div class="manual-img-card">\n'
                                        '      <img src="/static/images/manual/buckle-profile.png" '
                                        'alt="Signature Curve Profile">\n'
-                                       '      <div class="img-caption">Signature Curve Minima '
-                                       'Identification</div>\n'
+                                       '      <div class="img-caption">📈 Figure 1: FSM Signature '
+                                       'Curve Minima Identification</div>\n'
                                        '    </div>\n'
                                        '    <div class="manual-img-card">\n'
                                        '      <img src="/static/images/manual/buckle-shape.png" '
                                        'alt="Cross Section Buckling Shapes">\n'
-                                       '      <div class="img-caption">Local vs Distortional '
-                                       'Cross-Section Deformation</div>\n'
+                                       '      <div class="img-caption">🔬 Figure 2: Local (Fixed '
+                                       'Nodes) vs Distortional (Flange Rotation) Shapes</div>\n'
                                        '    </div>\n'
                                        '  </div>\n'
                                        '\n'
@@ -1301,20 +1649,59 @@ TOPICS = {'intro': {'id': 'intro',
                                        '    <div class="manual-img-card">\n'
                                        '      <img src="/static/images/manual/buckle-shapes.png" '
                                        'alt="Buckling Vector Diagrams">\n'
-                                       '      <div class="img-caption">2D Mode Vector '
-                                       'Mapping</div>\n'
+                                       '      <div class="img-caption">📊 Figure 3: 2D Mode Vector '
+                                       'Mapping under Axial & Flexural Stress</div>\n'
                                        '    </div>\n'
                                        '    <div class="manual-img-card">\n'
                                        '      <img src="/static/images/manual/buckle-renders.png" '
                                        'alt="3D Buckling Renders">\n'
-                                       '      <div class="img-caption">3D Longitudinal Buckling '
-                                       'Half-Wave Surface</div>\n'
+                                       '      <div class="img-caption">🌐 Figure 4: Three.js 3D '
+                                       'Longitudinal Buckling Half-Wave Surface</div>\n'
                                        '    </div>\n'
                                        '  </div>\n'
+                                       '\n'
+                                       '  <h2>Three Primary Buckling Mode Characteristics</h2>\n'
+                                       '  <table class="manual-table">\n'
+                                       '    <thead>\n'
+                                       '      <tr><th>Buckling Mode</th><th>Critical '
+                                       'Symbol</th><th>Half-Wavelength Range '
+                                       '($L$)</th><th>Deformation & Physical Behavior</th></tr>\n'
+                                       '    </thead>\n'
+                                       '    <tbody>\n'
+                                       '      <tr>\n'
+                                       '        <td><strong>1. Local Buckling</strong></td>\n'
+                                       '        <td>$P_{crl}, M_{crl}$</td>\n'
+                                       '        <td>Plate width scale<br>($20 \\sim 150\\text{ '
+                                       'mm}$)</td>\n'
+                                       '        <td>Corner fold lines remain stationary while flat '
+                                       'plate components (flange/web) buckle with short '
+                                       'waves.</td>\n'
+                                       '      </tr>\n'
+                                       '      <tr>\n'
+                                       '        <td><strong>2. Distortional '
+                                       'Buckling</strong></td>\n'
+                                       '        <td>$P_{crd}, M_{crd}$</td>\n'
+                                       '        <td>Intermediate scale<br>($100 \\sim 600\\text{ '
+                                       'mm}$)</td>\n'
+                                       '        <td>Lip edge stiffeners and flanges rotate about '
+                                       'the web-flange junction, distorting the cross-section '
+                                       'shape.</td>\n'
+                                       '      </tr>\n'
+                                       '      <tr>\n'
+                                       '        <td><strong>3. Global Buckling</strong></td>\n'
+                                       '        <td>$P_{cre}, M_{cre}$</td>\n'
+                                       '        <td>Member span scale<br>($1,000 \\sim '
+                                       '6,000\\text{ mm}$)</td>\n'
+                                       '        <td>Overall member buckles flexurally (Euler) or '
+                                       'flexural-torsionally without cross-sectional '
+                                       'distortion.</td>\n'
+                                       '      </tr>\n'
+                                       '    </tbody>\n'
+                                       '  </table>\n'
                                        '</div>'},
  'signature_curve': {'id': 'signature_curve',
                      'category_id': 'fsm_buckling',
-                     'category_title': '4. FSM 탄성 좌굴해석 이론',
+                     'category_title': '5. FSM 탄성 좌굴해석',
                      'title': '시그니처 커브 및 3D 시각화',
                      'title_en': 'Signature Curve & 3D Visualization',
                      'summary': '반파장 길이(L)에 따른 좌굴 계수(λ) 스펙트럼 곡선 해석법과 Three.js 3D 모드 형상 렌더링 조작법입니다.',
@@ -1355,16 +1742,34 @@ TOPICS = {'intro': {'id': 'intro',
                                      '좌굴 모드 형상이 3D 캔버스에 즉시 동기화됩니다.</li>\n'
                                      '  </ul>\n'
                                      '</div>\n',
-                     'content_en_html': '\n'
-                                        '<div class="manual-article en-article">\n'
-                                        '  <h1>Signature Curve & 3D Visualization</h1>\n'
-                                        '  <p class="lead">Understand the buckling signature curve '
-                                        'and interact with real-time 3D rendered buckling mode '
-                                        'deformations powered by Three.js.</p>\n'
-                                        '</div>\n'},
+                     'content_en_html': '<div class="manual-article en-article">\n'
+                                        '  <h1>Signature Curve & 3D Buckling Visualization</h1>\n'
+                                        '  <p class="lead">Plots critical buckling load factors '
+                                        '($\\lambda$) against half-wavelengths ($L$) on a '
+                                        'logarithmic spectrum, linking detected local/distortional '
+                                        'minima directly with interactive 3D WebGL '
+                                        'visualizations.</p>\n'
+                                        '\n'
+                                        '  <h2>Signature Curve Analysis</h2>\n'
+                                        '  <p>The signature curve provides a comprehensive '
+                                        'instability profile of thin-walled members across lengths '
+                                        'from $10\\text{ mm}$ to $10,000\\text{ mm}$. Minima '
+                                        'points on the curve indicate:</p>\n'
+                                        '  <ul>\n'
+                                        '    <li><strong>First Minimum ($L \\approx 50\\text{ '
+                                        'mm}$)</strong>: Critical Local Buckling Load ($P_{crl}, '
+                                        'M_{crl}$).</li>\n'
+                                        '    <li><strong>Second Minimum ($L \\approx 300\\text{ '
+                                        'mm}$)</strong>: Critical Distortional Buckling Load '
+                                        '($P_{crd}, M_{crd}$).</li>\n'
+                                        '    <li><strong>Asymptotic Upper Curve ($L > 1,500\\text{ '
+                                        'mm}$)</strong>: Critical Global Buckling Load ($P_{cre}, '
+                                        'M_{cre}$).</li>\n'
+                                        '  </ul>\n'
+                                        '</div>'},
  'fsm_params': {'id': 'fsm_params',
                 'category_id': 'fsm_buckling',
-                'category_title': '4. FSM 탄성 좌굴해석 이론',
+                'category_title': '5. FSM 탄성 좌굴해석',
                 'title': 'FSM 해석 구간 및 하중조건 설정',
                 'title_en': 'Buckling Analysis Parameters & Results Grid',
                 'summary': '스윕 반파장 범위(Lmin~Lmax), 스텝 수, 편심 압축·휨 하중조건 설정 및 해석 결과 그리드 내보내기 가이드입니다.',
@@ -1407,16 +1812,40 @@ TOPICS = {'intro': {'id': 'intro',
                                 '고유벡터 데이터를 CSV 파일로 다운로드.</li>\n'
                                 '  </ul>\n'
                                 '</div>\n',
-                'content_en_html': '\n'
-                                   '<div class="manual-article en-article">\n'
+                'content_en_html': '<div class="manual-article en-article">\n'
                                    '  <h1>Buckling Analysis Parameters & Results Grid</h1>\n'
-                                   '  <p class="lead">Configure half-wavelength sweep bounds '
-                                   '($L_{min}, L_{max}$), sampling density, stress distribution '
-                                   'types, and export raw buckling analysis curves to CSV.</p>\n'
-                                   '</div>\n'},
+                                   '  <p class="lead">Configures half-wavelength sweep range, '
+                                   'number of logarithmic calculation steps, initial stress '
+                                   'distribution conditions, and CSV results data export.</p>\n'
+                                   '\n'
+                                   '  <h2>Analysis Parameter Settings</h2>\n'
+                                   '  <table class="manual-table">\n'
+                                   '    <thead>\n'
+                                   '      <tr><th>Parameter Name</th><th>Default '
+                                   'Value</th><th>Valid Range</th><th>Description</th></tr>\n'
+                                   '    </thead>\n'
+                                   '    <tbody>\n'
+                                   '      <tr><td><strong>Minimum Length '
+                                   '($L_{min}$)</strong></td><td>$10\\text{ mm}$</td><td>$1.0 '
+                                   '\\sim 100\\text{ mm}$</td><td>Starting half-wavelength for '
+                                   'local buckling capture.</td></tr>\n'
+                                   '      <tr><td><strong>Maximum Length '
+                                   '($L_{max}$)</strong></td><td>$5,000\\text{ mm}$</td><td>$500 '
+                                   '\\sim 50,000\\text{ mm}$</td><td>Ending half-wavelength for '
+                                   'global buckling asymptotic check.</td></tr>\n'
+                                   '      <tr><td><strong>Logarithmic Steps</strong></td><td>35 '
+                                   'steps</td><td>$10 \\sim 100$</td><td>Number of evaluation '
+                                   'points logarithmically spaced along $L$.</td></tr>\n'
+                                   '      <tr><td><strong>Stress Condition</strong></td><td>Axial '
+                                   'Compression</td><td>Axial, Bending X, Bending '
+                                   'Y</td><td>Initial reference stress field applied across the '
+                                   'cross-section.</td></tr>\n'
+                                   '    </tbody>\n'
+                                   '  </table>\n'
+                                   '</div>'},
  'kds_dsm_comp': {'id': 'kds_dsm_comp',
                   'category_id': 'kds_design',
-                  'category_title': '5. KDS 14 31 10 부재설계 & 계산서',
+                  'category_title': '6. KDS / AISI 부재설계',
                   'title': 'KDS 압축부재 설계 (DSM Pn)',
                   'title_en': 'KDS Compression Member Design (DSM Pn)',
                   'summary': 'KDS 14 31 10 직접강도법(DSM)에 따른 전체좌굴(Pne), 국부좌굴(Pnl), 왜곡좌굴(Pnd) 및 '
@@ -1469,16 +1898,46 @@ TOPICS = {'intro': {'id': 'intro',
                                   '\\right] \\left(\\frac{P_{crd}}{P_y}\\right)^{0.6} P_y & '
                                   '(\\lambda_d > 0.561) \\end{cases}$$\n'
                                   '</div>\n',
-                  'content_en_html': '\n'
-                                     '<div class="manual-article en-article">\n'
-                                     '  <h1>KDS Compression Member Design (DSM Pn)</h1>\n'
+                  'content_en_html': '<div class="manual-article en-article">\n'
+                                     '  <h1>Compression Member Design (Direct Strength '
+                                     'Method)</h1>\n'
                                      '  <p class="lead">Evaluates the nominal axial compressive '
                                      'strength ($P_n = \\min(P_{nl}, P_{nd})$) using direct '
-                                     'strength method provisions.</p>\n'
-                                     '</div>\n'},
+                                     'strength method provisions per AISI S100 and KDS 14 31 '
+                                     '10.</p>\n'
+                                     '\n'
+                                     '  <h2>1. Global Buckling Strength ($P_{ne}$)</h2>\n'
+                                     '  $$P_{ne} = A_g F_n$$\n'
+                                     '  $$F_n = \\begin{cases} \\left( 0.658^{\\lambda_c^2} '
+                                     '\\right) F_y & (\\lambda_c \\le 1.5) \\\\ \\left( '
+                                     '\\frac{0.877}{\\lambda_c^2} \\right) F_y & (\\lambda_c > '
+                                     '1.5) \\end{cases}, \\quad \\lambda_c = '
+                                     '\\sqrt{\\frac{F_y}{F_{cre}}}$$\n'
+                                     '\n'
+                                     '  <h2>2. Local Buckling Interaction ($P_{nl}$)</h2>\n'
+                                     '  $$\\lambda_l = \\sqrt{\\frac{P_{ne}}{P_{crl}}}$$\n'
+                                     '  $$P_{nl} = \\begin{cases} P_{ne} & (\\lambda_l \\le 0.776) '
+                                     '\\\\ \\left[ 1 - 0.15 '
+                                     '\\left(\\frac{P_{crl}}{P_{ne}}\\right)^{0.4} \\right] '
+                                     '\\left(\\frac{P_{crl}}{P_{ne}}\\right)^{0.4} P_{ne} & '
+                                     '(\\lambda_l > 0.776) \\end{cases}$$\n'
+                                     '\n'
+                                     '  <h2>3. Distortional Buckling Strength ($P_{nd}$)</h2>\n'
+                                     '  $$\\lambda_d = \\sqrt{\\frac{P_y}{P_{crd}}}$$\n'
+                                     '  $$P_{nd} = \\begin{cases} P_y & (\\lambda_d \\le 0.561) '
+                                     '\\\\ \\left[ 1 - 0.25 '
+                                     '\\left(\\frac{P_{crd}}{P_y}\\right)^{0.6} \\right] '
+                                     '\\left(\\frac{P_{crd}}{P_y}\\right)^{0.6} P_y & (\\lambda_d '
+                                     '> 0.561) \\end{cases}$$\n'
+                                     '\n'
+                                     '  <h2>Design Factors</h2>\n'
+                                     '  <p><strong>LRFD Resistance Factor</strong>: $\\phi_c = '
+                                     '0.85$ &nbsp;|&nbsp; <strong>ASD Safety Factor</strong>: '
+                                     '$\\Omega_c = 1.80$</p>\n'
+                                     '</div>'},
  'kds_dsm_flex': {'id': 'kds_dsm_flex',
                   'category_id': 'kds_design',
-                  'category_title': '5. KDS 14 31 10 부재설계 & 계산서',
+                  'category_title': '6. KDS / AISI 부재설계',
                   'title': 'KDS 휨부재 설계 (DSM Mn)',
                   'title_en': 'KDS Flexural Member Design (DSM Mn)',
                   'summary': '횡비틀림좌굴(Mne), 국부좌굴(Mnl), 왜곡좌굴(Mnd) 및 공칭휨강도(Mn) 산정 수식입니다.',
@@ -1513,16 +1972,44 @@ TOPICS = {'intro': {'id': 'intro',
                                   '\\right) & (0.56 M_y \\le M_{cre} < 2.78 M_y) \\\\ M_y & '
                                   '(M_{cre} \\ge 2.78 M_y) \\end{cases}$$\n'
                                   '</div>\n',
-                  'content_en_html': '\n'
-                                     '<div class="manual-article en-article">\n'
-                                     '  <h1>KDS Flexural Member Design (DSM Mn)</h1>\n'
-                                     '  <p class="lead">Calculates nominal flexural capacity '
-                                     '($M_n$) accounting for lateral-torsional, local, and '
-                                     'distortional buckling modes under KDS 14 31 10.</p>\n'
-                                     '</div>\n'},
+                  'content_en_html': '<div class="manual-article en-article">\n'
+                                     '  <h1>Flexural Member Design (Direct Strength Method)</h1>\n'
+                                     '  <p class="lead">Computes nominal flexural capacity ($M_n = '
+                                     '\\min(M_{ne}, M_{nl}, M_{nd})$) accounting for '
+                                     'lateral-torsional (LTB), local, and distortional buckling '
+                                     'modes per AISI S100 and KDS 14 31 10.</p>\n'
+                                     '\n'
+                                     '  <h2>1. Lateral-Torsional Buckling Strength '
+                                     '($M_{ne}$)</h2>\n'
+                                     '  $$M_{ne} = \\begin{cases} M_{cre} & (M_{cre} < 0.56 M_y) '
+                                     '\\\\ \\frac{10}{9} M_y \\left( 1 - \\frac{10 M_y}{36 '
+                                     'M_{cre}} \\right) & (0.56 M_y \\le M_{cre} < 2.78 M_y) \\\\ '
+                                     'M_y & (M_{cre} \\ge 2.78 M_y) \\end{cases}$$\n'
+                                     '\n'
+                                     '  <h2>2. Local Buckling Interaction ($M_{nl}$)</h2>\n'
+                                     '  $$\\lambda_l = \\sqrt{\\frac{M_{ne}}{M_{crl}}}$$\n'
+                                     '  $$M_{nl} = \\begin{cases} M_{ne} & (\\lambda_l \\le 0.776) '
+                                     '\\\\ \\left[ 1 - 0.15 '
+                                     '\\left(\\frac{M_{crl}}{M_{ne}}\\right)^{0.4} \\right] '
+                                     '\\left(\\frac{M_{crl}}{M_{ne}}\\right)^{0.4} M_{ne} & '
+                                     '(\\lambda_l > 0.776) \\end{cases}$$\n'
+                                     '\n'
+                                     '  <h2>3. Distortional Buckling Strength ($M_{nd}$)</h2>\n'
+                                     '  $$\\lambda_d = \\sqrt{\\frac{M_y}{M_{crd}}}$$\n'
+                                     '  $$M_{nd} = \\begin{cases} M_y & (\\lambda_d \\le 0.673) '
+                                     '\\\\ \\left[ 1 - 0.22 '
+                                     '\\left(\\frac{M_{crd}}{M_y}\\right)^{0.5} \\right] '
+                                     '\\left(\\frac{M_{crd}}{M_y}\\right)^{0.5} M_y & (\\lambda_d '
+                                     '> 0.673) \\end{cases}$$\n'
+                                     '\n'
+                                     '  <h2>Design Factors</h2>\n'
+                                     '  <p><strong>LRFD Resistance Factor</strong>: $\\phi_b = '
+                                     '0.90$ &nbsp;|&nbsp; <strong>ASD Safety Factor</strong>: '
+                                     '$\\Omega_b = 1.67$</p>\n'
+                                     '</div>'},
  'kds_shear_crip': {'id': 'kds_shear_crip',
                     'category_id': 'kds_design',
-                    'category_title': '5. KDS 14 31 10 부재설계 & 계산서',
+                    'category_title': '6. KDS / AISI 부재설계',
                     'title': 'KDS 전단강도 & 웨브 크리플링',
                     'title_en': 'KDS Shear & Web Crippling Strength',
                     'summary': '웨브 전단강도(Vn) 및 4대 재하/지지조건(EOF, IOF, ETF, ITF)에 따른 공칭 웨브 크리플링 '
@@ -1592,16 +2079,55 @@ TOPICS = {'intro': {'id': 'intro',
                                     '  <p>($N$: 받침길이, $R$: 내부 코너반경, $h$: 웨브 평판높이, $C, C_R, C_N, '
                                     'C_h$: 조건별 계수)</p>\n'
                                     '</div>\n',
-                    'content_en_html': '\n'
-                                       '<div class="manual-article en-article">\n'
-                                       '  <h1>KDS Shear & Web Crippling Strength</h1>\n'
+                    'content_en_html': '<div class="manual-article en-article">\n'
+                                       '  <h1>Shear & Web Crippling Strength (AISI S100 '
+                                       'Provisions)</h1>\n'
                                        '  <p class="lead">Computes nominal shear resistance '
                                        '($V_n$) and localized web crippling capacity ($P_{nc}$) '
-                                       'across EOF, IOF, ETF, and ITF loading configurations.</p>\n'
-                                       '</div>\n'},
+                                       'across standard support configurations per AISI S100 and '
+                                       'KDS 14 31 10.</p>\n'
+                                       '\n'
+                                       '  <h2>1. Nominal Shear Strength ($V_n$)</h2>\n'
+                                       '  $$V_n = \\begin{cases} 0.60 F_y A_w & '
+                                       '\\left(\\frac{h}{t} \\le \\sqrt{\\frac{E '
+                                       'k_v}{F_y}}\\right) \\\\ 0.60 \\sqrt{E k_v F_y} '
+                                       '\\left(\\frac{A_w}{h/t}\\right) & \\left(\\sqrt{\\frac{E '
+                                       'k_v}{F_y}} < \\frac{h}{t} \\le 1.515 \\sqrt{\\frac{E '
+                                       'k_v}{F_y}}\\right) \\\\ \\frac{\\pi^2 E k_v A_w}{12 (1 - '
+                                       '\\nu^2) (h/t)^2} & \\left(\\frac{h}{t} > 1.515 '
+                                       '\\sqrt{\\frac{E k_v}{F_y}}\\right) \\end{cases}$$\n'
+                                       '\n'
+                                       '  <h2>2. Web Crippling Strength ($P_{nc}$)</h2>\n'
+                                       '  $$P_{nc} = C \\cdot t^2 \\cdot F_y \\cdot \\sin\\theta '
+                                       '\\cdot \\left[ 1 - C_R \\sqrt{\\frac{R}{t}} \\right] '
+                                       '\\cdot \\left[ 1 + C_N \\sqrt{\\frac{N}{t}} \\right] '
+                                       '\\cdot \\left[ 1 - C_h \\sqrt{\\frac{h}{t}} \\right]$$\n'
+                                       '\n'
+                                       '  <h2>4 Standard Loading & Support Conditions</h2>\n'
+                                       '  <table class="manual-table">\n'
+                                       '    <thead>\n'
+                                       '      <tr><th>Code</th><th>Configuration '
+                                       'Name</th><th>$C$</th><th>$C_R$</th><th>$C_N$</th><th>$C_h$</th><th>Description</th></tr>\n'
+                                       '    </thead>\n'
+                                       '    <tbody>\n'
+                                       '      '
+                                       '<tr><td><strong>EOF</strong></td><td>End-One-Flange</td><td>4.00</td><td>0.14</td><td>0.35</td><td>0.02</td><td>Single '
+                                       'flange loading at end support.</td></tr>\n'
+                                       '      '
+                                       '<tr><td><strong>IOF</strong></td><td>Interior-One-Flange</td><td>13.0</td><td>0.23</td><td>0.14</td><td>0.01</td><td>Single '
+                                       'flange loading at interior support/point load.</td></tr>\n'
+                                       '      '
+                                       '<tr><td><strong>ETF</strong></td><td>End-Two-Flange</td><td>7.50</td><td>0.08</td><td>0.12</td><td>0.048</td><td>Opposing '
+                                       'double flange compression at end support.</td></tr>\n'
+                                       '      '
+                                       '<tr><td><strong>ITF</strong></td><td>Interior-Two-Flange</td><td>20.0</td><td>0.10</td><td>0.08</td><td>0.031</td><td>Opposing '
+                                       'double flange compression at interior load.</td></tr>\n'
+                                       '    </tbody>\n'
+                                       '  </table>\n'
+                                       '</div>'},
  'quick_design': {'id': 'quick_design',
                   'category_id': 'kds_design',
-                  'category_title': '5. KDS 14 31 10 부재설계 & 계산서',
+                  'category_title': '6. KDS / AISI 부재설계',
                   'title': '퀵 디자인 (최적 단면 자동 추천)',
                   'title_en': 'Quick Design Optimization Tool',
                   'summary': '설계 소요 하중(Pu, Mu) 또는 등분포하중 입력 시 표준 단면 DB를 자동 전수 탐색하여 안전율을 만족하는 최경량 '
@@ -1623,30 +2149,24 @@ TOPICS = {'intro': {'id': 'intro',
                                   '(View Original)</button>\n'
                                   '    <div class="inline-en-box" style="display: none;">\n'
                                   '      <div class="en-box-header"><span '
-                                  'class="en-badge">ORIGINAL REFERENCE (CFS 14.0)</span></div>\n'
+                                  'class="en-badge">ORIGINAL REFERENCE (CFS 14.0 Quick '
+                                  'Design)</span></div>\n'
                                   '      <div class="en-box-content">\n'
                                   '        <p>The Quick Design tool automatically checks all '
                                   'cross-sections in a specified library against the required '
                                   'compressive and flexural loads, selecting the lightest '
-                                  'cross-section that satisfies design strength requirements.</p>\n'
+                                  'cross-section that satisfies AISI S100 and KDS 14 31 10 design '
+                                  'strength requirements.</p>\n'
                                   '      </div>\n'
                                   '    </div>\n'
                                   '  </div>\n'
                                   '\n'
-                                  '  <h2>🏛️ 레거시 vs 🌐 모던 웹 퀵 디자인 인터페이스 대조</h2>\n'
-                                  '  <div class="img-comparison-grid">\n'
-                                  '    <div class="manual-img-card">\n'
-                                  '      <img src="/static/images/manual/quick-design.png" '
-                                  'alt="CFS 14.0 레거시 퀵 디자인 대화상자">\n'
-                                  '      <div class="img-caption">🏛️ CFS 14.0 레거시 퀵 디자인 대화상자 '
-                                  '(Quick Design Dialog)</div>\n'
-                                  '    </div>\n'
-                                  '    <div class="manual-img-card">\n'
-                                  '      <img src="/static/images/manual/web-quick-design.png" '
+                                  '  <h2>CFDesigner 모던 퀵 디자인 최적화 인터페이스</h2>\n'
+                                  '  <div class="manual-img-card">\n'
+                                  '    <img src="/static/images/manual/web-quick-design.png" '
                                   'alt="CFDesigner 모던 퀵 디자인 모달">\n'
-                                  '      <div class="img-caption">🌐 CFDesigner 모던 퀵 디자인 최적 단면 자동 '
-                                  '추천 모달</div>\n'
-                                  '    </div>\n'
+                                  '    <div class="img-caption">🌐 CFDesigner 모던 퀵 디자인 최적 단면 자동 추천 '
+                                  '모달</div>\n'
                                   '  </div>\n'
                                   '\n'
                                   '  <h2>퀵 디자인 최적화 알고리즘 워크플로우</h2>\n'
@@ -1681,45 +2201,54 @@ TOPICS = {'intro': {'id': 'intro',
                                   '</div>',
                   'content_en_html': '<div class="manual-article en-article">\n'
                                      '  <h1>Quick Design Optimization Tool</h1>\n'
-                                     '  <p class="lead">Quick Design automatically checks all '
-                                     'cross-sections in standard libraries against demand loads '
-                                     '($P_u, M_{ux}, M_{uy}$), selecting the lightest, most '
-                                     'economical profile satisfying KDS 14 31 10 and AISI S100 '
-                                     'design requirements.</p>\n'
+                                     '  <p class="lead">Quick Design automatically scans '
+                                     'standardized section libraries to identify the lightest, '
+                                     'most economical profile satisfying compressive and flexural '
+                                     'demand loads under AISI S100 and KDS specifications.</p>\n'
                                      '\n'
-                                     '  <h2>Legacy vs Modern Web Quick Design Comparison</h2>\n'
-                                     '  <div class="img-comparison-grid">\n'
-                                     '    <div class="manual-img-card">\n'
-                                     '      <img src="/static/images/manual/quick-design.png" '
+                                     '  <h2>CFS 14.0 Legacy Quick Design Dialog</h2>\n'
+                                     '  <div class="manual-img-card">\n'
+                                     '    <img src="/static/images/manual/quick-design.png" '
                                      'alt="CFS 14.0 Legacy Quick Design Dialog">\n'
-                                     '      <div class="img-caption">🏛️ CFS 14.0 Legacy Quick '
-                                     'Design Dialog</div>\n'
-                                     '    </div>\n'
-                                     '    <div class="manual-img-card">\n'
-                                     '      <img src="/static/images/manual/web-quick-design.png" '
-                                     'alt="CFDesigner Modern Quick Design Modal">\n'
-                                     '      <div class="img-caption">🌐 CFDesigner Modern Quick '
-                                     'Design Modal</div>\n'
-                                     '    </div>\n'
+                                     '    <div class="img-caption">🏛️ CFS 14.0 Legacy Quick Design '
+                                     'Dialog (Demand Loads & Library Selection)</div>\n'
                                      '  </div>\n'
                                      '\n'
                                      '  <h2>Optimization Workflow</h2>\n'
                                      '  <ol>\n'
-                                     '    <li><strong>Demand Inputs</strong>: Enter axial '
-                                     'compression ($P_u$), bending moments ($M_{ux}, M_{uy}$), '
-                                     'unbraced lengths ($L_x, L_y, L_t$), and effective length '
-                                     'factors ($K$).</li>\n'
-                                     '    <li><strong>Library Sweep</strong>: Rapidly evaluates '
-                                     'section properties, elastic buckling limits, and P-M '
-                                     'interaction ratios for all library candidates.</li>\n'
-                                     '    <li><strong>Automatic Recommendation</strong>: '
-                                     'Highlights the minimum-weight profile with $D/C \\le 1.0$ '
-                                     'and applies it to the active canvas in one click.</li>\n'
+                                     '    <li><strong>Design Demands Input</strong>:\n'
+                                     '      <ul>\n'
+                                     '        <li>Required axial compression ($P_u$), major-axis '
+                                     'bending moment ($M_{ux}$), minor-axis moment '
+                                     '($M_{uy}$).</li>\n'
+                                     '        <li>Unbraced lengths ($L_x, L_y, L_t$) and effective '
+                                     'length factors ($K_x, K_y, K_t$).</li>\n'
+                                     '      </ul>\n'
+                                     '    </li>\n'
+                                     '    <li><strong>Exhaustive Library Evaluation</strong>:\n'
+                                     '      <ul>\n'
+                                     '        <li>Rapidly evaluates gross properties ($A_g$), '
+                                     'elastic buckling loads ($P_{crl}, P_{crd}, P_{cre}$), and '
+                                     'nominal strengths ($P_n, M_n$).</li>\n'
+                                     '        <li>Checks P-M interaction ratio: $\\frac{P_u}{\\phi '
+                                     'P_n} + \\frac{M_{ux}}{\\phi M_{nx}} + \\frac{M_{uy}}{\\phi '
+                                     'M_{ny}} \\le 1.0$.</li>\n'
+                                     '      </ul>\n'
+                                     '    </li>\n'
+                                     '    <li><strong>Automated Sizing Recommendation</strong>:\n'
+                                     '      <ul>\n'
+                                     '        <li>Highlights the profile with minimum '
+                                     'cross-sectional area ($A_g$) satisfying $D/C \\le '
+                                     '1.0$.</li>\n'
+                                     '        <li>Clicking [Apply Section] instantly loads the '
+                                     'optimized geometry into the active workspace.</li>\n'
+                                     '      </ul>\n'
+                                     '    </li>\n'
                                      '  </ol>\n'
                                      '</div>'},
  'kds_interaction': {'id': 'kds_interaction',
                      'category_id': 'kds_design',
-                     'category_title': '5. KDS 14 31 10 부재설계 & 계산서',
+                     'category_title': '6. KDS / AISI 부재설계',
                      'title': 'P-M 조합응력 & D/C 검토',
                      'title_en': 'P-M Interaction & Biaxial Bending',
                      'summary': '축력-휨 상관식(P-M Interaction), 모멘트 증대계수(B1, B2) 및 수요/용량비(D/C Ratio) '
@@ -1756,16 +2285,28 @@ TOPICS = {'intro': {'id': 'intro',
                                      '\\frac{C_{my} M_{uy}}{\\phi_b M_{ny} \\left(1 - '
                                      '\\frac{P_u}{P_{E1y}}\\right)} \\le 1.0$$\n'
                                      '</div>\n',
-                     'content_en_html': '\n'
-                                        '<div class="manual-article en-article">\n'
-                                        '  <h1>P-M Interaction & Biaxial Bending</h1>\n'
+                     'content_en_html': '<div class="manual-article en-article">\n'
+                                        '  <h1>P-M Interaction & Combined Stress '
+                                        'Verification</h1>\n'
                                         '  <p class="lead">Evaluates combined axial compression '
-                                        'and biaxial bending interaction equations incorporating '
-                                        'second-order moment amplification.</p>\n'
-                                        '</div>\n'},
+                                        'and biaxial bending interaction equations including '
+                                        'second-order moment magnification effects per AISI S100 '
+                                        'Section H1.2.</p>\n'
+                                        '\n'
+                                        '  <h2>P-M Interaction Equations</h2>\n'
+                                        '  $$\\frac{P_u}{\\phi_c P_n} + \\frac{C_{mx} '
+                                        'M_{ux}}{\\phi_b M_{nx} \\left(1 - '
+                                        '\\frac{P_u}{P_{Ex}}\\right)} + \\frac{C_{my} '
+                                        'M_{uy}}{\\phi_b M_{ny} \\left(1 - '
+                                        '\\frac{P_u}{P_{Ey}}\\right)} \\le 1.0$$\n'
+                                        '\n'
+                                        '  <h2>Moment Magnification Factors ($B_1$)</h2>\n'
+                                        '  $$B_1 = \\frac{C_m}{1 - P_u / P_E} \\ge 1.0, \\quad P_E '
+                                        '= \\frac{\\pi^2 E I}{(K L)^2}$$\n'
+                                        '</div>'},
  'report_guide': {'id': 'report_guide',
                   'category_id': 'kds_design',
-                  'category_title': '5. KDS 14 31 10 부재설계 & 계산서',
+                  'category_title': '6. KDS / AISI 부재설계',
                   'title': 'A4 구조계산서 출력 & 인쇄',
                   'title_en': 'A4 Calculation Report Guide',
                   'summary': '단면 형상도, 제원표, FSM 좌굴곡선, 부재검토 결과를 A4 규격 구조계산서로 미리보기 및 PDF 인쇄하는 방법입니다.',
@@ -1809,16 +2350,33 @@ TOPICS = {'intro': {'id': 'intro',
                                   '안전(OK/NG) 판정</li>\n'
                                   '  </ul>\n'
                                   '</div>\n',
-                  'content_en_html': '\n'
-                                     '<div class="manual-article en-article">\n'
-                                     '  <h1>A4 Calculation Report Guide</h1>\n'
-                                     '  <p class="lead">Generates formal structural calculation '
-                                     'reports formatted for standard A4 printing and PDF '
-                                     'submission.</p>\n'
-                                     '</div>\n'},
+                  'content_en_html': '<div class="manual-article en-article">\n'
+                                     '  <h1>A4 Calculation Report & Export Guide</h1>\n'
+                                     '  <p class="lead">Generates formal A4 calculation sheets '
+                                     'formatted with cross-section diagrams, gross/effective '
+                                     'property tables, FSM signature curves, and KDS/AISI design '
+                                     'verification formulas ready for printing or PDF export.</p>\n'
+                                     '\n'
+                                     '  <h2>Report Content Sections</h2>\n'
+                                     '  <ol>\n'
+                                     '    <li><strong>Project Header</strong>: Project title, '
+                                     'engineer, date, design code, and unit system.</li>\n'
+                                     '    <li><strong>Cross-Section Drafting</strong>: 2D '
+                                     'dimensioned plot with centroid ($C_G$) and shear center '
+                                     '($S_C$).</li>\n'
+                                     '    <li><strong>Property Tables</strong>: Gross ($A_g, I_x, '
+                                     'I_y$) and Torsional ($J, C_w, r_0$) properties.</li>\n'
+                                     '    <li><strong>FSM Buckling Graph</strong>: Signature curve '
+                                     'with identified critical limits ($P_{crl}, P_{crd}, '
+                                     'P_{cre}$).</li>\n'
+                                     '    <li><strong>Design Capacity Summary</strong>: Nominal '
+                                     'strengths ($P_n, M_n, V_n$), safety factors, and governing '
+                                     'D/C ratios.</li>\n'
+                                     '  </ol>\n'
+                                     '</div>'},
  'analysis_wizard': {'id': 'analysis_wizard',
                      'category_id': 'frame_analysis',
-                     'category_title': '6. 1D 뼈대 구조해석',
+                     'category_title': '7. 1D 구조해석',
                      'title': '1D 구조해석 마법사 & 하중입력',
                      'title_en': '1D Frame Analysis Wizard & Loadings',
                      'summary': '단순보, 2~3경간 연속보, 캔틸레버 모델 마법사 생성 및 등분포·집중 하중/모멘트 입력 인터페이스 가이드입니다.',
@@ -1908,32 +2466,33 @@ TOPICS = {'intro': {'id': 'intro',
                      'content_en_html': '<div class="manual-article en-article">\n'
                                         '  <h1>1D Frame Analysis Wizard & Loadings Guide</h1>\n'
                                         '  <p class="lead">The Analysis Wizard streamlines 1D beam '
-                                        'and frame structural analysis across 4 systematic stages: '
-                                        '<strong>Span Geometry $\\rightarrow$ Supports '
-                                        '$\\rightarrow$ Loadings $\\rightarrow$ Load '
+                                        'and frame structural modeling across 4 sequential stages: '
+                                        '<strong>Span Configuration $\\rightarrow$ Members & '
+                                        'Supports $\\rightarrow$ Applied Loads $\\rightarrow$ Load '
                                         'Combinations</strong>.</p>\n'
                                         '\n'
-                                        '  <h2>4-Page Wizard Breakdown</h2>\n'
+                                        '  <h2>4-Page Wizard Workflow</h2>\n'
                                         '  <ul>\n'
                                         '    <li><strong>Page 1 (Configuration)</strong>: Select '
-                                        'Simple Span, Continuous Span, Cantilever, or Custom '
-                                        'model.</li>\n'
+                                        'Simple Span Beam, 2-3 Span Continuous Beam, Cantilever '
+                                        'Beam, or Custom model.</li>\n'
                                         '    <li><strong>Page 2 (Members & Supports)</strong>: '
-                                        'Define span lengths (e.g., <code>3000, 3000</code>), '
-                                        'support constraints (Pinned, Roller, Fixed), and assigned '
-                                        'cross-section.</li>\n'
+                                        'Define span lengths in mm (e.g., <code>3000, '
+                                        '3000</code>), support boundary constraints (Pinned, '
+                                        'Roller, Fixed), and assigned cross-section.</li>\n'
                                         '    <li><strong>Page 3 (Applied Loads)</strong>: Input '
-                                        'dead/live uniform loads ($w$), point loads ($P$), and '
-                                        'concentrated moments ($M$). Toggle beam self-weight '
-                                        'inclusion.</li>\n'
+                                        'uniform dead/live loads ($w$ in $\\text{kN/m}$), '
+                                        'concentrated point loads ($P$ in $\\text{kN}$), and '
+                                        'moments ($M$ in $\\text{kN}\\cdot\\text{m}$). Toggle beam '
+                                        'self-weight inclusion.</li>\n'
                                         '    <li><strong>Page 4 (Load Combinations)</strong>: '
                                         'Choose LRFD ($1.2D + 1.6L$) or ASD ($D + L$) combinations '
-                                        'and trigger 1D FEM matrix solver.</li>\n'
+                                        'and trigger 1D FEM matrix stiffness solver.</li>\n'
                                         '  </ul>\n'
                                         '</div>'},
  'diagrams_viewer': {'id': 'diagrams_viewer',
                      'category_id': 'frame_analysis',
-                     'category_title': '6. 1D 뼈대 구조해석',
+                     'category_title': '7. 1D 구조해석',
                      'title': 'SFD / BMD / 처짐 다이어그램',
                      'title_en': 'Shear, Moment & Deflection Diagrams',
                      'summary': '전단력도(SFD), 휨모멘트도(BMD), 처짐(Deflection) 다이어그램 뷰어 및 부재설계(Member '
@@ -1977,17 +2536,30 @@ TOPICS = {'intro': {'id': 'intro',
                                      '검토합니다.</li>\n'
                                      '  </ul>\n'
                                      '</div>\n',
-                     'content_en_html': '\n'
-                                        '<div class="manual-article en-article">\n'
-                                        '  <h1>Shear, Moment & Deflection Diagrams</h1>\n'
-                                        '  <p class="lead">Visualize continuous Shear Force '
-                                        'Diagrams (SFD), Bending Moment Diagrams (BMD), and '
-                                        'Deflection profiles with direct parameter transfer to KDS '
-                                        'Member Check.</p>\n'
-                                        '</div>\n'},
+                     'content_en_html': '<div class="manual-article en-article">\n'
+                                        '  <h1>Shear, Moment & Deflection Diagrams (SFD / '
+                                        'BMD)</h1>\n'
+                                        '  <p class="lead">Visualizes internal force distributions '
+                                        'across beam spans, plotting interactive Shear Force '
+                                        '(SFD), Bending Moment (BMD), and Deflection curves with '
+                                        'direct one-click transfer to member design.</p>\n'
+                                        '\n'
+                                        '  <h2>Internal Force Diagrams</h2>\n'
+                                        '  <ul>\n'
+                                        '    <li><strong>Shear Force Diagram (SFD)</strong>: '
+                                        'Identifies maximum support shears ($V_{max}$) and '
+                                        'inflection points.</li>\n'
+                                        '    <li><strong>Bending Moment Diagram (BMD)</strong>: '
+                                        'Computes maximum positive span moments and negative '
+                                        'support moments ($M_{max}$).</li>\n'
+                                        '    <li><strong>Deflection Curve</strong>: Evaluates '
+                                        'maximum deflection ($\\delta_{max}$) against allowable '
+                                        'limits (e.g., $L/240$, $L/360$).</li>\n'
+                                        '  </ul>\n'
+                                        '</div>'},
  'glossary': {'id': 'glossary',
               'category_id': 'appendix',
-              'category_title': '7. 부록: 전문 용어사전 & 기호집',
+              'category_title': '8. 부록: 용어사전 & 기호집',
               'title': '냉간성형강 전문 용어사전 (Glossary)',
               'title_en': 'Engineering Glossary (AISI S100 & KDS)',
               'summary': 'KDS 14 31 10 및 AISI S100-16 기준에 정의된 냉간성형강 핵심 공학 용어의 한·영 표준 정의집입니다.',
@@ -2113,7 +2685,7 @@ TOPICS = {'intro': {'id': 'intro',
                                  '</div>'},
  'symbols': {'id': 'symbols',
              'category_id': 'appendix',
-             'category_title': '7. 부록: 전문 용어사전 & 기호집',
+             'category_title': '8. 부록: 용어사전 & 기호집',
              'title': '공학 기호 및 약어 정의집 (Symbols)',
              'title_en': 'Symbols & Abbreviations',
              'summary': 'CFDesigner 및 KDS/AISI 규준에 사용되는 설계 기호, 라틴 문자, 그리스 문자 및 단위계 총람입니다.',

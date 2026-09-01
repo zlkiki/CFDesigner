@@ -22,9 +22,10 @@ def test_manual_categories_api():
     res = client.get("/api/manual/categories")
     assert res.status_code == 200
     data = res.json()
-    assert len(data) == 7  # 7 categories (including 7. appendix)
+    assert len(data) == 8  # 8 categories matching CFS.chm tree
     cat_ids = [c["id"] for c in data]
     assert "getting_started" in cat_ids
+    assert "section_modeling" in cat_ids
     assert "section_library" in cat_ids
     assert "section_properties" in cat_ids
     assert "fsm_buckling" in cat_ids
@@ -131,7 +132,7 @@ def test_manual_multilingual_search_api():
 
 
 def test_manual_phase5_1_images_and_comparison_ui():
-    """AC 5-1-1 ~ AC 5-1-4: Verify all 16 manual images serve 200 OK and comparison cards exist."""
+    """AC 6-1-1 ~ AC 6-1-3: Verify 16 images serve 200 OK and independent image placement (KO: Web, EN: Legacy)."""
     # 1. Check Lightbox in manual.html
     res_html = client.get("/manual")
     assert res_html.status_code == 200
@@ -151,46 +152,60 @@ def test_manual_phase5_1_images_and_comparison_ui():
         assert res_img.status_code == 200, f"Failed to serve image: {img_name}"
         assert len(res_img.content) > 100
 
-    # 3. Check ui_layout topic has comparison cards
+    # 3. Check ui_layout topic has independent image placement (KO: Web, EN: Legacy)
     topic_ui = TOPICS["ui_layout"]
-    assert "section.png" in topic_ui["content_html"]
     assert "web-section-ui.png" in topic_ui["content_html"]
-    assert "analysis.png" in topic_ui["content_html"]
     assert "web-analysis-ui.png" in topic_ui["content_html"]
+    assert "section.png" in topic_ui["content_en_html"]
+    assert "analysis.png" in topic_ui["content_en_html"]
     assert "manual-img-card" in topic_ui["content_html"]
-    assert "img-comparison-grid" in topic_ui["content_html"]
+    assert "manual-img-card" in topic_ui["content_en_html"]
 
-    # 4. Check quick_design topic has comparison cards
+    # 4. Check quick_design topic has independent image placement
     topic_qd = TOPICS["quick_design"]
-    assert "quick-design.png" in topic_qd["content_html"]
     assert "web-quick-design.png" in topic_qd["content_html"]
+    assert "quick-design.png" in topic_qd["content_en_html"]
 
 
-def test_manual_phase5_2_wizard_and_tutorials():
-    """AC 5-2-1 ~ AC 5-2-4: Verify wizard, analysis_wizard, and dxf_import have detailed tutorials."""
-    # 1. Wizard topic
+
+def test_manual_phase6_2_modeling_and_properties_tables_and_math():
+    """AC 6-2-1 ~ AC 6-2-3: Verify categories 2-4 English content contains tables and math equations."""
+    # 1. Wizard English tables
     w = TOPICS["wizard"]
-    assert "C150" in w["content_html"]
-    assert "Z200" in w["content_html"]
-    assert "립 보강재" in w["content_html"]
-    assert "코너 내부 반경" in w["content_html"]
+    assert "<table" in w["content_en_html"]
     assert "Flange Width" in w["content_en_html"]
+    assert "Bend Radius" in w["content_en_html"]
 
-    # 2. Analysis Wizard topic
-    aw = TOPICS["analysis_wizard"]
-    assert "단순보" in aw["content_html"]
-    assert "연속보" in aw["content_html"]
-    assert "캔틸레버" in aw["content_html"]
-    assert "LRFD" in aw["content_html"]
-    assert "ASD" in aw["content_html"]
-    assert "Members & Supports" in aw["content_en_html"]
-
-    # 3. DXF Import topic
+    # 2. DXF Import English table
     dxf = TOPICS["dxf_import"]
-    assert "LWPOLYLINE" in dxf["content_html"] or "Polyline" in dxf["content_html"]
-    assert "중심선" in dxf["content_html"]
+    assert "<table" in dxf["content_en_html"]
     assert "Centerline" in dxf["content_en_html"]
-    assert "Width" in dxf["content_en_html"]
+    assert "Polyline Width" in dxf["content_en_html"]
+
+    # 3. Cold Work English formulas
+    cw = TOPICS["cold_work"]
+    assert "$$" in cw["content_en_html"]
+    assert "F_{ya}" in cw["content_en_html"]
+    assert "F_{yc}" in cw["content_en_html"]
+    assert "<table" in cw["content_en_html"]
+
+    # 4. Gross properties & Torsion properties English formulas & tables
+    gp = TOPICS["gross_props"]
+    assert "<table" in gp["content_en_html"]
+    assert "$$" in gp["content_en_html"]
+
+    tp = TOPICS["torsion_props"]
+    assert "<table" in tp["content_en_html"]
+    assert "Saint-Venant Torsion" in tp["content_en_html"]
+    assert "Warping Constant" in tp["content_en_html"]
+    assert "torsion-section1.png" in tp["content_en_html"]
+
+    # 5. Effective properties Winter equation
+    ep = TOPICS["effective_props"]
+    assert "$$" in ep["content_en_html"]
+    assert "\\rho" in ep["content_en_html"]
+    assert "b_{eff}" in ep["content_en_html"]
+
 
 
 def test_manual_phase5_3_buckling_torsion_glossary_symbols():
@@ -237,6 +252,53 @@ def test_manual_phase5_3_buckling_torsion_glossary_symbols():
     assert res_s_search.status_code == 200
     assert len(res_s_search.json()) > 0
     assert any(r["id"] == "symbols" for r in res_s_search.json())
+
+
+def test_manual_phase6_3_fsm_design_and_frame_english_symmetry():
+    """AC 6-3-1 ~ AC 6-3-3: Verify FSM, KDS/AISI design, and Frame analysis English formulas & tables."""
+    # 1. FSM Theory English equations & table
+    ft = TOPICS["fsm_theory"]
+    assert "$$" in ft["content_en_html"]
+    assert "[K_e]" in ft["content_en_html"]
+    assert "[K_g]" in ft["content_en_html"]
+    assert "<table" in ft["content_en_html"]
+
+    # 2. Buckling modes English table and diagrams
+    bm = TOPICS["buckling_modes"]
+    assert "<table" in bm["content_en_html"]
+    assert "buckle-profile.png" in bm["content_en_html"]
+    assert "Local Buckling" in bm["content_en_html"]
+
+    # 3. Compression DSM English AISI S100 formulas
+    comp = TOPICS["kds_dsm_comp"]
+    assert "$$" in comp["content_en_html"]
+    assert "P_{ne}" in comp["content_en_html"]
+    assert "P_{nl}" in comp["content_en_html"]
+    assert "P_{nd}" in comp["content_en_html"]
+    assert "\\phi_c" in comp["content_en_html"]
+    assert "\\Omega_c" in comp["content_en_html"]
+
+    # 4. Flexure DSM English AISI S100 formulas
+    flex = TOPICS["kds_dsm_flex"]
+    assert "$$" in flex["content_en_html"]
+    assert "M_{ne}" in flex["content_en_html"]
+    assert "M_{nl}" in flex["content_en_html"]
+    assert "M_{nd}" in flex["content_en_html"]
+
+    # 5. Shear & Web Crippling English table & formulas
+    crip = TOPICS["kds_shear_crip"]
+    assert "$$" in crip["content_en_html"]
+    assert "<table" in crip["content_en_html"]
+    assert "EOF" in crip["content_en_html"]
+    assert "ITF" in crip["content_en_html"]
+
+    # 6. 1D Frame Analysis Wizard English 4-stage workflow
+    aw = TOPICS["analysis_wizard"]
+    assert "Page 1" in aw["content_en_html"]
+    assert "Page 2" in aw["content_en_html"]
+    assert "Page 3" in aw["content_en_html"]
+    assert "Page 4" in aw["content_en_html"]
+
 
 
 
