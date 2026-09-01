@@ -31,6 +31,15 @@
 
     <div class="header-actions">
       <button class="btn btn-outline" id="btnThemeToggle" title="테마 전환">🌓 테마</button>
+      <button class="btn btn-primary" id="btnOpenQuickDesign" title="목표 하중 만족 최적 경량 단면 자동 탐색">
+        ⚡ 퀵 디자인
+      </button>
+      <button class="btn btn-outline" id="btnOpenLibrary" title="표준 단면 라이브러리 브라우저 (AISI, SSMA, LGSI, SFIA, HUD)">
+        📚 단면 라이브러리
+      </button>
+      <button class="btn btn-outline" id="btnOpenMaterial" title="재료 물성치 DB 및 가공경화 계산기">
+        🧪 재료 DB / 가공경화
+      </button>
       <button class="btn btn-outline" id="btnOpenManual" title="온라인 도움말 및 공학 매뉴얼 열기">
         ❓ 온라인 매뉴얼
       </button>
@@ -171,6 +180,60 @@
               <input type="number" class="form-input" id="loadVu" value="15.0" step="1">
             </div>
           </div>
+
+          <!-- Phase 3: Web Crippling Detailed Form -->
+          <div class="card" style="border-left: 3px solid var(--accent-primary);">
+            <div class="card-title">
+              <span>🛡️ 웨브 크리플링 (Web Crippling)</span>
+              <span style="font-size: 11px; color: var(--accent-primary);">KDS 4.4</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">재하 조건 (Loading Condition)</label>
+              <select class="form-select" id="cripConditionSelect">
+                <option value="IOF" selected>Interior-One-Flange (IOF, 내부1플랜지)</option>
+                <option value="EOF">End-One-Flange (EOF, 단부1플랜지)</option>
+                <option value="ITF">Interior-Two-Flange (ITF, 내부2플랜지)</option>
+                <option value="ETF">End-Two-Flange (ETF, 단부2플랜지)</option>
+              </select>
+            </div>
+
+            <div class="grid-input-2">
+              <div class="form-group">
+                <label class="form-label">지지길이 N (mm)</label>
+                <input type="number" class="form-input" id="cripBearingLength" value="50.0" min="5" step="5">
+              </div>
+              <div class="form-group">
+                <label class="form-label">소요반력 Ru (kN)</label>
+                <input type="number" class="form-input" id="cripRuInput" value="20.0" step="1">
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; margin-top: 8px; font-size: 11.5px;">
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="cripFastenedCheck" checked> 플랜지 체결 (Fastened)
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="cripStiffenedCheck" checked> 립 보강 (Stiffened)
+              </label>
+            </div>
+
+            <div id="cripResultBox" style="margin-top: 12px; background: var(--bg-tertiary); padding: 10px; border-radius: var(--radius-sm); font-size: 11.5px; line-height: 1.6;">
+              <div style="display: flex; justify-content: space-between;">
+                <span>공칭지압강도 $P_{nc}$:</span>
+                <strong id="valCripPnc" style="color: var(--text-primary);">- kN</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>설계지압강도 $\phi P_{nc}$ ($\phi=0.90$):</span>
+                <strong id="valCripPhiPnc" style="color: var(--accent-primary);">- kN</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 4px; border-top: 1px dashed var(--border-color); padding-top: 4px;">
+                <span>D/C Ratio ($R_u / \phi P_{nc}$):</span>
+                <strong id="valCripDcRatio" style="color: var(--accent-success);">-</strong>
+              </div>
+              <div id="valCripFormula" style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; word-break: break-all;"></div>
+            </div>
+          </div>
         </div>
       </div>
     </aside>
@@ -200,9 +263,21 @@
           <canvas id="canvas2d"></canvas>
           <div id="viewer3dContainer" style="width: 100%; height: 100%; display: none;"></div>
 
-          <!-- 2D Overlay Tools -->
-          <div class="viewer-overlay-tools">
-            <button class="overlay-btn" id="btnFitView" title="화면 맞춤">⛶</button>
+          <!-- 2D Overlay Tools & Transforms -->
+          <div class="viewer-overlay-tools" id="tools2dOverlay">
+            <button class="overlay-btn" id="btnFitView" title="화면 맞춤 (Fit View)">⛶</button>
+            <div class="overlay-divider"></div>
+            <button class="overlay-btn" id="btnToggleEffective" title="Winter 식 기반 유효단면(Effective Section) 2D 오버레이 렌더링 토글">👁️ 유효단면</button>
+            <div class="overlay-divider"></div>
+            <button class="overlay-btn" id="btnOpenElementEditor" title="요소 편집 (Element Spreadsheet)">📋 요소편집</button>
+            <button class="overlay-btn" id="btnRotateCw" title="90° 시계방향 회전">↻ 90°</button>
+            <button class="overlay-btn" id="btnRotateCcw" title="90° 반시계방향 회전">↺ 90°</button>
+            <button class="overlay-btn" id="btnOpenRotateModal" title="임의 각도 회전">🔀 회전</button>
+            <button class="overlay-btn" id="btnMirrorH" title="상하 대칭 (Mirror X/H)">🪞 상하</button>
+            <button class="overlay-btn" id="btnMirrorV" title="좌우 대칭 (Mirror Y/V)">🪞 좌우</button>
+            <button class="overlay-btn" id="btnAlignCg" title="도심 원점 정렬 (Align CG)">🎯 도심정렬</button>
+            <div class="overlay-divider"></div>
+            <button class="overlay-btn" id="btnOpenInsertRibsModal" title="중간 보강 리브 추가">⚡ 리브추가</button>
           </div>
         </div>
       </div>
@@ -210,7 +285,11 @@
       <!-- Bottom FSM Chart Area -->
       <div class="chart-workspace">
         <div class="chart-header">
-          <span>📈 FSM 탄성 좌굴곡선 (Signature Curve)</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span>📈 FSM 탄성 좌굴곡선 (Signature Curve)</span>
+            <button class="btn btn-outline" id="btnOpenFsmParams" style="padding: 2px 8px; font-size: 11px;" title="반파장 스윕 범위 및 스텝수 커스텀 설정">⚙️ 세부설정</button>
+            <button class="btn btn-outline" id="btnOpenFsmData" style="padding: 2px 8px; font-size: 11px;" title="반파장-좌굴계수 수치 테이블 및 CSV 다운로드">📊 수치데이터</button>
+          </div>
           <div style="display: flex; gap: 14px; font-size: 11.5px; font-weight: normal; color: var(--text-secondary);">
             <span>국부(Pcrl): <strong id="valPcrl" style="color: #38bdf8;">-</strong></span>
             <span>왜곡(Pcrd): <strong id="valPcrd" style="color: #818cf8;">-</strong></span>
@@ -323,6 +402,455 @@
       </div>
       <div class="modal-body">
         <iframe id="reportIframe"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Phase 1: Element Table Editor Modal ================= -->
+  <div class="modal-backdrop" id="elementEditorModal">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <strong style="font-size: 15px;">📋 단면 요소 테이블 스프레드시트 편집기 (Element Table Editor)</strong>
+        <button class="btn btn-outline" id="btnCloseElementEditor" style="padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <div class="modal-body" style="padding: 16px; max-height: 75vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-size: 12px; color: var(--text-secondary);">
+            각 요소의 좌표$(X, Y)$, 길이($L$), 각도($\theta$), 두께($t$), 반경($R$)을 직접 편집합니다.
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline" id="btnAddElementRow" style="padding: 5px 12px; font-size: 12px;">+ 행 추가</button>
+            <button class="btn btn-primary" id="btnApplyElements" style="padding: 5px 16px; font-size: 12px;">⚡ 적용 및 재해석</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="editor-table" id="elementEditorTable">
+            <thead>
+              <tr>
+                <th style="width: 45px;">ID</th>
+                <th>X0 (mm)</th>
+                <th>Y0 (mm)</th>
+                <th>X1 (mm)</th>
+                <th>Y1 (mm)</th>
+                <th>길이 L (mm)</th>
+                <th>각도 θ (°)</th>
+                <th>두께 t (mm)</th>
+                <th>반경 R (mm)</th>
+                <th style="width: 50px;">삭제</th>
+              </tr>
+            </thead>
+            <tbody id="elementTableBody">
+              <!-- Dynamically rendered rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Phase 1: Rotate Modal ================= -->
+  <div class="modal-backdrop" id="rotateModal">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <strong style="font-size: 15px;">🔀 단면 회전 (Rotate Section)</strong>
+        <button class="btn btn-outline" id="btnCloseRotateModal" style="padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        <div class="form-group">
+          <label class="form-label">회전 각도 (°)</label>
+          <input type="number" class="form-input" id="rotateAngleInput" value="45" step="5">
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">* 양수(+): 반시계방향(CCW) / 음수(-): 시계방향(CW)</div>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer;">
+            <input type="checkbox" id="rotateCenterCg" checked> 도심($C_G$) 기준 회전
+          </label>
+        </div>
+        <button class="btn btn-primary" id="btnSubmitRotate" style="width: 100%; margin-top: 16px;">
+          회전 적용
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Phase 1: Insert Ribs Modal ================= -->
+  <div class="modal-backdrop" id="insertRibsModal">
+    <div class="modal-dialog modal-dialog-md">
+      <div class="modal-header">
+        <strong style="font-size: 15px;">⚡ 중간 보강 리브 추가 마법사 (Insert Intermediate Ribs)</strong>
+        <button class="btn btn-outline" id="btnCloseRibsModal" style="padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        <div class="form-group">
+          <label class="form-label">대상 요소 선택 (Target Element)</label>
+          <select class="form-select" id="ribTargetElementSelect">
+            <!-- Dynamically populated options -->
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">리브 형태 (Rib Type)</label>
+          <select class="form-select" id="ribTypeSelect">
+            <option value="V" selected>V-Shape (삼각 리브)</option>
+            <option value="TRAPEZOID">Trapezoid (사다리꼴 리브)</option>
+          </select>
+        </div>
+
+        <div class="grid-input-2" style="margin-top: 12px;">
+          <div class="form-group">
+            <label class="form-label">리브 너비 $w_r$ (mm)</label>
+            <input type="number" class="form-input" id="ribWidthInput" value="25.0" step="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">리브 깊이 $d_r$ (mm)</label>
+            <input type="number" class="form-input" id="ribDepthInput" value="12.0" step="1">
+          </div>
+        </div>
+
+        <div class="grid-input-2" style="margin-top: 12px;">
+          <div class="form-group">
+            <label class="form-label">리브 개수 (개)</label>
+            <input type="number" class="form-input" id="ribCountInput" value="1" min="1" max="5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">모서리 반경 $R$ (mm)</label>
+            <input type="number" class="form-input" id="ribRadiusInput" value="0.0" step="0.5">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="btnSubmitInsertRibs" style="width: 100%; margin-top: 18px;">
+          ⚡ 리브 생성 및 재해석 적용
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Phase 2: Section Library Browser Modal ================= -->
+  <div class="modal-backdrop" id="sectionLibraryModal">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <strong style="font-size: 15px;">📚 표준 단면 라이브러리 브라우저 (Standard Section Library)</strong>
+        <button class="btn btn-outline" id="btnCloseLibraryModal" style="padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <div class="modal-body" style="padding: 16px; display: flex; gap: 16px; height: calc(80vh - 60px);">
+        <!-- Left: Library Tabs, Search & Section List -->
+        <div style="flex: 1.3; display: flex; flex-direction: column; gap: 10px; min-width: 320px;">
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;" id="libTabGroup">
+            <button class="btn btn-outline btn-lib-tab active" data-lib="SSMA">SSMA (경량형강)</button>
+            <button class="btn btn-outline btn-lib-tab" data-lib="SFIA">SFIA</button>
+            <button class="btn btn-outline btn-lib-tab" data-lib="AISI">AISI Standard</button>
+            <button class="btn btn-outline btn-lib-tab" data-lib="LGSI">LGSI</button>
+            <button class="btn btn-outline btn-lib-tab" data-lib="HUD">HUD</button>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <input type="text" class="form-input" id="libSearchInput" placeholder="단면 규격 검색 (예: 362S, 600S, Track...)" style="font-size: 12px;">
+            <button class="btn btn-outline" id="btnSearchLib" style="padding: 4px 12px;">검색</button>
+          </div>
+
+          <div style="flex: 1; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-secondary);">
+            <div id="libSectionListContainer" style="padding: 4px;">
+              <!-- Dynamically populated section list grouped by type -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: 2D Mini Preview & Properties Summary -->
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
+          <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);" id="libSelectedName">
+            단면을 선택하세요
+          </div>
+          
+          <div style="flex: 1; min-height: 200px; background: var(--bg-primary); border-radius: var(--radius-sm); position: relative; overflow: hidden;">
+            <canvas id="libPreviewCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+          </div>
+
+          <div id="libPropsSummary" style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.6; background: var(--bg-tertiary); padding: 10px; border-radius: var(--radius-sm);">
+            <div>단면적 $A_g$: <strong id="libPropAg" style="color: var(--text-primary);">-</strong> mm²</div>
+            <div>단면이차모멘트 $I_x$: <strong id="libPropIx" style="color: var(--text-primary);">-</strong> mm⁴</div>
+            <div>단면이차모멘트 $I_y$: <strong id="libPropIy" style="color: var(--text-primary);">-</strong> mm⁴</div>
+            <div>두께 $t$: <strong id="libPropT" style="color: var(--text-primary);">-</strong> mm</div>
+          </div>
+
+          <button class="btn btn-primary" id="btnLoadLibSection" style="width: 100%; padding: 8px;" disabled>
+            ⚡ 선택한 단면 작업공간에 불러오기 (Load Section)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Phase 2: Material Properties & Cold-Work Modal ================= -->
+  <div class="modal-backdrop" id="materialModal">
+    <div class="modal-dialog modal-dialog-md">
+      <div class="modal-header">
+        <strong style="font-size: 15px;">🧪 재료 물성치 DB 및 코너 가공경화 계산기 (Material DB)</strong>
+        <button class="btn btn-outline" id="btnCloseMaterialModal" style="padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        <div class="form-group">
+          <label class="form-label">표준 강종 프리셋 선택 (Preset Grade)</label>
+          <select class="form-select" id="matPresetSelect">
+            <!-- Dynamically populated from /api/library/materials -->
+          </select>
+        </div>
+
+        <div class="grid-input-2" style="margin-top: 12px;">
+          <div class="form-group">
+            <label class="form-label">모재 항복강도 $F_y$ (MPa)</label>
+            <input type="number" class="form-input" id="matFyInput" value="345.0" step="5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">모재 인장강도 $F_u$ (MPa)</label>
+            <input type="number" class="form-input" id="matFuInput" value="450.0" step="5">
+          </div>
+        </div>
+
+        <div class="grid-input-2" style="margin-top: 12px;">
+          <div class="form-group">
+            <label class="form-label">탄성계수 $E$ (MPa)</label>
+            <input type="number" class="form-input" id="matEInput" value="205000" step="1000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">포아송비 $\nu$</label>
+            <input type="number" class="form-input" id="matNuInput" value="0.30" step="0.01">
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px; border: 1px solid var(--border-color); padding: 12px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; color: var(--accent-primary);">
+            <input type="checkbox" id="matColdWorkCheck" checked> 코너 소성가공 가공경화 강도 증가 효과 반영 ($F_{ya}$)
+          </label>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+            * AISI S100 Section A3.3.2 / KDS 14 31 10 3.3.2 적용
+          </div>
+
+          <div id="coldWorkDetails" style="margin-top: 10px; font-size: 11.5px; line-height: 1.6; background: var(--bg-tertiary); padding: 8px; border-radius: var(--radius-sm);">
+            <div>코너부 항복강도 $F_{yc}$: <strong id="valFyc" style="color: var(--accent-success);">-</strong> MPa</div>
+            <div>유효 설계항복강도 $F_{ya}$: <strong id="valFya" style="color: var(--accent-primary);">-</strong> MPa (<span id="valPercentInc" style="color: var(--accent-success);">+0%</span>)</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="btnApplyMaterial" style="width: 100%; margin-top: 18px;">
+          ⚡ 재료 물성치 부재설계에 적용
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Phase 3: Quick Design Modal ================= -->
+  <div class="modal-backdrop" id="quickDesignModal">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <strong style="font-size: 15px;">⚡ 퀵 디자인 (Quick Design) 최적 단면 자동 탐색</strong>
+        <button class="btn btn-outline" id="btnCloseQuickDesignModal" style="padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <div class="modal-body" style="padding: 16px; display: flex; flex-direction: column; gap: 14px; max-height: 80vh; overflow-y: auto;">
+        <!-- Input Parameters Card -->
+        <div class="card" style="background: var(--bg-tertiary); padding: 12px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--accent-primary); margin-bottom: 8px;">
+            1. 설계 소요 하중 및 구속 조건 입력
+          </div>
+          <div class="grid-input-3" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+            <div class="form-group">
+              <label class="form-label">소요 축력 Pu (kN)</label>
+              <input type="number" class="form-input" id="qdPu" value="50.0" step="5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">휨모멘트 Mux (kN·m)</label>
+              <input type="number" class="form-input" id="qdMux" value="5.0" step="0.5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">소요 전단력 Vu (kN)</label>
+              <input type="number" class="form-input" id="qdVu" value="10.0" step="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">비지지길이 L (mm)</label>
+              <input type="number" class="form-input" id="qdLength" value="3000" step="100">
+            </div>
+          </div>
+
+          <div class="grid-input-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px;">
+            <div class="form-group">
+              <label class="form-label">최대 높이 Hmax (mm)</label>
+              <input type="number" class="form-input" id="qdMaxH" placeholder="제한 없음" step="10">
+            </div>
+            <div class="form-group">
+              <label class="form-label">최대 단위중량 (kg/m)</label>
+              <input type="number" class="form-input" id="qdMaxW" placeholder="제한 없음" step="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">대상 라이브러리</label>
+              <select class="form-select" id="qdLibrarySelect">
+                <option value="" selected>전체 (SSMA, SFIA, AISI...)</option>
+                <option value="SSMA">SSMA (경량형강)</option>
+                <option value="SFIA">SFIA</option>
+                <option value="AISI">AISI Standard</option>
+                <option value="LGSI">LGSI</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="btnExecuteQuickDesign" style="width: 100%; margin-top: 12px; padding: 8px; font-size: 13px;">
+            ⚡ 최적 경량 단면 자동 탐색 실행 (Find Lightest Sections)
+          </button>
+        </div>
+
+        <!-- Result Candidates Grid -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-size: 12.5px; font-weight: 600;">
+              2. 추천 최적 단면 리스트 (<span id="qdResultCount" style="color: var(--accent-primary);">0</span>개 단면 통과)
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted);">* 단위중량 오름차순 정렬 (D/C &le; 1.0)</div>
+          </div>
+
+          <div class="table-responsive" style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+            <table class="editor-table" id="quickDesignTable">
+              <thead>
+                <tr>
+                  <th style="width: 45px;">순위</th>
+                  <th>단면명</th>
+                  <th>라이브러리</th>
+                  <th>단위중량</th>
+                  <th>규격 (H×B×t)</th>
+                  <th>D/C 압축</th>
+                  <th>D/C 휨</th>
+                  <th>D/C 조합</th>
+                  <th>최대 D/C</th>
+                  <th>절감률</th>
+                  <th style="width: 100px;">적용</th>
+                </tr>
+              </thead>
+              <tbody id="quickDesignTableBody">
+                <tr><td colspan="11" style="text-align: center; color: var(--text-muted); padding: 20px;">하중 입력 후 탐색 버튼을 클릭하세요.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Phase 3: FSM Parameters Modal ================= -->
+  <div class="modal-backdrop" id="fsmParamsModal">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <strong style="font-size: 15px;">⚙️ FSM 좌굴해석 세부 설정</strong>
+        <button class="btn btn-outline" id="btnCloseFsmParams" style="padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        <div class="grid-input-2">
+          <div class="form-group">
+            <label class="form-label">최소 반파장 Lmin (mm)</label>
+            <input type="number" class="form-input" id="fsmLmin" value="10" min="1" step="5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">최대 반파장 Lmax (mm)</label>
+            <input type="number" class="form-input" id="fsmLmax" value="10000" min="100" step="500">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label class="form-label">스윕 스텝 수 (Points, 로그 스케일)</label>
+          <input type="number" class="form-input" id="fsmSteps" value="60" min="15" max="150" step="5">
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label class="form-label">응력 분포 상태 (Stress Type)</label>
+          <select class="form-select" id="fsmStressType">
+            <option value="compression" selected>순수 축압축 (Pure Compression)</option>
+            <option value="bending_x">강축 휨 (Major Bending X-X)</option>
+            <option value="bending_y">약축 휨 (Minor Bending Y-Y)</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" id="btnApplyFsmParams" style="width: 100%; margin-top: 16px;">
+          ⚡ 커스텀 파라미터로 재해석 실행
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Phase 3: FSM Numerical Data Table & CSV Modal ================= -->
+  <div class="modal-backdrop" id="fsmDataModal">
+    <div class="modal-dialog modal-dialog-md">
+      <div class="modal-header">
+        <strong style="font-size: 15px;">📊 FSM 좌굴해석 수치 데이터 그리드</strong>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline" id="btnExportFsmCsv" style="padding: 4px 10px; font-size: 12px;">📥 CSV 다운로드</button>
+          <button class="btn btn-outline" id="btnCloseFsmData" style="padding: 4px 10px;">✕ 닫기</button>
+        </div>
+      </div>
+      <div class="modal-body" style="padding: 16px; max-height: 70vh; overflow-y: auto;">
+        <div class="table-responsive">
+          <table class="editor-table" id="fsmDataTable">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>반파장 L (mm)</th>
+                <th>좌굴하중계수 β (Pcr / Py)</th>
+                <th>탄성좌굴하중 Pcr (kN)</th>
+                <th>탄성좌굴모멘트 Mcr (kN·m)</th>
+              </tr>
+            </thead>
+            <tbody id="fsmDataTableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Phase 3: Effective Width Settings Modal ================= -->
+  <div class="modal-backdrop" id="effectiveModal">
+    <div class="modal-dialog modal-dialog-md">
+      <div class="modal-header">
+        <strong style="font-size: 15px;">👁️ Winter 유효단면(Effective Properties) 수치해석</strong>
+        <button class="btn btn-outline" id="btnCloseEffectiveModal" style="padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        <div class="grid-input-2">
+          <div class="form-group">
+            <label class="form-label">적용 응력 수준 $f$ (MPa)</label>
+            <input type="number" class="form-input" id="effStressInput" value="345.0" step="5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">재하 모드 / 모멘트 축</label>
+            <select class="form-select" id="effAxisSelect">
+              <option value="X" selected>강축 휨 압축 (X-Axis Bending)</option>
+              <option value="Y">약축 휨 압축 (Y-Axis Bending)</option>
+              <option value="AXIAL">균일 축압축 (Uniform Axial)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="effResultSummary" style="margin-top: 14px; background: var(--bg-tertiary); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; line-height: 1.7;">
+          <div style="display: flex; justify-content: space-between;">
+            <span>유효단면적 $A_e$:</span>
+            <strong id="valAe">- mm²</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>단면적 유효율 ($A_e / A_g$):</span>
+            <strong id="valAeRatio" style="color: var(--accent-primary);">- %</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>유효 단면2차모멘트 $I_{xe}$:</span>
+            <strong id="valIxe">- mm⁴</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>도심 이동량 ($\Delta y$):</span>
+            <strong id="valDeltaY" style="color: var(--accent-warning);">- mm</strong>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; display: flex; gap: 8px;">
+          <button class="btn btn-primary" id="btnComputeEffective" style="flex: 1; padding: 8px;">
+            ⚡ 유효단면 계산 및 2D 캔버스 오버레이
+          </button>
+        </div>
       </div>
     </div>
   </div>

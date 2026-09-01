@@ -7,9 +7,12 @@
 ## 1. 프로젝트 목적 및 에이전트 미션
 
 * **프로젝트명**: CFDesigner (Cold-Formed Section Analyzer & Designer)
+* **프로젝트 핵심 목적**:
+  * **기존 상용 CFS 프로그램(`CFS.exe`)의 모든 기능, 공학 해석/설계 알고리즘, 라이브러리 및 도움말 시스템을 모던 웹(Web) 애플리케이션으로 100% 포팅(Full Web Migration)**하는 것.
 * **에이전트 미션**:
-  1. 상용 프로그램(`CFS.exe`)의 **C# 소스코드를 Ground Truth(정답 기준)로 삼아 엣지 케이스 수식 및 수치해석 노하우를 무결하게 참조**.
-  2. AutoCAD 2D Polyline(DXF) 입력 기반의 **비정형 단면 기하 모델링 $\rightarrow$ FSM(유한대판법) 탄성 좌굴해석 $\rightarrow$ KDS 14 31 10 / AISI S100 직접강도법(DSM) 설계 파이프라인** 구축.
+  1. 상용 프로그램(`CFS.exe`)의 **C# 소스코드 및 원본 자산을 Ground Truth(정답 기준)로 삼아 모든 기능과 엣지 케이스 수식, 수치해석 노하우를 무결하게 웹 엔진으로 포팅**.
+  2. AutoCAD 2D Polyline(DXF) 입력 기반의 **비정형 단면 기하 모델링 $\rightarrow$ FSM(유한대판법) 탄성 좌굴해석 $\rightarrow$ KDS 14 31 10 / AISI S100 직접강도법(DSM) 설계 파이프라인**을 모던 AltDP 웹 UI로 완전 구현.
+  3. 단면 해석, 시그니처 커브, 3D 좌굴모드 시각화, 부재검토, 계산서 출력 및 다국어 온라인 도움말 시스템 등 CFS의 전 영역을 웹 기반으로 완벽 서비스화.
 
 ---
 

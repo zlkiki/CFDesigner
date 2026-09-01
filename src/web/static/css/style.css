@@ -533,23 +533,214 @@ aside.right-dashboard {
   overflow: hidden;
 }
 
+.modal-dialog-sm {
+  max-width: 420px;
+  height: auto;
+  min-height: 250px;
+}
+
+.modal-dialog-md {
+  max-width: 560px;
+  height: auto;
+  min-height: 380px;
+}
+
+.modal-dialog-lg {
+  max-width: 1050px;
+  height: 80vh;
+}
+
 .modal-header {
   padding: 14px 20px;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: var(--bg-secondary);
 }
 
 .modal-body {
   flex: 1;
   overflow: auto;
   padding: 0;
-  background: #525659;
+  background: var(--bg-primary);
 }
 
 .modal-body iframe {
   width: 100%;
   height: 100%;
   border: none;
+}
+
+/* ---------------- 2D Overlay Toolbar Enhancements ---------------- */
+.viewer-overlay-tools {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  padding: 5px 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.overlay-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.overlay-btn:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #fff;
+}
+
+.overlay-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border-color);
+  margin: 0 2px;
+}
+
+/* ---------------- Element Spreadsheet Editor Table ---------------- */
+.table-responsive {
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.editor-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  background: var(--bg-secondary);
+}
+
+.editor-table th {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.editor-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: center;
+}
+
+.editor-table tr:hover td {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.editor-table tr.selected td {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.editor-table input[type="number"] {
+  width: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  text-align: right;
+}
+
+.editor-table input[type="number"]:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.btn-row-del {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--accent-danger);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.btn-row-del:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--accent-danger);
+}
+
+/* ---------------- Phase 2: Section Library Browser ---------------- */
+.btn-lib-tab {
+  padding: 4px 10px;
+  font-size: 11.5px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-lib-tab.active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.lib-type-header {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--accent-primary);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 5px 8px;
+  border-radius: 4px;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.lib-section-item {
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s ease;
+}
+
+.lib-section-item:hover {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent-primary);
+}
+
+.lib-section-item.selected {
+  background: var(--accent-primary);
+  color: #fff;
+  font-weight: 600;
 }

@@ -25,9 +25,28 @@ class SectionCanvas2D {
     this.showCG = true;
     this.showSC = true;
     this.showPrincipal = true;
+    this.highlightElemId = null;
+    this.showEffective = false;
+    this.effectiveSegments = [];
 
     this.initEvents();
     this.resize();
+  }
+
+  setHighlightElement(elemId) {
+    this.highlightElemId = elemId;
+    this.render();
+  }
+
+  setEffectiveSegments(segments) {
+    this.effectiveSegments = segments || [];
+    this.render();
+  }
+
+  toggleEffective(show) {
+    this.showEffective = (show !== undefined) ? show : !this.showEffective;
+    this.render();
+    return this.showEffective;
   }
 
   initEvents() {
@@ -166,7 +185,51 @@ class SectionCanvas2D {
     });
     ctx.stroke();
 
-    // 4. Draw Nodes
+    // 3.1 Draw Highlighted Element (if any)
+    if (this.highlightElemId !== null) {
+      const target = this.elements.find(e => e.elem_id === this.highlightElemId);
+      if (target) {
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = Math.max(3.5 / this.scale, this.thickness * 1.4);
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(target.x0, target.y0);
+        ctx.lineTo(target.x1, target.y1);
+        ctx.stroke();
+
+        // Pulsing highlight start/end dots
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(target.x0, target.y0, 4.0 / this.scale, 0, Math.PI * 2);
+        ctx.arc(target.x1, target.y1, 4.0 / this.scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // 4. Draw Effective / Ineffective Segments Overlay
+    if (this.showEffective && this.effectiveSegments && this.effectiveSegments.length > 0) {
+      this.effectiveSegments.forEach((seg) => {
+        ctx.beginPath();
+        ctx.moveTo(seg.x1, seg.y1);
+        ctx.lineTo(seg.x2, seg.y2);
+
+        if (seg.is_effective) {
+          // Effective portion: Bold Cyan / Green
+          ctx.strokeStyle = '#06b6d4';
+          ctx.lineWidth = Math.max(3.0 / this.scale, (seg.thickness || this.thickness) * 1.2);
+          ctx.setLineDash([]);
+        } else {
+          // Ineffective (void / buckled) portion: Red Dashed / Transparent
+          ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+          ctx.lineWidth = Math.max(2.0 / this.scale, (seg.thickness || this.thickness) * 0.8);
+          ctx.setLineDash([4 / this.scale, 3 / this.scale]);
+        }
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+    }
+
+    // 5. Draw Nodes
     if (this.showNodes) {
       this.elements.forEach((e, idx) => {
         ctx.fillStyle = '#38bdf8';
@@ -182,7 +245,7 @@ class SectionCanvas2D {
       });
     }
 
-    // 5. Draw Principal Axes
+    // 6. Draw Principal Axes
     if (this.showPrincipal && this.properties) {
       const alphaRad = (this.properties.theta_p || 0) * Math.PI / 180;
       const axLen = 60;
@@ -203,7 +266,7 @@ class SectionCanvas2D {
       ctx.setLineDash([]);
     }
 
-    // 6. Draw CG (Centroid) Marker
+    // 7. Draw CG (Centroid) Marker
     if (this.showCG && this.properties) {
       ctx.fillStyle = '#ef4444';
       ctx.beginPath();
@@ -211,7 +274,7 @@ class SectionCanvas2D {
       ctx.fill();
     }
 
-    // 7. Draw SC (Shear Center) Marker
+    // 8. Draw SC (Shear Center) Marker
     if (this.showSC && this.properties) {
       const scX = this.properties.x0 || 0;
       const scY = this.properties.y0 || 0;

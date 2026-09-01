@@ -16,12 +16,16 @@ from ..cad.dxf_reader import DXFReader, DXFPolyline, DXFVertex
 from ..cad.part_mesher import PartMesher, SectionGeometry, Element
 from ..geometry.gross_properties import SectionPropertiesCalculator, GrossProperties
 from ..geometry.section_wizard import SectionWizard
+from ..geometry.geometry_editor import GeometryEditor
+from ..geometry.library_parser import CFSLibraryParser, ColdWorkCalculator, STANDARD_MATERIALS
+from ..geometry.effective_width import EffectiveWidthSolver, EffectivePropertiesResult
 from ..solver.strip_assembler import StripAssembler
-from ..solver.signature_curve import SignatureCurveAnalyzer, BucklingCurveResult
+from ..solver.signature_curve import SignatureCurveAnalyzer, BucklingCurveResult, BucklingPoint
 from ..solver.eigen_solver import FSMEigenSolver
 from ..design.dsm_compression import DSMCompression, CompressionDesignResult
 from ..design.dsm_flexure import DSMFlexure, FlexureDesignResult
-from ..design.shear_and_crippling import WebShearAndCrippling, ShearCripplingResult
+from ..design.shear_and_crippling import WebShearAndCrippling, ShearCripplingResult, WebCripplingResult
+from ..design.quick_design import QuickDesignEngine, QuickDesignResult
 from ..design.beam_column import BeamColumnInteraction, InteractionResult
 from ..report.html_report import HTMLReportGenerator
 
@@ -54,6 +58,30 @@ class ElementDTO(BaseModel):
     angle: float
     thickness: float
     radius: float = 0.0
+
+
+class ElementsUpdateRequest(BaseModel):
+    elements: List[ElementDTO]
+    thickness: float = 2.0
+
+
+class TransformRequest(BaseModel):
+    elements: List[ElementDTO]
+    thickness: float = 2.0
+    transform_type: str = "rotate_90_cw" # rotate_90_cw, rotate_90_ccw, rotate_angle, mirror_h, mirror_v, align_cg, align_min
+    angle_deg: Optional[float] = 0.0
+    center_at_cg: Optional[bool] = True
+
+
+class InsertRibsRequest(BaseModel):
+    elements: List[ElementDTO]
+    thickness: float = 2.0
+    target_elem_id: int = 1
+    rib_type: str = "V" # V, TRAPEZOID
+    rib_width: float = 20.0
+    rib_depth: float = 10.0
+    num_ribs: int = 1
+    rib_radius: float = 0.0
 
 
 class FSMRequest(BaseModel):
@@ -172,6 +200,11 @@ def serialize_geometry(geom: SectionGeometry, props: GrossProperties) -> Dict[st
     }
 
 
+def _calculate_and_bundle_section(geom: SectionGeometry) -> Dict[str, Any]:
+    props = SectionPropertiesCalculator.calculate(geom)
+    return serialize_geometry(geom, props)
+
+
 # ---------------------------------------------------------
 # API Endpoints
 # ---------------------------------------------------------
@@ -236,6 +269,72 @@ async def calculate_properties(elements: List[ElementDTO], thickness: float):
     Computes geometric properties from element list.
     """
     geom = elements_from_dto(elements, thickness)
+    props = SectionPropertiesCalculator.calculate(geom)
+    return serialize_geometry(geom, props)
+
+
+@router.post("/section/elements")
+async def update_elements_endpoint(req: ElementsUpdateRequest):
+    """
+    Reconstructs section geometry from modified element table, calculates properties, and returns updated geometry.
+    """
+    elem_dicts = [e.model_dump() for e in req.elements]
+    geom = GeometryEditor.update_elements(elem_dicts, req.thickness)
+    props = SectionPropertiesCalculator.calculate(geom)
+    return serialize_geometry(geom, props)
+
+
+@router.post("/section/transform")
+async def transform_section_endpoint(req: TransformRequest):
+    """
+    Performs geometric transformation: 90-degree rotate, arbitrary rotate, mirror H/V, align CG/origin.
+    """
+    elem_dicts = [e.model_dump() for e in req.elements]
+    geom = GeometryEditor.update_elements(elem_dicts, req.thickness)
+    
+    tt = req.transform_type.lower()
+    center_at_cg = req.center_at_cg if req.center_at_cg is not None else True
+
+    if tt == "rotate_90_cw":
+        geom = GeometryEditor.rotate_section(geom, -math.pi / 2.0, center_at_cg=center_at_cg)
+    elif tt == "rotate_90_ccw":
+        geom = GeometryEditor.rotate_section(geom, math.pi / 2.0, center_at_cg=center_at_cg)
+    elif tt == "rotate_angle":
+        ang_rad = math.radians(req.angle_deg or 0.0)
+        geom = GeometryEditor.rotate_section(geom, ang_rad, center_at_cg=center_at_cg)
+    elif tt in ("mirror_h", "mirror_x"):
+        geom = GeometryEditor.mirror_section(geom, axis="horizontal", center_at_cg=center_at_cg)
+    elif tt in ("mirror_v", "mirror_y"):
+        geom = GeometryEditor.mirror_section(geom, axis="vertical", center_at_cg=center_at_cg)
+    elif tt == "align_cg":
+        geom = GeometryEditor.align_to_origin(geom, align_type="cg")
+    elif tt == "align_min":
+        geom = GeometryEditor.align_to_origin(geom, align_type="min")
+    else:
+        raise HTTPException(status_code=400, detail=f"Unknown transform type: {req.transform_type}")
+
+    props = SectionPropertiesCalculator.calculate(geom)
+    return serialize_geometry(geom, props)
+
+
+@router.post("/section/insert-ribs")
+async def insert_ribs_endpoint(req: InsertRibsRequest):
+    """
+    Inserts intermediate stiffener ribs into target element and re-meshes geometry.
+    """
+    elem_dicts = [e.model_dump() for e in req.elements]
+    geom = GeometryEditor.update_elements(elem_dicts, req.thickness)
+    
+    geom = GeometryEditor.insert_rib(
+        geom=geom,
+        target_elem_id=req.target_elem_id,
+        rib_type=req.rib_type,
+        rib_width=req.rib_width,
+        rib_depth=req.rib_depth,
+        num_ribs=req.num_ribs,
+        rib_radius=req.rib_radius
+    )
+    
     props = SectionPropertiesCalculator.calculate(geom)
     return serialize_geometry(geom, props)
 
@@ -465,3 +564,283 @@ async def generate_report_html(data: Dict[str, Any]):
     """
     html_content = HTMLReportGenerator.render_report(data)
     return {"html": html_content}
+
+
+# =========================================================
+# Phase 2: Section & Material Library Endpoints
+# =========================================================
+
+class ColdWorkRequest(BaseModel):
+    base_fy: float = 345.0
+    base_fu: float = 450.0
+    r_inside: float = 2.0
+    thickness: float = 1.5
+    num_corners: int = 4
+    total_length: float = 250.0
+
+
+@router.get("/library/files")
+async def get_library_files():
+    """
+    Returns the list of available .cfsl library files in original_source.
+    """
+    lib_dir = "original_source"
+    libs = []
+    if os.path.exists(lib_dir):
+        for f in sorted(os.listdir(lib_dir)):
+            if f.lower().endswith(".cfsl"):
+                name = os.path.splitext(f)[0]
+                libs.append({"name": name, "filename": f, "path": os.path.join(lib_dir, f)})
+    return {"libraries": libs}
+
+
+@router.get("/library/sections")
+async def get_library_sections(lib: str = "SSMA", type: Optional[str] = None, query: Optional[str] = None):
+    """
+    Returns sections in the specified library, with optional type and text filtering.
+    """
+    file_path = os.path.join("original_source", f"{lib}.cfsl")
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail=f"Library file {lib}.cfsl not found.")
+
+    summary = CFSLibraryParser.get_library_summary(file_path)
+    
+    # Flatten sections or filter by type/query
+    filtered_types = []
+    for t in summary["types"]:
+        if type and type.lower() not in t["name"].lower():
+            continue
+        
+        matched_sections = []
+        for s in t["sections"]:
+            if query:
+                q = query.lower()
+                if q not in s["name"].lower() and q not in t["name"].lower():
+                    continue
+            matched_sections.append(s)
+            
+        filtered_types.append({
+            "name": t["name"],
+            "count": len(matched_sections),
+            "sections": matched_sections
+        })
+
+    return {
+        "library_name": summary["library_name"],
+        "company": summary["company"],
+        "types": filtered_types
+    }
+
+
+@router.get("/library/sections/{lib_name}/{offset}")
+async def load_library_section(lib_name: str, offset: int):
+    """
+    Loads full geometric and mechanical properties of a library section by offset.
+    """
+    file_path = os.path.join("original_source", f"{lib_name}.cfsl")
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail=f"Library {lib_name}.cfsl not found.")
+
+    try:
+        geom = CFSLibraryParser.load_section(file_path, offset, to_metric=True)
+        if not geom.elements:
+            raise HTTPException(status_code=400, detail="Failed to parse section elements.")
+        
+        return _calculate_and_bundle_section(geom)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading section: {str(e)}")
+
+
+@router.get("/library/materials")
+async def get_material_presets():
+    """
+    Returns standard steel material presets (KDS/KS, ASTM, Stainless Steel).
+    """
+    return {"materials": STANDARD_MATERIALS}
+
+
+@router.post("/material/cold-work")
+async def calculate_cold_work(req: ColdWorkRequest):
+    """
+    Calculates cold-work forming yield strength increase (Fya)
+    per AISI S100 Section A3.3.2 and KDS 14 31 10 3.3.2.
+    """
+    res = ColdWorkCalculator.calculate(
+        base_fy=req.base_fy,
+        base_fu=req.base_fu,
+        r_inside=req.r_inside,
+        thickness=req.thickness,
+        num_corners=req.num_corners,
+        total_length=req.total_length
+    )
+    return res
+
+
+# ---------------------------------------------------------
+# Phase 3: Advanced Design & Solver Endpoints
+# ---------------------------------------------------------
+
+class WebCripplingDetailedRequest(BaseModel):
+    h: float = 150.0                # Web depth (mm)
+    t: float = 2.0                  # Web thickness (mm)
+    r: float = 2.0                  # Inside bend radius (mm)
+    n_bearing: float = 50.0         # Bearing length N (mm)
+    fy: float = 300.0               # Yield strength (MPa)
+    condition: str = "IOF"          # "EOF", "IOF", "ETF", "ITF"
+    fastened: bool = True           # Flange fastened
+    stiffened: bool = True          # Stiffened flange (with lip)
+    theta_deg: float = 90.0         # Web inclination angle
+    ru: float = 0.0                 # Required reaction Ru (kN)
+
+
+class QuickDesignSearchRequest(BaseModel):
+    pu: float = 0.0                 # Axial load Pu (kN)
+    mux: float = 0.0                # Moment Mux (kNm)
+    muy: float = 0.0                # Moment Muy (kNm)
+    vu: float = 0.0                 # Shear force Vu (kN)
+    length: float = 3000.0          # Unbraced length L (mm)
+    fy: float = 300.0               # Yield strength (MPa)
+    max_depth: Optional[float] = None
+    max_weight: Optional[float] = None
+    library: Optional[str] = None
+    max_results: int = 15
+
+
+class FSMCustomSweepRequest(BaseModel):
+    elements: List[ElementDTO]
+    thickness: float = 2.0
+    l_min: float = 10.0
+    l_max: float = 10000.0
+    steps: int = 60
+    load_type: str = "compression"   # compression, bending_x, bending_y
+    yield_stress: float = 345.0
+    elastic_modulus: float = 205000.0
+    poisson_ratio: float = 0.3
+    member_length: float = 3000.0
+
+
+class EffectiveWidthRequest(BaseModel):
+    elements: List[ElementDTO]
+    thickness: float = 2.0
+    stress_f: float = 300.0
+    fy: float = 300.0
+    moment_axis: str = "X"          # "X", "Y", "AXIAL"
+
+
+@router.post("/design/web-crippling")
+async def calculate_web_crippling_api(req: WebCripplingDetailedRequest):
+    """
+    Computes web crippling nominal and design capacities for 4 support conditions
+    (EOF, IOF, ETF, ITF) per KDS 14 31 10 4.4 and AISI S100 G5.
+    """
+    res = WebShearAndCrippling.calculate_web_crippling_advanced(
+        h=req.h,
+        t=req.t,
+        r=req.r,
+        n_bearing=req.n_bearing,
+        fy=req.fy,
+        condition=req.condition,
+        fastened=req.fastened,
+        stiffened=req.stiffened,
+        theta_deg=req.theta_deg,
+        ru=req.ru
+    )
+    return res
+
+
+@router.post("/design/quick-design")
+async def quick_design_search_api(req: QuickDesignSearchRequest):
+    """
+    Scans library sections, executes DSM compression, flexure, and shear design checks,
+    and returns top candidates sorted by weight ascending.
+    """
+    res = QuickDesignEngine.search_optimal_sections(
+        pu_kn=req.pu,
+        mux_knm=req.mux,
+        muy_knm=req.muy,
+        vu_kn=req.vu,
+        length_mm=req.length,
+        fy_mpa=req.fy,
+        max_depth_mm=req.max_depth,
+        max_weight_kgm=req.max_weight,
+        library_filter=req.library,
+        max_results=req.max_results
+    )
+    return res
+
+
+@router.post("/fsm/parameters")
+async def fsm_custom_sweep_api(req: FSMCustomSweepRequest):
+    """
+    Executes FSM elastic buckling analysis with customized half-wavelength sweep range,
+    number of steps, and stress distribution.
+    """
+    geom = elements_from_dto(req.elements, req.thickness)
+    gross_props = SectionPropertiesCalculator.calculate(geom)
+
+    assembler = StripAssembler(
+        geom=geom,
+        props=gross_props,
+        e_modulus=req.elastic_modulus,
+        poisson=req.poisson_ratio
+    )
+
+    analyzer = SignatureCurveAnalyzer(assembler)
+    fsm_res = analyzer.analyze(
+        l_min=req.l_min,
+        l_max=req.l_max,
+        num_points=req.steps,
+        load_type=req.load_type,
+        yield_stress=req.yield_stress,
+        member_length=req.member_length
+    )
+
+    return {
+        "curve": {
+            "lengths": fsm_res.lengths,
+            "load_factors": fsm_res.load_factors,
+            "points": [
+                {
+                    "length": round(pt.length, 2),
+                    "load_factor": round(pt.load_factor, 4),
+                    "critical_load": round(pt.critical_load, 1),
+                    "critical_moment": round(pt.critical_moment, 1)
+                }
+                for pt in fsm_res.points
+            ]
+        },
+        "modes": {
+            "p_crl": round(fsm_res.p_crl, 1),
+            "l_local": round(fsm_res.l_local, 1),
+            "p_crd": round(fsm_res.p_crd, 1),
+            "l_distortional": round(fsm_res.l_distortional, 1),
+            "p_cre": round(fsm_res.p_cre, 1),
+            "l_global": round(fsm_res.l_global, 1)
+        }
+    }
+
+
+@router.post("/section/effective")
+async def calculate_section_effective_api(req: EffectiveWidthRequest):
+    """
+    Computes Winter effective width, reduced section properties (Ae, Ixe, Iye, delta_y),
+    and 2D effective/void line segments.
+    """
+    raw_elems = [
+        {
+            "id": el.elem_id,
+            "x1": el.x0, "y1": el.y0,
+            "x2": el.x1, "y2": el.y1,
+            "thickness": el.thickness if el.thickness > 0 else req.thickness
+        }
+        for el in req.elements
+    ]
+
+    res = EffectiveWidthSolver.analyze_section_effective(
+        elements=raw_elems,
+        stress_f=req.stress_f,
+        moment_axis=req.moment_axis,
+        fy=req.fy
+    )
+    return res
+
