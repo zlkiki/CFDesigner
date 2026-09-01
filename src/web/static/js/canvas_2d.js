@@ -71,6 +71,22 @@ class SectionCanvas2D {
     return this.showEffective;
   }
 
+  setFsmModeData(nodes, strips, modeKey = 'local_mode', amplitude = 15.0) {
+    this.fsmNodes = nodes || [];
+    this.fsmStrips = strips || [];
+    this.fsmModeKey = modeKey;
+    this.fsmAmplitude = amplitude;
+    if (this.showModeShape2D) {
+      this.render();
+    }
+  }
+
+  toggle2DModeShape(show) {
+    this.showModeShape2D = (show !== undefined) ? show : !this.showModeShape2D;
+    this.render();
+    return this.showModeShape2D;
+  }
+
   initEvents() {
     window.addEventListener('resize', () => this.resize());
 
@@ -335,6 +351,37 @@ class SectionCanvas2D {
       ctx.stroke();
     }
 
+    // 8.5 FSM 2D Deformed Cross-Section Mode Shape (도해3)
+    if (this.showModeShape2D && this.fsmNodes && this.fsmNodes.length > 0 && this.fsmStrips) {
+      ctx.save();
+      ctx.lineWidth = 2.0 / this.scale;
+      ctx.strokeStyle = '#ec4899'; // Vivid pink for buckling mode shape
+      ctx.setLineDash([4 / this.scale, 3 / this.scale]);
+
+      const amp = this.fsmAmplitude || 15.0;
+      const key = this.fsmModeKey || 'local_mode';
+
+      for (const strip of this.fsmStrips) {
+        const n1 = this.fsmNodes[strip.node_i];
+        const n2 = this.fsmNodes[strip.node_j];
+        if (!n1 || !n2) continue;
+
+        const d1 = n1[key] || [0, 0, 0, 0];
+        const d2 = n2[key] || [0, 0, 0, 0];
+
+        const x1 = n1.x + (d1[0] || 0) * amp;
+        const y1 = n1.y + (d1[1] || 0) * amp;
+        const x2 = n2.x + (d2[0] || 0) * amp;
+        const y2 = n2.y + (d2[1] || 0) * amp;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
     ctx.restore();
 
     // 9. Screen-space Legends (CG / SC labels)
@@ -362,7 +409,7 @@ class SectionCanvas2D {
       const badgeW = 200;
       const badgeH = 34;
       const bx = (w - badgeW) / 2;
-      const by = 20;
+      const by = (h - badgeH) / 2;
 
       ctx.save();
       ctx.fillStyle = this.theme === 'light' ? 'rgba(255, 255, 255, 0.94)' : 'rgba(15, 23, 42, 0.90)';

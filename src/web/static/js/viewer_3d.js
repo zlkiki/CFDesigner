@@ -30,6 +30,9 @@ class BucklingViewer3D {
     this.ambientLight = null;
     this.dirLight1 = null;
     this.dirLight2 = null;
+    this.axesHelper = null;
+    this.stressProfileGroup = null;
+    this.showStressProfile = false;
 
     this.initThree();
     this.initControls();
@@ -46,7 +49,7 @@ class BucklingViewer3D {
     this.camera = new THREE.PerspectiveCamera(45, w / h, 5, 3500);
     this.updateCamera();
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: true });
     this.renderer.setSize(w, h);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.container.appendChild(this.renderer.domElement);
@@ -62,6 +65,22 @@ class BucklingViewer3D {
     this.dirLight2 = new THREE.DirectionalLight(0x818cf8, this.theme === 'light' ? 0.9 : 0.8);
     this.dirLight2.position.set(-200, -200, -300);
     this.scene.add(this.dirLight2);
+
+    // XYZ Triad Axes Helper at coordinate origin
+    this.axesHelper = new THREE.AxesHelper(60);
+    this.axesHelper.position.set(0, 0, 0);
+    this.scene.add(this.axesHelper);
+
+    // Fixed HUD Orientation Triad Inset (Bottom-Left 3D Coordinate Compass)
+    this.axesScene = new THREE.Scene();
+    this.axesCamera = new THREE.PerspectiveCamera(50, 1, 1, 1000);
+    this.axesCamera.up = this.camera.up;
+    const hudAxes = new THREE.AxesHelper(35);
+    this.axesScene.add(hudAxes);
+
+    // Stress Profile Object Group
+    this.stressProfileGroup = new THREE.Group();
+    this.scene.add(this.stressProfileGroup);
 
     window.addEventListener('resize', () => this.onResize());
   }
@@ -82,7 +101,58 @@ class BucklingViewer3D {
     }
   }
 
-  showLoading(message = '⏳ FSM 좌굴해석 재계산 중...') {
+  toggleAnimation() {
+    this.isAnimating = !this.isAnimating;
+    return this.isAnimating;
+  }
+
+  toggleStressProfile(show) {
+    this.showStressProfile = (show !== undefined) ? show : !this.showStressProfile;
+    if (this.stressProfileGroup) {
+      this.stressProfileGroup.visible = this.showStressProfile;
+    }
+    return this.showStressProfile;
+  }
+
+  exportImage() {
+    if (!this.renderer) return;
+    this.renderer.render(this.scene, this.camera);
+    const dataUrl = this.renderer.domElement.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `CFDesigner_3D_Buckling_${this.currentModeKey}_${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  printView() {
+    if (!this.renderer) return;
+    this.renderer.render(this.scene, this.camera);
+    const dataUrl = this.renderer.domElement.toDataURL('image/png');
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(`
+        <html>
+          <head>
+            <title>CFDesigner 3D 버클링 모드형상 인쇄</title>
+            <style>
+              body { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; }
+              img { max-width: 95vw; max-height: 85vh; object-fit: contain; border: 1px solid #ccc; border-radius: 8px; }
+              h3 { margin: 15px 0 5px 0; color: #1e293b; }
+            </style>
+          </head>
+          <body>
+            <h3>CFDesigner - 3D 탄성 버클링 모드형상 (${this.currentModeKey})</h3>
+            <img src="${dataUrl}" onload="window.print(); window.close();" />
+          </body>
+        </html>
+      `);
+      win.document.close();
+    }
+  }
+
+  showLoading(message = '⏳ FSM 탄성 버클링 재계산 중...') {
     if (!this.loadingBadge) {
       this.loadingBadge = document.createElement('div');
       this.loadingBadge.className = 'viewer-3d-loading-badge';
@@ -166,11 +236,62 @@ class BucklingViewer3D {
     this.strips = strips || [];
     this.currentModeKey = modeKey;
     this.buildGeometry();
+    this.buildStressProfile();
   }
 
   setMode(modeKey) {
     this.currentModeKey = modeKey;
     this.buildGeometry();
+    this.buildStressProfile();
+  }
+
+  buildStressProfile() {
+    if (!this.stressProfileGroup) return;
+    while (this.stressProfileGroup.children.length > 0) {
+      const obj = this.stressProfileGroup.children[0];
+      this.stressProfileGroup.remove(obj);
+      if (obj.geometry) obj.geometry.dispose();
+    }
+
+    if (!this.nodes || this.nodes.length === 0) return;
+
+    // Draw stress profile arrows and boundary lines at mid-span z = 0
+    const points = [];
+    const lengthZ = 200;
+    const zMid = 0;
+
+    for (let inod = 0; inod < this.nodes.length; inod++) {
+      const n = this.nodes[inod];
+      const stressVal = n.stress !== undefined ? n.stress : -345.0; // Negative for compression
+      const arrowLen = (stressVal / 345.0) * 20.0;
+
+      // Line from node outward
+      const p1 = new THREE.Vector3(n.x, n.y, zMid);
+      const p2 = new THREE.Vector3(n.x, n.y + arrowLen, zMid);
+
+      const lineGeom = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+      const lineMat = new THREE.LineBasicMaterial({
+        color: stressVal < 0 ? 0xef4444 : 0x3b82f6,
+        linewidth: 2
+      });
+      const line = new THREE.Line(lineGeom, lineMat);
+      this.stressProfileGroup.add(line);
+      points.push(p2);
+    }
+
+    if (points.length > 1) {
+      const profileGeom = new THREE.BufferGeometry().setFromPoints(points);
+      const profileMat = new THREE.LineDashedMaterial({
+        color: 0xf59e0b,
+        dashSize: 4,
+        gapSize: 2
+      });
+      const profileLine = new THREE.Line(profileGeom, profileMat);
+      profileLine.computeLineDistances();
+      this.stressProfileGroup.add(profileLine);
+    }
+
+    this.stressProfileGroup.visible = this.showStressProfile;
   }
 
   buildGeometry() {
@@ -201,7 +322,7 @@ class BucklingViewer3D {
     for (let iz = 0; iz <= numZ; iz++) {
       const zFrac = iz / numZ;
       const z = (zFrac - 0.5) * lengthZ;
-      const sinZ = Math.sin(zFrac * Math.PI); // Half-sine buckling wave
+      const sinZ = Math.sin(zFrac * Math.PI); // Longitudinal Half-sine wave (도해4)
 
       for (let inod = 0; inod < numNodes; inod++) {
         const n = this.nodes[inod];
@@ -300,6 +421,28 @@ class BucklingViewer3D {
       this.mesh.geometry.computeVertexNormals();
     }
 
+    const w = this.container ? (this.container.clientWidth || 600) : 600;
+    const h = this.container ? (this.container.clientHeight || 400) : 400;
+
+    this.renderer.setViewport(0, 0, w, h);
+    this.renderer.setScissor(0, 0, w, h);
+    this.renderer.setScissorTest(false);
     this.renderer.render(this.scene, this.camera);
+
+    // Render fixed bottom-left Triad Compass HUD (X: Red, Y: Green, Z: Blue)
+    if (this.axesScene && this.axesCamera) {
+      const insetSize = 90;
+      this.axesCamera.position.copy(this.camera.position);
+      this.axesCamera.position.sub(this.scene.position);
+      this.axesCamera.position.setLength(100);
+      this.axesCamera.lookAt(0, 0, 0);
+
+      this.renderer.clearDepth();
+      this.renderer.setScissorTest(true);
+      this.renderer.setScissor(12, 12, insetSize, insetSize);
+      this.renderer.setViewport(12, 12, insetSize, insetSize);
+      this.renderer.render(this.axesScene, this.axesCamera);
+      this.renderer.setScissorTest(false);
+    }
   }
 }

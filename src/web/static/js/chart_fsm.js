@@ -69,7 +69,7 @@ class FSMSignatureChart {
           y: {
             title: {
               display: true,
-              text: '탄성 좌굴하중 P_cr (kN)',
+              text: '탄성 버클링하중 P_cr (kN)',
               color: '#94a3b8',
               font: { size: 11, weight: 'bold' }
             },
@@ -119,7 +119,7 @@ class FSMSignatureChart {
 
     this.chart.data.datasets[0].data = formatted;
     this.chart.data.datasets[0].label = isBending ? 'FSM Signature Curve (Mcr)' : 'FSM Signature Curve (Pcr)';
-    this.chart.options.scales.y.title.text = isBending ? '탄성 좌굴모멘트 M_cr (kN·m)' : '탄성 좌굴하중 P_cr (kN)';
+    this.chart.options.scales.y.title.text = isBending ? '탄성 버클링모멘트 M_cr (kN·m)' : '탄성 버클링하중 P_cr (kN)';
     this.chart.update();
   }
 }

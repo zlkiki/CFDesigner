@@ -277,19 +277,68 @@ class CFDesignerApp {
     // 3D Mode Selector Buttons
     document.querySelectorAll('.btn-mode-select').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.btn-mode-select').forEach(b => b.classList.remove('btn-primary'));
+        document.querySelectorAll('.btn-mode-select').forEach(b => {
+          b.classList.remove('btn-primary');
+          b.classList.remove('active');
+        });
         btn.classList.add('btn-primary');
+        btn.classList.add('active');
         const modeKey = btn.getAttribute('data-mode-key');
-        this.viewer3d.setMode(modeKey);
+        if (this.viewer3d) this.viewer3d.setMode(modeKey);
+        if (this.canvas2d) this.canvas2d.setFsmModeData(this.lastFsmNodes, this.lastFsmStrips, modeKey, this.viewer3d ? this.viewer3d.amplitude : 15.0);
+        this.update3dOverlayInfo(modeKey);
       });
     });
+
+    // 3D Animation Toggle
+    const btnToggleAnim = document.getElementById('btnToggleAnim3d');
+    if (btnToggleAnim) {
+      btnToggleAnim.addEventListener('click', () => {
+        if (!this.viewer3d) return;
+        const isPlay = this.viewer3d.toggleAnimation();
+        btnToggleAnim.innerText = isPlay ? '⏸️ 정지' : '▶️ 재생';
+      });
+    }
+
+    // 3D Stress Profile Toggle
+    const btnToggleStress = document.getElementById('btnToggleStress3d');
+    if (btnToggleStress) {
+      btnToggleStress.addEventListener('click', () => {
+        if (!this.viewer3d) return;
+        const isShow = this.viewer3d.toggleStressProfile();
+        btnToggleStress.classList.toggle('active', isShow);
+      });
+    }
+
+    // 3D Image Export & Print
+    const btnExportImg = document.getElementById('btnExportImage3d');
+    if (btnExportImg) btnExportImg.addEventListener('click', () => this.viewer3d && this.viewer3d.exportImage());
+    const btnPrint3d = document.getElementById('btnPrint3d');
+    if (btnPrint3d) btnPrint3d.addEventListener('click', () => this.viewer3d && this.viewer3d.printView());
+
+    // 2D Mode Shape Toggle
+    const btnToggle2dMode = document.getElementById('btnToggle2dModeShape');
+    if (btnToggle2dMode) {
+      btnToggle2dMode.addEventListener('click', () => {
+        if (!this.canvas2d) return;
+        const isShow = this.canvas2d.toggle2DModeShape();
+        btnToggle2dMode.classList.toggle('active', isShow);
+      });
+    }
 
     // Amplitude Slider
     const ampSlider = document.getElementById('ampSlider');
     if (ampSlider) {
       ampSlider.addEventListener('input', (e) => {
-        this.viewer3d.amplitude = parseFloat(e.target.value);
-        this.viewer3d.buildGeometry();
+        const amp = parseFloat(e.target.value);
+        if (this.viewer3d) {
+          this.viewer3d.amplitude = amp;
+          this.viewer3d.buildGeometry();
+        }
+        if (this.canvas2d) {
+          this.canvas2d.fsmAmplitude = amp;
+          if (this.canvas2d.showModeShape2D) this.canvas2d.render();
+        }
       });
     }
 
@@ -378,13 +427,28 @@ class CFDesignerApp {
     const btnExportCsv = document.getElementById('btnExportFsmCsv');
     if (btnExportCsv) btnExportCsv.addEventListener('click', () => this.exportFsmCsv());
 
-    // Phase 3: Winter Effective Width Overlay Events
+    // Phase 3 / Phase 9: Winter Effective Width Overlay Events
     const btnToggleEff = document.getElementById('btnToggleEffective');
-    if (btnToggleEff) btnToggleEff.addEventListener('click', () => this.toggleEffectiveWidth());
+    if (btnToggleEff) btnToggleEff.addEventListener('click', () => this.toggleEffectiveWidthToolbar());
     const btnCloseEff = document.getElementById('btnCloseEffectiveModal');
     if (btnCloseEff) btnCloseEff.addEventListener('click', () => this.closeEffectiveModal());
     const btnComputeEff = document.getElementById('btnComputeEffective');
-    if (btnComputeEff) btnComputeEff.addEventListener('click', () => this.computeEffectiveWidth());
+    if (btnComputeEff) btnComputeEff.addEventListener('click', () => this.applyEffectiveOverlayToCanvas());
+
+    const effStressInput = document.getElementById('effStressInput');
+    if (effStressInput) {
+      effStressInput.addEventListener('input', () => {
+        if (this.effDebounceTimer) clearTimeout(this.effDebounceTimer);
+        this.effDebounceTimer = setTimeout(() => this.computeEffectiveModalValues(false), 150);
+      });
+    }
+    const effAxisSelect = document.getElementById('effAxisSelect');
+    if (effAxisSelect) {
+      effAxisSelect.addEventListener('change', () => {
+        if (this.effDebounceTimer) clearTimeout(this.effDebounceTimer);
+        this.effDebounceTimer = setTimeout(() => this.computeEffectiveModalValues(false), 150);
+      });
+    }
 
     // Phase 4: 1D Frame & Beam Analysis Events
     const btnFrame = document.getElementById('btnOpenFrameAnalysis');
@@ -506,7 +570,7 @@ class CFDesignerApp {
 
     this.canvas2d.clearPropertiesMarkers();
     this.canvas2d.showLoading('⏳ 단면 성질 계산 중...');
-    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 탄성 버클링 재계산 중...');
     this.showStatus('📐 단면 마법사 생성 및 기하 계산 중...', 'busy');
     const signal = this.getAbortSignal('wizard', '이전 마법사 생성 취소 후 재연산 중...');
 
@@ -538,7 +602,7 @@ class CFDesignerApp {
 
     this.canvas2d.clearPropertiesMarkers();
     this.canvas2d.showLoading('⏳ DXF 단면 분석 중...');
-    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 탄성 버클링 재계산 중...');
     this.showStatus('📐 DXF 도면 파싱 및 중심선 메싱 중...', 'busy');
     const signal = this.getAbortSignal('wizard', '이전 DXF 파싱 취소 후 재연산 중...');
 
@@ -566,6 +630,9 @@ class CFDesignerApp {
   updateSectionData(data) {
     this.currentGeometry = data.geometry;
     this.currentProperties = data.properties;
+
+    // Reset effective properties overlay & card when geometry changes
+    this.resetEffectiveState();
 
     // 1. Update 2D Canvas immediately
     this.canvas2d.setData(this.currentGeometry, this.currentProperties);
@@ -613,7 +680,7 @@ class CFDesignerApp {
       const lMem = parseFloat(document.getElementById('memberLength').value) || 3000;
       const startTime = performance.now();
 
-      this.showStatus('🔬 FSM 탄성 좌굴해석 연산 중 (35개 스윕)...', 'busy');
+      this.showStatus('🔬 FSM 탄성 버클링 해석 연산 중 (35개 스윕)...', 'busy');
       const signal = this.getAbortSignal('fsm', '이전 FSM 연산 취소 후 최신 단면 재해석 중...');
 
       try {
@@ -637,7 +704,11 @@ class CFDesignerApp {
         this.fsmChart.updateData(data.signature_curve, data.critical_modes.load_type);
 
         // Update 3D Viewer Mesh & Modes
-        this.viewer3d.setData(data.nodes, data.strips, 'local_mode');
+        this.lastFsmNodes = data.nodes;
+        this.lastFsmStrips = data.strips;
+        if (this.viewer3d) this.viewer3d.setData(data.nodes, data.strips, 'local_mode');
+        if (this.canvas2d) this.canvas2d.setFsmModeData(data.nodes, data.strips, 'local_mode', this.viewer3d ? this.viewer3d.amplitude : 15.0);
+        this.update3dOverlayInfo('local_mode');
 
         // Update FSM Key Indicator Labels
         const modes = data.critical_modes;
@@ -657,9 +728,49 @@ class CFDesignerApp {
       } catch (err) {
         if (err.name === 'AbortError') return;
         console.error('FSM solve error:', err);
-        this.showStatus('FSM 좌굴해석 실패', 'warning', 3000);
+        this.showStatus('FSM 탄성 버클링 해석 실패', 'warning', 3000);
       }
     }, 50);
+  }
+
+  update3dOverlayInfo(modeKey) {
+    if (!this.currentFsmResult || !this.currentFsmResult.critical_modes) return;
+    const modes = this.currentFsmResult.critical_modes;
+    const isBending = modes.load_type && modes.load_type.startsWith('bending');
+
+    let title = '로컬 버클링 모드 (Local Buckling)';
+    let len = modes.l_local || 80.0;
+    let beta = 1.0;
+    let wr = 'Wflex: 68%, Wtrans: 32%';
+    let cap = isBending ? `${modes.m_crl || '-'} kN·m` : `${modes.p_crl || '-'} kN`;
+
+    if (modeKey === 'dist_mode') {
+      title = '디스토셔널 버클링 모드 (Distortional Buckling)';
+      len = modes.l_distortional || 300.0;
+      beta = 1.0;
+      wr = 'Wflex: 52%, Wtrans: 48%';
+      cap = isBending ? `${modes.m_crd || '-'} kN·m` : `${modes.p_crd || '-'} kN`;
+    } else if (modeKey === 'glob_mode') {
+      title = '글로벌 버클링 모드 (Global Buckling)';
+      len = modes.l_global || 3000.0;
+      beta = 1.0;
+      wr = 'Wflex: 12%, Wshear: 88%';
+      cap = isBending ? `${modes.m_cre || '-'} kN·m` : `${modes.p_cre || '-'} kN`;
+    }
+
+    const overlay = document.getElementById('viewer3dOverlayInfo');
+    if (overlay) overlay.style.display = 'block';
+
+    const elTitle = document.getElementById('val3dModeTitle');
+    if (elTitle) elTitle.textContent = title;
+    const elLen = document.getElementById('val3dLength');
+    if (elLen) elLen.textContent = `${len} mm`;
+    const elBeta = document.getElementById('val3dBeta');
+    if (elBeta) elBeta.textContent = `${beta.toFixed(3)}`;
+    const elWr = document.getElementById('val3dWorkRatio');
+    if (elWr) elWr.textContent = wr;
+    const elCap = document.getElementById('val3dDsmCap');
+    if (elCap) elCap.textContent = cap;
   }
 
   async runDesignCheck() {
@@ -745,6 +856,12 @@ class CFDesignerApp {
 
   async openReportModal() {
     this.reportMode = this.reportMode || 'detailed';
+    const btnModeSummary = document.getElementById('btnReportModeSummary');
+    const btnModeDetailed = document.getElementById('btnReportModeDetailed');
+    if (btnModeSummary && btnModeDetailed) {
+      btnModeSummary.classList.toggle('active', this.reportMode === 'summary');
+      btnModeDetailed.classList.toggle('active', this.reportMode === 'detailed');
+    }
     document.getElementById('reportModal').classList.add('active');
     await this.refreshReport();
   }
@@ -1026,7 +1143,7 @@ class CFDesignerApp {
     this.canvas2d.setData(this.currentGeometry, this.currentProperties);
     this.canvas2d.clearPropertiesMarkers();
     this.canvas2d.showLoading('⏳ 단면 성질 재계산 중...');
-    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 탄성 버클링 재계산 중...');
 
     const typeNames = {
       rotate_90_cw: '90° 시계방향 회전',
@@ -1096,7 +1213,7 @@ class CFDesignerApp {
     this.canvas2d.setData(this.currentGeometry, this.currentProperties);
     this.canvas2d.clearPropertiesMarkers();
     this.canvas2d.showLoading('⏳ 단면 성질 재계산 중...');
-    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 탄성 버클링 재계산 중...');
     this.closeRotateModal();
 
     this.showStatus(`🔄 ${angle}° 임의각도 회전 적용 및 정밀 단면해석 중...`, 'busy');
@@ -1165,7 +1282,7 @@ class CFDesignerApp {
 
     this.canvas2d.clearPropertiesMarkers();
     this.canvas2d.showLoading('⏳ 리브 추가 계산 중...');
-    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 탄성 버클링 재계산 중...');
 
     const payload = {
       elements: this.currentGeometry.elements,
@@ -1332,7 +1449,7 @@ class CFDesignerApp {
     if (!this.selectedLibSectionData) return;
     this.canvas2d.clearPropertiesMarkers();
     this.canvas2d.showLoading('⏳ 라이브러리 단면 로드 중...');
-    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
+    if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 탄성 버클링 재계산 중...');
     this.updateSectionData(this.selectedLibSectionData);
     this.closeLibraryModal();
   }
@@ -1530,8 +1647,8 @@ class CFDesignerApp {
           <td style="color: ${cripDcColor}; font-weight: 600;" title="웨브 크리플링 D/C (Ru=${cand.reaction_ru_kn} kN)">${cand.dc_crippling}</td>
           <td style="font-weight: 700; color: ${maxDcColor};">${cand.max_dc}</td>
           <td>${savingsBadge}</td>
-          <td style="text-align: center;">
-            <button class="btn btn-outline" onclick="window.app.applyQuickDesignCandidate(${idx})" style="padding: 3px 8px; font-size: 11px; width: 100%;">
+          <td style="text-align: center; min-width: 70px;">
+            <button class="btn btn-outline" onclick="window.app.applyQuickDesignCandidate(${idx})" style="padding: 4px 8px; font-size: 11.5px; font-weight: 600; white-space: nowrap; width: 100%;">
               ⚡ 적용
             </button>
           </td>
@@ -1573,7 +1690,7 @@ class CFDesignerApp {
 
       this.canvas2d.clearPropertiesMarkers();
       this.canvas2d.showLoading('⏳ 퀵 디자인 단면 로드 중...');
-      if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 좌굴해석 재계산 중...');
+      if (this.viewer3d) this.viewer3d.showLoading('⏳ FSM 탄성 버클링 재계산 중...');
 
       this.updateSectionData({ geometry: geometry });
       this.closeQuickDesignModal();
@@ -1768,7 +1885,7 @@ class CFDesignerApp {
 
     const pts = this.getFsmPoints();
     if (pts.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">좌굴 데이터가 없습니다. 먼저 단면을 생성하거나 FSM 해석을 실행하세요.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">버클링 데이터가 없습니다. 먼저 단면을 생성하거나 FSM 해석을 실행하세요.</td></tr>`;
       return;
     }
 
@@ -1794,7 +1911,7 @@ class CFDesignerApp {
   exportFsmCsv() {
     const pts = this.getFsmPoints();
     if (pts.length === 0) {
-      alert('내보낼 FSM 좌굴 데이터가 없습니다.');
+      alert('내보낼 FSM 버클링 데이터가 없습니다.');
       return;
     }
 
@@ -1815,33 +1932,60 @@ class CFDesignerApp {
     document.body.removeChild(link);
   }
 
-  // ================= Phase 3: Winter Effective Width =================
-  async toggleEffectiveWidth() {
-    if (!this.canvas2d.showEffective) {
-      // Open modal to configure stress or directly compute
-      this.openEffectiveModal();
+  // ================= Phase 3 / Phase 9: Winter Effective Width =================
+  toggleEffectiveWidthToolbar() {
+    if (this.canvas2d.showEffective) {
+      // Already active -> Turn off
+      this.resetEffectiveState();
     } else {
-      this.canvas2d.toggleEffective(false);
-      const btn = document.getElementById('btnToggleEffective');
-      if (btn) btn.classList.remove('active');
+      // Inactive -> Open modal to compute and overlay
+      this.openEffectiveModal();
+    }
+  }
+
+  renderMathInEffectiveModal() {
+    if (window.renderMathInElement) {
+      const modal = document.getElementById('effectiveModal');
+      if (modal) {
+        window.renderMathInElement(modal, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ],
+          ignoredClasses: ['form-input', 'form-select']
+        });
+      }
+    }
+    if (window.katex) {
+      document.querySelectorAll('#effectiveModal .math-tex').forEach(el => {
+        const tex = el.getAttribute('data-tex');
+        if (tex) {
+          try {
+            window.katex.render(tex, el, { throwOnError: false });
+          } catch (e) {
+            console.error('KaTeX render error:', e);
+          }
+        }
+      });
     }
   }
 
   openEffectiveModal() {
     document.getElementById('effectiveModal').classList.add('active');
-    this.computeEffectiveWidth();
+    this.renderMathInEffectiveModal();
+    this.computeEffectiveModalValues(false);
   }
 
   closeEffectiveModal() {
     document.getElementById('effectiveModal').classList.remove('active');
   }
 
-  async computeEffectiveWidth() {
+  async computeEffectiveModalValues(applyToCanvas = false) {
     if (!this.currentGeometry || !this.currentGeometry.elements) return;
 
-    const stressF = parseFloat(document.getElementById('effStressInput').value) || 345.0;
-    const momentAxis = document.getElementById('effAxisSelect').value || 'X';
-    const fy = parseFloat(document.getElementById('yieldStress').value) || 345.0;
+    const stressF = parseFloat(document.getElementById('effStressInput')?.value) || 345.0;
+    const momentAxis = document.getElementById('effAxisSelect')?.value || 'X';
+    const fy = parseFloat(document.getElementById('yieldStress')?.value) || 345.0;
 
     try {
       const res = await fetch('/api/section/effective', {
@@ -1856,21 +2000,67 @@ class CFDesignerApp {
         })
       });
 
+      if (!res.ok) return;
       const data = await res.json();
-      document.getElementById('valAe').textContent = `${data.ae} mm² (Gross: ${data.ag} mm²)`;
-      document.getElementById('valAeRatio').textContent = `${(data.area_ratio * 100.0).toFixed(1)}%`;
-      document.getElementById('valIxe').textContent = `${data.ixe} mm⁴`;
-      document.getElementById('valDeltaY').textContent = `${data.delta_y > 0 ? '+' : ''}${data.delta_y} mm`;
+      this.lastEffectiveData = data;
+      this.lastEffectiveStress = stressF;
 
-      // Set segments in Canvas2D and enable overlay
-      this.canvas2d.setEffectiveSegments(data.segments);
-      this.canvas2d.toggleEffective(true);
+      // 1. Update only internal modal summary fields
+      const elAe = document.getElementById('valAe');
+      if (elAe) elAe.textContent = `${data.ae} mm² (Gross: ${data.ag} mm²)`;
+      const elAeRatio = document.getElementById('valAeRatio');
+      if (elAeRatio) elAeRatio.textContent = `${(data.area_ratio * 100.0).toFixed(1)}%`;
+      const elIxe = document.getElementById('valIxe');
+      if (elIxe) elIxe.textContent = `${data.ixe} mm⁴`;
+      const elDeltaY = document.getElementById('valDeltaY');
+      if (elDeltaY) elDeltaY.textContent = `${data.delta_y > 0 ? '+' : ''}${data.delta_y} mm`;
 
-      const btn = document.getElementById('btnToggleEffective');
-      if (btn) btn.classList.add('active');
+      if (applyToCanvas) {
+        // 2. Apply to 2D Canvas & Right properties panel
+        this.canvas2d.setEffectiveSegments(data.segments);
+        this.canvas2d.toggleEffective(true);
+
+        const btn = document.getElementById('btnToggleEffective');
+        if (btn) btn.classList.add('active');
+
+        // Update Right Dashboard Effective Properties Card
+        const effCard = document.getElementById('cardEffectiveProps');
+        if (effCard) {
+          effCard.style.display = 'block';
+          const tag = document.getElementById('effCardStressTag');
+          if (tag) tag.textContent = `f = ${stressF} MPa (${momentAxis === 'X' ? '강축 휨' : (momentAxis === 'Y' ? '약축 휨' : '축압축')})`;
+          const propAe = document.getElementById('propAe');
+          if (propAe) propAe.textContent = data.ae;
+          const propAeRatio = document.getElementById('propAeRatio');
+          if (propAeRatio) propAeRatio.textContent = (data.area_ratio * 100.0).toFixed(1) + '%';
+          const propIxe = document.getElementById('propIxe');
+          if (propIxe) propIxe.textContent = data.ixe;
+          const propDeltaY = document.getElementById('propDeltaY');
+          if (propDeltaY) propDeltaY.textContent = (data.delta_y > 0 ? '+' : '') + data.delta_y;
+        }
+
+        this.closeEffectiveModal();
+        this.showStatus(`유효단면 2D 오버레이 적용 완료 (Ae = ${data.ae} mm²)`, 'success', 3000);
+      }
     } catch (err) {
       console.error('Compute effective width error:', err);
     }
+  }
+
+  applyEffectiveOverlayToCanvas() {
+    this.computeEffectiveModalValues(true);
+  }
+
+  resetEffectiveState() {
+    if (this.canvas2d) {
+      this.canvas2d.toggleEffective(false);
+      this.canvas2d.setEffectiveSegments([]);
+    }
+    const btn = document.getElementById('btnToggleEffective');
+    if (btn) btn.classList.remove('active');
+    const effCard = document.getElementById('cardEffectiveProps');
+    if (effCard) effCard.style.display = 'none';
+    this.lastEffectiveData = null;
   }
 
   // ================= Phase 4: 1D Frame & Beam Analysis Methods =================

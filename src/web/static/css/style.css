@@ -455,9 +455,9 @@ main.center-workspace {
 
 .viewer-3d-loading-badge {
   position: absolute;
-  top: 24px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   background: var(--bg-card);
   border: 1.5px solid var(--accent-primary);
   color: var(--text-primary);

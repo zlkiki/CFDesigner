@@ -14,6 +14,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
+  <!-- KaTeX for Math Equations -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
   <!-- App Styles -->
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
@@ -262,29 +267,47 @@
         <div class="viewer-header">
           <div class="viewer-tab-group">
             <button class="viewer-tab-btn active" data-mode="2d">📐 2D 단면 형상</button>
-            <button class="viewer-tab-btn" data-mode="3d">🌀 3D 좌굴 모드형상</button>
+            <button class="viewer-tab-btn" data-mode="3d">🌀 3D 버클링 모드형상</button>
           </div>
 
           <!-- Mode Selector for 3D Viewer -->
-          <div id="modeSelectorBar" style="display: none; align-items: center; gap: 8px;">
+          <div id="modeSelectorBar" style="display: none; align-items: center; gap: 6px; flex-wrap: wrap;">
             <span style="font-size: 11.5px; color: var(--text-secondary);">모드:</span>
-            <button class="btn btn-outline btn-mode-select btn-primary" data-mode-key="local_mode" style="padding: 3px 8px; font-size: 11px;">국부(Local)</button>
-            <button class="btn btn-outline btn-mode-select" data-mode-key="dist_mode" style="padding: 3px 8px; font-size: 11px;">왜곡(Distortional)</button>
-            <button class="btn btn-outline btn-mode-select" data-mode-key="glob_mode" style="padding: 3px 8px; font-size: 11px;">전체(Global)</button>
-            <span style="font-size: 11.5px; color: var(--text-secondary); margin-left: 8px;">진폭:</span>
-            <input type="range" id="ampSlider" min="1" max="40" value="15" style="width: 70px;">
+            <button class="btn btn-outline btn-mode-select active btn-primary" data-mode-key="local_mode" style="padding: 3px 8px; font-size: 11px;">로컬 버클링(Local)</button>
+            <button class="btn btn-outline btn-mode-select" data-mode-key="dist_mode" style="padding: 3px 8px; font-size: 11px;">디스토셔널 버클링(Distortional)</button>
+            <button class="btn btn-outline btn-mode-select" data-mode-key="glob_mode" style="padding: 3px 8px; font-size: 11px;">글로벌 버클링(Global)</button>
+            <span style="font-size: 11.5px; color: var(--text-secondary); margin-left: 4px;">진폭:</span>
+            <input type="range" id="ampSlider" min="1" max="40" value="15" style="width: 60px;">
+            <button class="btn btn-outline" id="btnToggleAnim3d" style="padding: 3px 7px; font-size: 11px;" title="진동 애니메이션 재생/일시정지">⏸️ 정지</button>
+            <button class="btn btn-outline" id="btnToggleStress3d" style="padding: 3px 7px; font-size: 11px;" title="초기 응력분포 프로파일 표시">📊 응력분포</button>
+            <button class="btn btn-outline" id="btnExportImage3d" style="padding: 3px 7px; font-size: 11px;" title="3D 버클링 형상 PNG 저장">📷 캡처</button>
+            <button class="btn btn-outline" id="btnPrint3d" style="padding: 3px 7px; font-size: 11px;" title="3D 버클링 형상 인쇄">🖨️ 인쇄</button>
           </div>
         </div>
 
         <div class="viewer-canvas-container">
           <canvas id="canvas2d"></canvas>
-          <div id="viewer3dContainer" style="width: 100%; height: 100%; display: none;"></div>
+          <div id="viewer3dContainer" style="width: 100%; height: 100%; display: none; position: relative;">
+            <!-- 3D Overlay Info: Half-wavelength, Buckling factor, Work ratio, Capacity -->
+            <div id="viewer3dOverlayInfo" style="position: absolute; top: 12px; left: 14px; background: rgba(15, 23, 42, 0.85); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 11.5px; color: #f8fafc; pointer-events: none; z-index: 20; backdrop-filter: blur(6px); line-height: 1.5;">
+              <div style="font-weight: 700; color: #38bdf8; margin-bottom: 2px;" id="val3dModeTitle">로컬 버클링 모드 (Local Buckling)</div>
+              <div style="display: flex; gap: 12px; color: var(--text-muted);">
+                <span>반파장 L: <strong id="val3dLength" style="color: #f8fafc;">- mm</strong></span>
+                <span>버클링계수 β: <strong id="val3dBeta" style="color: #f8fafc;">-</strong></span>
+              </div>
+              <div style="display: flex; gap: 12px; color: var(--text-muted); margin-top: 2px;">
+                <span>Work Ratio: <strong id="val3dWorkRatio" style="color: #a78bfa;">-</strong></span>
+                <span>공칭강도 Pn/Mn: <strong id="val3dDsmCap" style="color: #34d399;">-</strong></span>
+              </div>
+            </div>
+          </div>
 
           <!-- 2D Overlay Tools & Transforms -->
           <div class="viewer-overlay-tools" id="tools2dOverlay">
             <button class="overlay-btn" id="btnFitView" title="화면 맞춤 (Fit View)">⛶</button>
             <div class="overlay-divider"></div>
             <button class="overlay-btn" id="btnToggleEffective" title="Winter 식 기반 유효단면(Effective Section) 2D 오버레이 렌더링 토글">👁️ 유효단면</button>
+            <button class="overlay-btn" id="btnToggle2dModeShape" title="FSM 2D 단면 변형 모드형상(도해3) 렌더링 토글">🌀 2D 변형모드</button>
             <div class="overlay-divider"></div>
             <button class="overlay-btn" id="btnOpenElementEditor" title="요소 편집 (Element Spreadsheet)">📋 요소편집</button>
             <button class="overlay-btn" id="btnRotateCw" title="90° 시계방향 회전">↻ 90°</button>
@@ -303,9 +326,9 @@
       <div class="chart-workspace">
         <div class="chart-header">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span>📈 FSM 탄성 좌굴곡선 (Signature Curve)</span>
+            <span>📈 FSM 탄성 버클링 곡선 (Signature Curve)</span>
             <button class="btn btn-outline" id="btnOpenFsmParams" style="padding: 2px 8px; font-size: 11px;" title="반파장 스윕 범위 및 스텝수 커스텀 설정">⚙️ 세부설정</button>
-            <button class="btn btn-outline" id="btnOpenFsmData" style="padding: 2px 8px; font-size: 11px;" title="반파장-좌굴계수 수치 테이블 및 CSV 다운로드">📊 수치데이터</button>
+            <button class="btn btn-outline" id="btnOpenFsmData" style="padding: 2px 8px; font-size: 11px;" title="반파장-버클링계수 수치 테이블 및 CSV 다운로드">📊 수치데이터</button>
           </div>
           <div style="display: flex; gap: 14px; font-size: 11.5px; font-weight: normal; color: var(--text-secondary);">
             <span>국부(Pcrl): <strong id="valPcrl" style="color: #38bdf8;">-</strong></span>
@@ -339,6 +362,20 @@
           <tr><td class="name">전단중심 X0 / Y0</td><td class="val"><span id="propX0">-</span> / <span id="propY0">-</span></td><td class="unit">mm</td></tr>
           <tr><td class="name">극단면2차반경 (ro)</td><td class="val" id="propRo">-</td><td class="unit">mm</td></tr>
         </table>
+
+        <!-- Effective Properties Card (Shown when 2D overlay is active) -->
+        <div id="cardEffectiveProps" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+          <div style="font-size: 11.5px; font-weight: 700; color: #3b82f6; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+            <span>👁️ 유효단면 성질 (Effective)</span>
+            <span id="effCardStressTag" style="font-size: 10.5px; color: var(--text-muted); font-weight: 500;">f = 345 MPa</span>
+          </div>
+          <table class="property-table">
+            <tr><td class="name">유효단면적 (Ae)</td><td class="val" id="propAe" style="color: #3b82f6; font-weight: 600;">-</td><td class="unit">mm²</td></tr>
+            <tr><td class="name">단면적 유효율 (Ae/Ag)</td><td class="val" id="propAeRatio" style="color: #3b82f6; font-weight: 600;">-</td><td class="unit">%</td></tr>
+            <tr><td class="name">유효 2차모멘트 (Ixe)</td><td class="val" id="propIxe" style="color: #3b82f6; font-weight: 600;">-</td><td class="unit">mm⁴</td></tr>
+            <tr><td class="name">도심 이동량 (Δy)</td><td class="val" id="propDeltaY" style="color: var(--accent-warning); font-weight: 600;">-</td><td class="unit">mm</td></tr>
+          </table>
+        </div>
       </div>
 
       <!-- KDS 14 31 10 Member Design Check Results -->
@@ -432,8 +469,8 @@
         <div style="display: flex; align-items: center; gap: 12px;">
           <strong style="font-size: 15px; color: var(--text-primary);">📑 구조계산서 출력 (KDS 14 31 10 / AISI S100)</strong>
           <div style="display: inline-flex; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 2px;">
-            <button class="btn btn-xs active" id="btnReportModeSummary" style="padding: 4px 10px; font-size: 11.5px; border-radius: 4px;">📋 간략 요약 보고서</button>
-            <button class="btn btn-xs" id="btnReportModeDetailed" style="padding: 4px 10px; font-size: 11.5px; border-radius: 4px;">📑 정식 상세 계산서</button>
+            <button class="btn btn-xs active" id="btnReportModeSummary" style="padding: 4px 10px; font-size: 11.5px; border-radius: 4px;">📋 요약 보고서 (Summary Report)</button>
+            <button class="btn btn-xs" id="btnReportModeDetailed" style="padding: 4px 10px; font-size: 11.5px; border-radius: 4px;">📑 상세 보고서 (Detailed Calculation Report)</button>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
@@ -476,7 +513,7 @@
               <label><input type="checkbox" id="chkRptTorsion" checked> 3. 비틀림/뒴 성질 (Torsion Wn, Sw)</label>
               <label><input type="checkbox" id="chkRptEffective" checked> 4. 유효단면 성질 (Winter Iteration)</label>
               <label><input type="checkbox" id="chkRptStrength" checked> 5. 완전지지 강도 (Fully Braced)</label>
-              <label><input type="checkbox" id="chkRptFSM" checked> 6. FSM 탄성좌굴 (Signature Curve)</label>
+              <label><input type="checkbox" id="chkRptFSM" checked> 6. FSM 탄성 버클링 (Signature Curve)</label>
               <label><input type="checkbox" id="chkRptMember" checked> 7. KDS 부재내력 (Member Design)</label>
               <label><input type="checkbox" id="chkRptCrippling" checked> 8. 웨브 크리플링 (Web Crippling)</label>
             </div>
@@ -728,7 +765,7 @@
 
   <!-- ================= Phase 3/Phase 8: Quick Design Full-Spec Modal (frmQuickDesign.cs 100% Port) ================= -->
   <div class="modal-backdrop" id="quickDesignModal">
-    <div class="modal-dialog modal-dialog-lg" style="max-width: 1320px; width: 96vw;">
+    <div class="modal-dialog modal-dialog-lg" style="max-width: 1440px; width: 98vw;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <strong style="font-size: 15px;">⚡ 퀵 디자인 (Quick Design) 최적 경량 단면 자동 탐색</strong>
@@ -736,7 +773,7 @@
         </div>
         <button class="btn btn-outline" id="btnCloseQuickDesignModal" style="padding: 4px 10px;">✕ 닫기</button>
       </div>
-      <div class="modal-body" style="padding: 16px; display: grid; grid-template-columns: 310px 330px 1fr; gap: 16px; max-height: 84vh; overflow-y: auto;">
+      <div class="modal-body" style="padding: 16px; display: grid; grid-template-columns: 320px 340px 1fr; gap: 16px; max-height: 84vh; overflow-y: auto;">
         
         <!-- Column 1: Section & Material Filtering -->
         <div class="card" style="background: var(--bg-tertiary); padding: 12px; display: flex; flex-direction: column; gap: 10px;">
@@ -846,7 +883,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">횡좌굴 지지 (Bracing)</label>
+            <label class="form-label">횡 버클링 지지 (Bracing)</label>
             <select class="form-select" id="qdBracingSelect">
               <option value="Unbraced" selected>지점만 지지 (Unbraced)</option>
               <option value="Midpoint">중앙 1개소 지지 (Midpoint L/2)</option>
@@ -952,7 +989,7 @@
   <div class="modal-backdrop" id="fsmParamsModal">
     <div class="modal-dialog modal-dialog-sm">
       <div class="modal-header">
-        <strong style="font-size: 15px;">⚙️ FSM 좌굴해석 세부 설정</strong>
+        <strong style="font-size: 15px;">⚙️ FSM 탄성 버클링 해석 세부 설정</strong>
         <button class="btn btn-outline" id="btnCloseFsmParams" style="padding: 4px 10px;">✕ 닫기</button>
       </div>
       <div class="modal-body" style="padding: 16px;">
@@ -992,7 +1029,7 @@
   <div class="modal-backdrop" id="fsmDataModal">
     <div class="modal-dialog modal-dialog-md">
       <div class="modal-header">
-        <strong style="font-size: 15px;">📊 FSM 좌굴해석 수치 데이터 그리드</strong>
+        <strong style="font-size: 15px;">📊 FSM 탄성 버클링 해석 수치 데이터 그리드</strong>
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-outline" id="btnExportFsmCsv" style="padding: 4px 10px; font-size: 12px;">📥 CSV 다운로드</button>
           <button class="btn btn-outline" id="btnCloseFsmData" style="padding: 4px 10px;">✕ 닫기</button>
@@ -1005,9 +1042,9 @@
               <tr>
                 <th>No</th>
                 <th>반파장 L (mm)</th>
-                <th>좌굴하중계수 β (Pcr / Py)</th>
-                <th>탄성좌굴하중 Pcr (kN)</th>
-                <th>탄성좌굴모멘트 Mcr (kN·m)</th>
+                <th>버클링 하중계수 β (Pcr / Py)</th>
+                <th>탄성버클링 하중 Pcr (kN)</th>
+                <th>탄성버클링 모멘트 Mcr (kN·m)</th>
               </tr>
             </thead>
             <tbody id="fsmDataTableBody">
@@ -1029,7 +1066,7 @@
       <div class="modal-body" style="padding: 16px;">
         <div class="grid-input-2">
           <div class="form-group">
-            <label class="form-label">적용 응력 수준 $f$ (MPa)</label>
+            <label class="form-label">적용 응력 수준 <span class="math-tex" data-tex="f">f</span> (MPa)</label>
             <input type="number" class="form-input" id="effStressInput" value="345.0" step="5">
           </div>
           <div class="form-group">
@@ -1044,26 +1081,26 @@
 
         <div id="effResultSummary" style="margin-top: 14px; background: var(--bg-tertiary); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; line-height: 1.7;">
           <div style="display: flex; justify-content: space-between;">
-            <span>유효단면적 $A_e$:</span>
+            <span>유효단면적 <span class="math-tex" data-tex="A_e">A_e</span>:</span>
             <strong id="valAe">- mm²</strong>
           </div>
           <div style="display: flex; justify-content: space-between;">
-            <span>단면적 유효율 ($A_e / A_g$):</span>
+            <span>단면적 유효율 (<span class="math-tex" data-tex="A_e / A_g">A_e / A_g</span>):</span>
             <strong id="valAeRatio" style="color: var(--accent-primary);">- %</strong>
           </div>
           <div style="display: flex; justify-content: space-between;">
-            <span>유효 단면2차모멘트 $I_{xe}$:</span>
+            <span>유효 단면2차모멘트 <span class="math-tex" data-tex="I_{xe}">I_{xe}</span>:</span>
             <strong id="valIxe">- mm⁴</strong>
           </div>
           <div style="display: flex; justify-content: space-between;">
-            <span>도심 이동량 ($\Delta y$):</span>
+            <span>도심 이동량 (<span class="math-tex" data-tex="\Delta y">\Delta y</span>):</span>
             <strong id="valDeltaY" style="color: var(--accent-warning);">- mm</strong>
           </div>
         </div>
 
         <div style="margin-top: 14px; display: flex; gap: 8px;">
           <button class="btn btn-primary" id="btnComputeEffective" style="flex: 1; padding: 8px;">
-            ⚡ 유효단면 계산 및 2D 캔버스 오버레이
+            ⚡ 유효단면 2D 캔버스 오버레이
           </button>
         </div>
       </div>
