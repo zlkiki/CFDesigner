@@ -1,0 +1,113 @@
+# [요구사항 11] 구조계산서 상세 계산 과정(Calculation Trace) 완전 복원: 설계 기준 조항(KDS/AISI), 수식 정의, 중간 파라미터 대입 및 전개식 100% 텍스트 수록
+
+> **요구사항 번호**: `요구사항11`  
+> **상태**: 🚀 `계획 완료 및 대기 (Active Master)`  
+> **작성 일자**: 2026-09-01  
+> **원본 레퍼런스 (Ground Truth)**:
+> - [`decompiled_src/RSG/CFS/Section.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/Section.cs) (라인 2715~3600: `CFS.strTrace` 600+ 라인의 인장/압축/휨/전단/크리플링/조합응력 상세 수식 전개 텍스트 엔진)
+> - [`decompiled_src/RSG/CFS/Report.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/Report.cs) (라인 920~1050: `rptMemberCheck`, `rptTrace` 상세 계산서 포맷팅 및 RTF 조립)
+> - [`decompiled_src/RSG/CFS/MemberCheck.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/MemberCheck.cs) (라인 400~1200: 한계상태별 상관방정식 `EqText` 및 메시지 조립)
+> - [`docs/12_structural_calculation_report_specification.md`](file:///f:/PyProject/CFDesigner/docs/12_structural_calculation_report_specification.md) (구조계산서 시스템 명세서)
+
+---
+
+## 1. 배경 및 추진 목적
+
+현재 CFDesigner의 구조계산서([`src/web/report/html_report.py`](file:///f:/PyProject/CFDesigner/src/web/report/html_report.py))는 단면 기하 성질, FSM 요약표, DSM 공칭강도 요약표 위주로 구성되어 있어, **원본 상용 CFS 프로그램의 핵심 기능인 "Calculation Details (상세 수식 전개 및 계산 과정 Trace)"**이 축약되어 있는 상태입니다.
+
+원본 CFS는 [`Section.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/Section.cs) 및 [`Report.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/RSG/CFS/Report.cs)에서 구조엔지니어가 인허가 관공서나 구조기술사 검토용으로 제출할 수 있도록:
+1. **적용 기준 조항 번호 명시** (예: `KDS 14 31 10 (4.1.1)`, `AISI S100-16 Eq. E2-1`)
+2. **공학 수식의 원형 표기** (예: $P_n = A_e \cdot F_n$, $F_n = (0.658^{\lambda_c^2}) F_y$)
+3. **중간 산정 파라미터의 실제 대입값 표기** (예: $F_{cre} = 345.2\text{ MPa}, \lambda_c = 0.852, A_e = 412.5\text{ mm}^2$)
+4. **최종 설계강도 및 안전율/저항계수 표기** (예: $\phi P_n = 112.4\text{ kN} (\phi_c = 0.85), \Omega = 1.80$)
+5. **한계상태별 상관방정식 전개식** (예: $\frac{P_u}{\phi P_n} + \frac{M_{ux}}{\phi M_{nx}} + \frac{M_{uy}}{\phi M_{ny}} = \frac{45.0}{112.4} + \frac{2.5}{4.8} + 0 = 0.921 \le 1.0$)
+
+이 모든 세부 과정을 완전한 텍스트 및 KaTeX 수식 블록으로 생성하여 출력합니다.  
+이에 따라 원본 `Section.cs`의 `CFS.strTrace` 엔진을 Python 구조계산서 생성기에 100% 완전 이식하여 **실제 인허가 제출용 최고급 구조계산서**를 구현합니다.
+
+---
+
+## 2. 세부 구현 요구사항 (5대 영역)
+
+### 2.1 인장 및 압축 부재 상세 계산 과정 Trace 복원
+1. **축방향 인장 강도 ($T_n$) Trace**:
+   - 총단면 항복 파괴: $T_n = A_g \cdot F_y$, $\phi_t = 0.90, \Omega_t = 1.67$ 대입식 전개.
+   - 순단면 파단 파괴: $T_n = A_n \cdot F_u$, $\phi_t = 0.75, \Omega_t = 2.00$ 대입식 전개.
+2. **축방향 압축 강도 ($P_n$) Trace (KDS 14 31 10 & AISI S100)**:
+   - **글로벌 버클링 (Global Buckling)**:
+     - 세장비 $K L / r$, 오일러 버클링 응력 $F_{cre} = \pi^2 E / (K L / r)^2$ 산정 전개.
+     - 무차원 세장비 $\lambda_c = \sqrt{F_y / F_{cre}}$ 및 탄성/비탄성 좌굴응력 $F_n$ 분기 판정식 표출.
+   - **로컬 버클링 (Local Buckling)**:
+     - 유효단면법(EWM): 각 판 요소별 Winter 유효폭 $b_e / w$ 산정 및 $A_e = \sum b_e \cdot t$ 전개.
+     - 직접강도법(DSM): $P_{crl}, \lambda_l = \sqrt{P_{ne} / P_{crl}}$, 공칭강도 $P_{nl}$ 산정식 대입 전개.
+   - **디스토셔널 버클링 (Distortional Buckling)**:
+     - $P_{crd}, \lambda_d = \sqrt{P_y / P_{crd}}$, 공칭강도 $P_{nd}$ 산정식 대입 전개.
+   - **최종 공칭 압축강도**: $P_n = \min(P_{ne}, P_{nl}, P_{nd})$ 판정 과정.
+
+---
+
+### 2.2 휨 부재 ($M_{nx}, M_{ny}$) 상세 계산 과정 Trace 복원
+1. **초기 항복 모멘트 및 소성 모멘트**:
+   - $M_y = S_{fy} \cdot F_y$, $M_p = Z_f \cdot F_y$ 산정식.
+2. **글로벌 횡-비틀림 버클링 (LTB)**:
+   - 모멘트 구배 보정계수 $C_b = \frac{12.5 M_{max}}{2.5 M_{max} + 3 M_A + 4 M_B + 3 M_C}$ 전개.
+   - 탄성 횡-비틀림 버클링 모멘트 $M_{cre}$ 산정식 (이축대칭/일축대칭/비대칭 단면별 엄밀식 표기).
+   - 공칭 LTB 강도 $M_{ne}$ 결정 과정.
+3. **로컬 및 디스토셔널 버클링 휨강도**:
+   - EWM 유효단면계수 $S_e$ 및 DSM $M_{crl}, M_{crd}$ 기반 $M_{nl}, M_{nd}$ 산정식 대입 전개.
+4. **최종 공칭 휨강도**: $M_{nx} = \min(M_{ne}, M_{nl}, M_{nd})$ 판정 과정.
+
+---
+
+### 2.3 전단강도 ($V_n$) 및 웨브 크리플링 ($P_{nc}$) 상세 Trace 복원
+1. **웨브 전단강도 ($V_n$) 산정 Trace**:
+   - 각 웨브 판요소별 $h/t$ 판폭두께비 및 전단좌굴계수 $k_v = 5.34 + \frac{4.0}{(a/h)^2}$ 산정.
+   - 전단항복($0.6 F_y$), 비탄성 전단좌굴, 탄성 전단좌굴의 3구간 기준 조항 및 수치 대입 전개.
+2. **웨브 크리플링 ($P_{nc}$) 산정 Trace**:
+   - 재하조건(EOF, IOF, ETF, ITF) 자동 판별 조항 표기.
+   - 지압길이 $N$, 굽힘반경 $R$, 판두께 $t$ 및 계수($C, C_R, C_N, C_h$) 대입식:
+     $$P_{nc} = C \cdot t^2 \cdot F_y \cdot \left(1 - C_R \sqrt{\frac{R}{t}}\right)\left(1 + C_N \sqrt{\frac{N}{t}}\right)\left(1 - C_h \sqrt{\frac{h}{t}}\right)$$
+
+---
+
+### 2.4 P-M-V-B 다축 조합응력 상관식 전개 및 세부 판정식
+1. **축력-휨 2축 조합 (P-M Interaction)**:
+   - $P-\delta$ 효과(모멘트 증대계수 $B_1, B_2$ 또는 $C_m / (1 - P/P_E)$) 산정식 전개.
+   - 단면 강도 상관식: $\frac{P_u}{\phi P_n} + \frac{M_{ux}}{\phi M_{nx}} + \frac{M_{uy}}{\phi M_{ny}} \le 1.0$ (대입 수치 및 D/C 비).
+   - 부재 안정성 상관식: $\frac{P_u}{\phi P_{ne}} + \frac{C_{mx} M_{ux}}{\phi M_{nx} (1 - P_u/P_{Ex})} + \frac{C_{my} M_{uy}}{\phi M_{ny} (1 - P_u/P_{Ey})} \le 1.0$.
+2. **휨-전단 및 휨-크리플링 조합**:
+   - $\left(\frac{M_u}{\phi M_n}\right)^2 + \left(\frac{V_u}{\phi V_n}\right)^2 \le 1.0$ 전개식.
+   - $\frac{P_{wc}}{\phi P_{nc}} + \frac{M_u}{\phi M_n} \le 1.3$ (또는 기준 규준 상관식) 전개식.
+3. **비틀림 바이모멘트 ($B$) 조합응력**:
+   - $\sigma_{total} = \frac{P}{A} + \frac{M_x y}{I_x} + \frac{M_y x}{I_y} + \frac{B \omega}{C_w} \le \phi F_y$ 단면 최대 응력 전개.
+
+---
+
+### 2.5 구조계산서 모달 UI & PDF 인쇄 렌더러 통합 (`src/web/report/html_report.py`)
+1. **[상세 보고서] 모드에 "제5장: 상세 수식 전개 및 계산 과정 (Calculation Trace Details)" 장 신설**:
+   - 각 하중 케이스별로 수식, 파라미터, 대입값, 단위가 포함된 고품질 KaTeX/HTML 블록 렌더링.
+2. **모달 내 [계산 Trace 접기/펼치기] 아코디언 지원**:
+   - 너무 방대한 경우 특정 부재력(압축, 강축휨, 약축휨, 전단, 크리플링, 조합응력)을 원클릭으로 접고 펼칠 수 있는 인터랙티브 UI 제공.
+3. **인쇄/PDF 출력 시 완벽한 페이지 브레이크(A4 Page Break)**:
+   - 인쇄 시 수식 블록 중간이 잘리지 않도록 `page-break-inside: avoid;` 및 깔끔한 A4 레이아웃 보장.
+
+---
+
+## 3. 하위 작업 분할 (Scope Partitioning 제안)
+
+| Phase | 세부 작업 내용 | 주요 파일 | 검증 기준 |
+|---|---|---|---|
+| **Phase 11-1** | Python 부재설계 엔진 Trace 생성기 구축 (인장/압축/휨/전단/크리플링/조합 수식 조립기) | `src/design/kds_trace_engine.py`, `src/design/member_check.py` | `pytest tests/engine/` (수식 대입값 및 텍스트 일치성 검증) |
+| **Phase 11-2** | HTML 구조계산서 제너레이터에 Trace 장 신설 및 KaTeX 수식 렌더러 통합 | `src/web/report/html_report.py`, `src/web/report/templates/` | 리포트 HTML 생성 및 수식 정상 표출 확인 |
+| **Phase 11-3** | 계산서 모달 UI 아코디언 접기/펼치기 및 A4 인쇄 스타일 최적화 | `src/web/static/css/style.css`, `src/web/static/js/app.js` | 브라우저 모달 UI 및 인쇄 미리보기 검증 |
+| **Phase 11-4** | CFS 원본 `rptMemberCheck` 대비 1:1 전수 수식 대조 및 전수 테스트 통과 | `docs/`, `tests/ui/test_report_generation.py` | `pytest` 전체 테스트 100% 통과 |
+
+---
+
+## 4. 수용 기준 (Acceptance Criteria)
+
+1. [ ] **AC 11-1**: 부재설계 시 인장, 압축, 휨, 전단, 크리플링, P-M 조합의 설계 기준 조항 번호와 계산 수식 원형이 빠짐없이 생성되어야 한다.
+2. [ ] **AC 11-2**: 계산서의 모든 수식 전개에 실제 입력 파라미터($F_y, L_x, K_x, A_e, S_e, M_{cre}$ 등)가 명확히 대입된 중간 수치 및 단위가 표기되어야 한다.
+3. [ ] **AC 11-3**: P-M 상관식 및 휨-전단, 휨-크리플링 조합식의 실제 계산값과 안전율(D/C)이 한눈에 검토 가능하도록 수록되어야 한다.
+4. [ ] **AC 11-4**: 상세 구조계산서 모달 및 A4 인쇄/PDF 저장 시 수식이 깨짐 없이 미려하게 KaTeX/수식 블록으로 출력되어야 한다.
+5. [ ] **AC 11-5**: 기존 단위/통합 테스트 스위트가 오류 없이 100% 통과해야 한다.
