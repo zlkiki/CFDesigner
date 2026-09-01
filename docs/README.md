@@ -20,6 +20,7 @@
 | **[`09_cfs_legacy_help_manual_vs_web_gap_analysis.md`](file:///f:/PyProject/CFDesigner/docs/09_cfs_legacy_help_manual_vs_web_gap_analysis.md)** | CFS 레거시 도움말 vs 웹 도움말 전수 Gap 분석서 | 원본 도움말 79개 토픽 + 13종 이미지 vs 웹 25개 토픽 1:1 대조 및 누락(Gap) 식별 |
 | **[`10_cfs_legacy_ui_vs_web_gap_analysis.md`](file:///f:/PyProject/CFDesigner/docs/10_cfs_legacy_ui_vs_web_gap_analysis.md)** | CFS 레거시 UI vs 웹 구현 Gap 분석서 | 상용 CFS 14.0 원본 기능 100% 전수 대조 및 Phase 1~5 웹 이식 검증 |
 | **[`11_pytest_testing_guide.md`](file:///f:/PyProject/CFDesigner/docs/11_pytest_testing_guide.md)** | Pytest 도메인별 3대 테스트 가이드 | 엔진 / UI / 도움말 3대 영역 분리 구조, 초고속 실행 치트시트 및 검증 규칙 |
+| **[`12_structural_calculation_report_specification.md`](file:///f:/PyProject/CFDesigner/docs/12_structural_calculation_report_specification.md)** | 구조계산서 및 출력 시스템 명세서 | 듀얼 리포트 모드, CFS 원본 14종 리포트 전수 이식, 10대 장별 수식/테이블 및 SVG 다이어그램 사양 |
 | **[`cfs_help_manual/`](file:///f:/PyProject/CFDesigner/decompiled_src/cfs_help_manual/overview.htm)** | CFS 14.0 공식 매뉴얼 원문 아카이브 | CFS.chm 추출 95개 HTML 공식 이론 및 인터페이스 도움말 (`decompiled_src/`) |
 
 ---

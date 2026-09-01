@@ -110,6 +110,7 @@
 * 📊 **[CFS 레거시 도움말 vs 웹 Gap 분석서](file:///f:/PyProject/CFDesigner/docs/09_cfs_legacy_help_manual_vs_web_gap_analysis.md)**: 원본 도움말 79개 토픽 + 13종 이미지 vs 웹 25개 토픽 1:1 전수 대조 매트릭스
 * 🔍 **[CFS Legacy UI vs Web Gap 분석서](file:///f:/PyProject/CFDesigner/docs/10_cfs_legacy_ui_vs_web_gap_analysis.md)**: CFS 원본 UI 기능 전수 대조 및 웹 구현 현황
 * 🧪 **[Pytest 도메인별 3대 테스트 가이드](file:///f:/PyProject/CFDesigner/docs/11_pytest_testing_guide.md)**: 엔진 / UI / 도움말 3대 영역 분리 구조, 초고속 실행 치트시트 및 검증 규칙
+* 📑 **[구조계산서 및 출력 시스템 명세서](file:///f:/PyProject/CFDesigner/docs/12_structural_calculation_report_specification.md)**: 듀얼 리포트 모드, CFS 원본 14종 리포트 전수 이식, 10대 장별 수식/테이블 및 SVG 다이어그램 사양
 * 🔗 **[KDS 국가건설기준 연동 가이드 (kcsc2md)](file:///f:/PyProject/kcsc2md/docs/외부프로젝트_연동_및_조회_가이드.md)**: KDS 기준 Ground Truth 조회 표준
 
 
