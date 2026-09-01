@@ -43,16 +43,16 @@ def build():
     ret = subprocess.call(cmd, cwd=ROOT_DIR)
     
     if ret == 0:
-        dist_exe = os.path.join(ROOT_DIR, "dist", "CFDesigner.exe")
+        dist_dir = os.path.join(ROOT_DIR, "dist", "CFDesigner")
+        dist_exe = os.path.join(dist_dir, "CFDesigner.exe")
         if os.path.exists(dist_exe):
-            size_mb = os.path.getsize(dist_exe) / (1024 * 1024)
             print("=======================================================================")
-            print("  [SUCCESS] Build Succeeded!")
-            print(f"  [OUTPUT]  Executable : {dist_exe}")
-            print(f"  [SIZE]    File Size  : {size_mb:.2f} MB")
+            print("  [SUCCESS] Standalone Folder Build Succeeded!")
+            print(f"  [FOLDER]  Distribution Folder : {dist_dir}")
+            print(f"  [EXEC]    Main Executable     : {dist_exe}")
             print("=======================================================================")
         else:
-            print("[!] Build finished but output exe was not found in dist/")
+            print("[!] Build finished but output exe was not found in dist/CFDesigner/")
     else:
         print(f"[!] Build failed with exit code: {ret}")
         sys.exit(ret)

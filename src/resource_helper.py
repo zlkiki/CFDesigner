@@ -10,11 +10,13 @@ import sys
 def get_base_dir() -> str:
     """
     Returns the base directory of the application.
-    - In PyInstaller frozen bundle: returns sys._MEIPASS
+    - In PyInstaller frozen bundle: returns sys._MEIPASS or exe directory
     - In development mode: returns project root directory
     """
-    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-        return sys._MEIPASS
+    if getattr(sys, "frozen", False):
+        if hasattr(sys, "_MEIPASS") and os.path.exists(sys._MEIPASS):
+            return sys._MEIPASS
+        return os.path.dirname(sys.executable)
     # When running as normal Python script: 1 level up from src/
     return os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
