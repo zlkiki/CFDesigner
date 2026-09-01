@@ -3,7 +3,7 @@
 > **문서 상태**: 🌟 Single Source of Truth (SSOT)  
 > **문서 버전**: v2.0 (Phase 1~5 25개 전수 토픽 및 한·영 3-Way Bilingual 통합판)  
 > **관련 엔드포인트**: `/manual` (SPA 웹 뷰어) & `/api/manual/*` (REST API)  
-> **원본 레퍼런스**: CFS 14.0 공식 매뉴얼 ([`docs/cfs_help_manual/`](file:///f:/PyProject/CFDesigner/docs/cfs_help_manual/overview.htm)) & KDS 14 31 10 기준
+> **원본 레퍼런스**: CFS 14.0 공식 매뉴얼 ([`decompiled_src/cfs_help_manual/`](file:///f:/PyProject/CFDesigner/decompiled_src/cfs_help_manual/overview.htm)) & KDS 14 31 10 기준
 
 ---
 
@@ -129,7 +129,7 @@ class TopicDict(TypedDict):
 
 ## 5. KDS 14 31 10 & CFS 14.0 원본 무결성 대조 체계
 
-1. **CFS 14.0 오리지널 도움말 아카이브 ([`docs/cfs_help_manual/`](file:///f:/PyProject/CFDesigner/docs/cfs_help_manual/overview.htm))**:
+1. **CFS 14.0 오리지널 도움말 아카이브 ([`decompiled_src/cfs_help_manual/`](file:///f:/PyProject/CFDesigner/decompiled_src/cfs_help_manual/overview.htm))**:
    - 95개 오리지널 도움말 HTML 파일 보존.
    - 영문 원문 뷰 및 인라인 대조 시 원본 문구와 수식 변수 표기법을 그대로 준용.
 2. **KDS 14 31 10 국가건설기준 Ground Truth**:

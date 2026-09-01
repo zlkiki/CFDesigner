@@ -66,7 +66,16 @@
 * **기술 문서는 실시간 최신화**:
   * `docs/` 내의 기술 문서는 아키텍처/구조 변경 시 지속 동기화.
 
-### 3.5. 작업별 모델 활용 전략 (Model Tier Guidelines)
+### 3.5. Goal 주도형 단계적 연속 구현 규약 (Goal-Driven Continuous Partitioned Execution)
+* **집중력 유지 및 토큰 효율성 극대화**:
+  * 사용자가 마스터 요구사항(예: `요구사항05`)을 통째로 `/goal`로 지정하여 전체 작업을 지시할 때, 에이전트는 단일 컨텍스트 폭주와 누락을 방지하고 토큰 효율성을 추구하기 위해 **작은 단위로 분할된 하위 Phase 문서(`요구사항XX-1`, `XX-2` 등)를 순차적 실행 단위로 삼아 지속적으로 전체 구현을 완주**합니다.
+* **단계별 무결성 자율 전진 (Phase-by-Phase Verification & Progression)**:
+  1. 각 하위 Phase별로 지정된 파일과 컴포넌트만 정밀하게 구현/수정하여 컨텍스트 낭비를 최소화.
+  2. 해당 Phase의 Acceptance Criteria(1:1 체크리스트) 및 단위 테스트(`pytest`) 100% 통과를 확인.
+  3. 완료 즉시 다음 Phase로 중단 없이 자율 진입하여 마스터 요구사항의 모든 Phase가 끝날 때까지 연속 작업.
+  4. 모든 하위 Phase 완료 후 마스터 요구사항의 종합 수용 기준을 최종 전수 검증하고 완수 보고.
+
+### 3.6. 작업별 모델 활용 전략 (Model Tier Guidelines)
 1. **High 모델 (Flash High / Pro)**: FSM 수치해석 행렬 분석, 비정형 CAD 메싱 알고리즘 역추적, KDS DSM 설계식 유도
 2. **Medium 모델 (Flash Medium)**: 파이썬 모듈 구현, 단위 테스트 작성, 디컴파일/데이터 파싱
 3. **Low 모델 (Flash Low / Lite)**: 단순 파일 조회, Git 커밋/푸시 명령 실행
@@ -84,6 +93,7 @@
 * 🚀 **[Python 독립 엔진 아키텍처 명세서](file:///f:/PyProject/CFDesigner/docs/06_python_engine_architecture_specification.md)**: 5대 계층 독립 Python 엔진 구조 및 API 사양
 * 💻 **[CFDesigner 웹 앱 UI/UX 명세서](file:///f:/PyProject/CFDesigner/docs/07_web_application_ui_ux_specification.md)**: 4대 화면, 10대 전문 모달, 2D/3D 인터랙션 및 UX 파이프라인 규약
 * 📖 **[온라인 도움말 시스템 통합 명세서](file:///f:/PyProject/CFDesigner/docs/08_online_help_manual_specification.md)**: 한·영 Bilingual 3-Way 뷰, 25개 토픽 및 다국어 검색 통합 SSOT
-* 🔍 **[CFS Legacy vs Web Gap 분석서](file:///f:/PyProject/CFDesigner/docs/10_cfs_legacy_ui_vs_web_gap_analysis.md)**: CFS 원본 기능 전수 대조 및 웹 구현 현황
+* 📊 **[CFS 레거시 도움말 vs 웹 Gap 분석서](file:///f:/PyProject/CFDesigner/docs/09_cfs_legacy_help_manual_vs_web_gap_analysis.md)**: 원본 도움말 79개 토픽 + 13종 이미지 vs 웹 25개 토픽 1:1 전수 대조 매트릭스
+* 🔍 **[CFS Legacy UI vs Web Gap 분석서](file:///f:/PyProject/CFDesigner/docs/10_cfs_legacy_ui_vs_web_gap_analysis.md)**: CFS 원본 UI 기능 전수 대조 및 웹 구현 현황
 * 🔗 **[KDS 국가건설기준 연동 가이드 (kcsc2md)](file:///f:/PyProject/kcsc2md/docs/외부프로젝트_연동_및_조회_가이드.md)**: KDS 기준 Ground Truth 조회 표준
 

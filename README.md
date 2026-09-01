@@ -59,7 +59,7 @@ graph LR
 
 ### 🌐 5. 다국어 온라인 도움말 시스템 (Phase 5)
 * **6개 카테고리 25개 토픽 완비**: 시작하기, 라이브러리, 단면성질, FSM 좌굴이론, KDS 부재설계, 1D 구조해석 전 영역 망라.
-* **3-Way Bilingual Edition**: 한글 웹 UI/UX 가이드 + KDS 수식(`content_html`)과 CFS 14.0 오리지널 영문 원문(`content_en_html`, `docs/cfs_help_manual/` 1:1 대조) 수록.
+* **3-Way Bilingual Edition**: 한글 웹 UI/UX 가이드 + KDS 수식(`content_html`)과 CFS 14.0 오리지널 영문 원문(`content_en_html`, `decompiled_src/cfs_help_manual/` 1:1 대조) 수록.
 * **인라인 [🌐 원문보기] 토글 & 다국어 실시간 검색**: 전문용어 툴팁, KaTeX 수식 렌더링, 키워드 가중치 검색 지원.
 
 ### 📄 6. A4 표준 구조계산서 출력
