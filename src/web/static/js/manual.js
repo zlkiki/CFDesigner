@@ -96,6 +96,25 @@ class ManualViewer {
   }
 
   bindEvents() {
+    // Lightbox modal elements & close events
+    this.lightboxModal = document.getElementById("imageLightboxModal");
+    this.lightboxImg = document.getElementById("lightboxImg");
+    this.lightboxCaption = document.getElementById("lightboxCaption");
+    this.lightboxClose = document.getElementById("lightboxClose");
+    this.lightboxBackdrop = document.getElementById("lightboxBackdrop");
+
+    if (this.lightboxClose) {
+      this.lightboxClose.addEventListener("click", () => this.closeLightbox());
+    }
+    if (this.lightboxBackdrop) {
+      this.lightboxBackdrop.addEventListener("click", () => this.closeLightbox());
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && this.lightboxModal && this.lightboxModal.classList.contains("active")) {
+        this.closeLightbox();
+      }
+    });
+
     // Theme toggle
     if (this.btnTheme) {
       this.btnTheme.addEventListener("click", () => {
@@ -327,6 +346,8 @@ class ManualViewer {
       this.renderEquations(this.splitContentEn);
       this.bindGlossaryTooltips(this.splitContentKo);
       this.bindGlossaryTooltips(this.splitContentEn);
+      this.setupLightbox(this.splitContentKo);
+      this.setupLightbox(this.splitContentEn);
     } else {
       this.splitView.style.display = "none";
       this.articleContent.style.display = "block";
@@ -340,7 +361,40 @@ class ManualViewer {
 
       this.renderEquations(this.articleContent);
       this.bindGlossaryTooltips(this.articleContent);
+      this.setupLightbox(this.articleContent);
     }
+  }
+
+  setupLightbox(container) {
+    if (!container) return;
+    const images = container.querySelectorAll(".manual-img-card img, img.zoomable");
+    images.forEach(img => {
+      img.style.cursor = "zoom-in";
+      img.addEventListener("click", () => {
+        const card = img.closest(".manual-img-card");
+        let caption = img.alt || "";
+        if (card) {
+          const capEl = card.querySelector(".img-caption");
+          if (capEl) caption = capEl.textContent.trim();
+        }
+        this.openLightbox(img.src, caption);
+      });
+    });
+  }
+
+  openLightbox(src, caption) {
+    if (!this.lightboxModal || !this.lightboxImg) return;
+    this.lightboxImg.src = src;
+    if (this.lightboxCaption) {
+      this.lightboxCaption.textContent = caption || "";
+      this.lightboxCaption.style.display = caption ? "block" : "none";
+    }
+    this.lightboxModal.classList.add("active");
+  }
+
+  closeLightbox() {
+    if (!this.lightboxModal) return;
+    this.lightboxModal.classList.remove("active");
   }
 
   toggleInlineEn(btn) {

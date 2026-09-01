@@ -59,11 +59,13 @@ graph TD
 | **5. KDS 설계 & 계산서** | `kds_dsm_comp` | KDS 압축부재 설계 (DSM Pn) | KDS Compression Member Design (DSM Pn) | $P_{ne}, P_{nl}, P_{nd}$ 및 공칭압축강도 $P_n$ 산정식 | 기반 |
 | | `kds_dsm_flex` | KDS 휨부재 설계 (DSM Mn) | KDS Flexural Member Design (DSM Mn) | $M_{ne}, M_{nl}, M_{nd}$ 및 공칭휨강도 $M_n$ 산정식 | 기반 |
 | | `kds_shear_crip` | KDS 전단강도 & 웨브 크리플링 | KDS Shear & Web Crippling Strength | 전단강도 $V_n$ 및 4대 지지조건(EOF/IOF/ETF/ITF) $P_{nc}$ 산정식 | Phase 3 |
-| | `quick_design` | 퀵 디자인 (최적 단면 자동 추천) | Quick Design Optimization Tool | 소요 하중($P_u, M_u$) 입력 시 경량 최적 단면 자동 탐색 알고리즘 | Phase 3 |
+| | `quick_design` | 퀵 디자인 (최적 단면 자동 추천) | Quick Design Optimization Tool | 소요 하중($P_u, M_u$) 입력 시 경량 최적 단면 자동 탐색 알고리즘 (레거시 대조 도해 수록) | Phase 3 |
 | | `kds_interaction` | P-M 조합응력 & D/C 검토 | P-M Interaction & Biaxial Bending | 휨-압축 상관식, 모멘트 증대계수($B_1, B_2$), D/C 판정 기준 | 기반 |
 | | `report_guide` | A4 구조계산서 출력 & 인쇄 | A4 Calculation Report Guide | 인쇄 미리보기, 수식 근거표, 브라우저 PDF/인쇄 표준 서식 | 기반 |
-| **6. 1D 구조해석** | `analysis_wizard` | 1D 구조해석 마법사 & 하중입력 | 1D Frame Analysis Wizard & Loadings | 단순보, 연속보, 캔틸레버 경간/지점/하중(점/분포/모멘트) 입력법 | Phase 4 |
+| **6. 1D 구조해석** | `analysis_wizard` | 1D 구조해석 마법사 & 하중입력 | 1D Frame Analysis Wizard & Loadings | 4단계(경간/지점/하중/조합) 모델링 및 SFD/BMD 다이어그램 튜토리얼 | Phase 4 |
 | | `diagrams_viewer` | SFD / BMD / 처짐 다이어그램 | Shear, Moment & Deflection Diagrams | SFD/BMD/처짐 차트 인터랙션 및 부재설계 원클릭 연동 흐름 | Phase 4 |
+| **7. 부록: 사전 & 기호집** | `glossary` | 냉간성형강 전문 용어사전 | Engineering Glossary (AISI S100 & KDS) | AISI S100/KDS 1.8만자 A~Z 공학 전문 용어 공식 정의집 | Phase 5 |
+| | `symbols` | 공학 기호 및 약어 정의집 | Symbols & Abbreviations | 로마자/그리스 문자/설계 약어 114종 기호 및 단위계 총람 | Phase 5 |
 
 ---
 

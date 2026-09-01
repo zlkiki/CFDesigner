@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat&logo=fastapi&logoColor=white" alt="FastAPI" />
   <img src="https://img.shields.io/badge/Design_Code-KDS_14_31_10-blue?style=flat" alt="KDS 14 31 10" />
   <img src="https://img.shields.io/badge/Design_Code-AISI_S100-navy?style=flat" alt="AISI S100" />
-  <img src="https://img.shields.io/badge/Tests-55%20Passed%20(100%25)-brightgreen?style=flat" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-60%20Passed%20(100%25)-brightgreen?style=flat" alt="Tests" />
 </p>
 
 ---
@@ -57,10 +57,11 @@ graph LR
 * **SFD / BMD / 처짐 다이어그램**: 전단력도(SFD), 휨모멘트도(BMD), 처짐 곡선 인터랙티브 렌더링 및 허용 처짐 자동 검토.
 * **부재설계 원클릭 연동**: 최대 단면력($M_{max}, V_{max}$)을 KDS 부재설계 모듈로 원클릭 전송하여 단면 안전성 자동 평가.
 
-### 🌐 5. 다국어 온라인 도움말 시스템 (Phase 5)
-* **6개 카테고리 25개 토픽 완비**: 시작하기, 라이브러리, 단면성질, FSM 좌굴이론, KDS 부재설계, 1D 구조해석 전 영역 망라.
+### 🌐 5. 다국어 온라인 도움말 & 도해·용어사전 시스템 (Phase 5)
+* **7개 카테고리 27개 토픽 완비**: 시작하기, 라이브러리, 단면성질, FSM 좌굴이론, KDS 부재설계, 1D 구조해석, 부록(전문 용어사전 & 기호집).
+* **고해상도 도해 16종 & 라이트박스 줌**: 레거시 vs 모던 웹 2열 대조 카드, FSM 좌굴 4종 및 비틀림 좌표계 4종 고해상도 그래픽 도해 수록.
 * **3-Way Bilingual Edition**: 한글 웹 UI/UX 가이드 + KDS 수식(`content_html`)과 CFS 14.0 오리지널 영문 원문(`content_en_html`, `decompiled_src/cfs_help_manual/` 1:1 대조) 수록.
-* **인라인 [🌐 원문보기] 토글 & 다국어 실시간 검색**: 전문용어 툴팁, KaTeX 수식 렌더링, 키워드 가중치 검색 지원.
+* **1.8만자 전문 용어사전 & 114종 기호집**: AISI S100/KDS 공식 공학 용어 정의 및 라틴/그리스 문자 총람, 키워드 가중치 검색 지원.
 
 ### 📄 6. A4 표준 구조계산서 출력
 * 단면 형상도, Gross/Effective 성질표, FSM 시그니처 커브, DSM 강도 산정식 및 종합 판정 요약표를 A4 포맷 브라우저 인쇄 및 PDF 저장.
