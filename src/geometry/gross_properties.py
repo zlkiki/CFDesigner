@@ -60,8 +60,28 @@ class SectionPropertiesCalculator:
         props = GrossProperties()
         t = geom.thickness
 
-        # 1. Total Area & Moments of Inertia
+        # 1. Total Area & Centroid (xcg, ycg)
         total_a = 0.0
+        sum_x_a = 0.0
+        sum_y_a = 0.0
+
+        for elem in geom.elements:
+            l = elem.length
+            elem_a = l * t
+            total_a += elem_a
+            mid_x = (elem.x0 + elem.x1) / 2.0
+            mid_y = (elem.y0 + elem.y1) / 2.0
+            sum_x_a += elem_a * mid_x
+            sum_y_a += elem_a * mid_y
+
+        xcg = (sum_x_a / total_a) if total_a > 1e-9 else 0.0
+        ycg = (sum_y_a / total_a) if total_a > 1e-9 else 0.0
+        props.area = total_a
+        props.weight = total_a * 7.85e-3  # kg/m for steel (density = 7.85 g/cm³)
+        props.xcg = xcg
+        props.ycg = ycg
+
+        # 2. Centroidal Moments of Inertia (Parallel Axis Theorem)
         sum_ix = 0.0
         sum_iy = 0.0
         sum_ixy = 0.0
@@ -72,24 +92,23 @@ class SectionPropertiesCalculator:
         for elem in geom.elements:
             l = elem.length
             elem_a = l * t
-            total_a += elem_a
-
             dx = elem.x1 - elem.x0
             dy = elem.y1 - elem.y0
-            mid_x = (elem.x0 + elem.x1) / 2.0
-            mid_y = (elem.y0 + elem.y1) / 2.0
+            
+            # Centroid-relative midpoint
+            mid_xc = ((elem.x0 + elem.x1) / 2.0) - xcg
+            mid_yc = ((elem.y0 + elem.y1) / 2.0) - ycg
 
-            min_x = min(min_x, elem.x0, elem.x1)
-            max_x = max(max_x, elem.x0, elem.x1)
-            min_y = min(min_y, elem.y0, elem.y1)
-            max_y = max(max_y, elem.y0, elem.y1)
+            min_x = min(min_x, elem.x0 - xcg, elem.x1 - xcg)
+            max_x = max(max_x, elem.x0 - xcg, elem.x1 - xcg)
+            min_y = min(min_y, elem.y0 - ycg, elem.y1 - ycg)
+            max_y = max(max_y, elem.y0 - ycg, elem.y1 - ycg)
 
-            # Local moments of inertia (Thin-walled bar element formula)
-            sum_ix += (t * dy * dy * l / 12.0) + elem_a * mid_y * mid_y
-            sum_iy += (t * dx * dx * l / 12.0) + elem_a * mid_x * mid_x
-            sum_ixy += (t * dx * dy * l / 12.0) + elem_a * mid_x * mid_y
+            # Local moments of inertia (Thin-walled bar element formula with centroidal shift)
+            sum_ix += (t * dy * dy * l / 12.0) + elem_a * mid_yc * mid_yc
+            sum_iy += (t * dx * dx * l / 12.0) + elem_a * mid_xc * mid_xc
+            sum_ixy += (t * dx * dy * l / 12.0) + elem_a * mid_xc * mid_yc
 
-        props.area = total_a
         props.ix = sum_ix
         props.iy = sum_iy
         props.ixy = sum_ixy
@@ -98,7 +117,21 @@ class SectionPropertiesCalculator:
         props.rx = math.sqrt(max(props.ix / total_a, 0.0))
         props.ry = math.sqrt(max(props.iy / total_a, 0.0))
 
-        # Principal Properties
+        # Principal Properties & Alpha
+        if abs(props.ix - props.iy) < 1e-5:
+            if abs(props.ixy) / (props.ix + props.iy + 1e-9) < 1e-4:
+                alpha_rad = 0.0
+            else:
+                alpha_rad = -math.copysign(1.0, props.ixy) * math.pi / 4.0
+        else:
+            alpha_rad = math.atan2(2.0 * props.ixy, props.iy - props.ix) / 2.0
+            if props.ix < props.iy:
+                alpha_rad += math.pi / 2.0
+            if alpha_rad > math.pi / 2.0:
+                alpha_rad -= math.pi
+
+        props.theta_p = math.degrees(alpha_rad)
+
         diff = (props.ix - props.iy) / 2.0
         r_mohr = math.sqrt(diff * diff + props.ixy * props.ixy)
         props.i1 = (props.ix + props.iy) / 2.0 + r_mohr
@@ -106,14 +139,7 @@ class SectionPropertiesCalculator:
         props.r1 = math.sqrt(max(props.i1 / total_a, 0.0))
         props.r2 = math.sqrt(max(props.i2 / total_a, 0.0))
 
-        if abs(diff) > 1e-9 or abs(props.ixy) > 1e-9:
-            alpha_rad = 0.5 * math.atan2(-2.0 * props.ixy, props.ix - props.iy)
-            props.theta_p = math.degrees(alpha_rad)
-        else:
-            alpha_rad = 0.0
-            props.theta_p = 0.0
-
-        # Section Moduli
+        # Section Moduli (relative to Centroid)
         c_top = max_y + t / 2.0
         c_bot = abs(min_y - t / 2.0)
         c_right = max_x + t / 2.0
@@ -126,7 +152,7 @@ class SectionPropertiesCalculator:
 
         # Torsion Constant (J)
         if geom.is_closed:
-            nodes = [(elem.x0, elem.y0) for elem in geom.elements]
+            nodes = [(elem.x0 - xcg, elem.y0 - ycg) for elem in geom.elements]
             n_n = len(nodes)
             am = 0.5 * abs(sum(nodes[i][0] * nodes[(i + 1) % n_n][1] - nodes[(i + 1) % n_n][0] * nodes[i][1] for i in range(n_n)))
             sum_ds_t = sum(elem.length / elem.thickness for elem in geom.elements)
@@ -134,15 +160,16 @@ class SectionPropertiesCalculator:
         else:
             props.j = sum((1.0 / 3.0) * elem.length * (elem.thickness ** 3) for elem in geom.elements)
 
-        # Check Point Symmetry: sum(mid_x) ~ 0 and sum(mid_y) ~ 0 for point symmetric pairs
+        # Check Point Symmetry relative to Centroid
         is_point_sym = False
         if len(geom.elements) >= 3:
-            # Check if each element has a point-symmetric counterpart
             matched = 0
             for e1 in geom.elements:
-                m1x, m1y = (e1.x0 + e1.x1)/2.0, (e1.y0 + e1.y1)/2.0
+                m1x = (e1.x0 + e1.x1)/2.0 - xcg
+                m1y = (e1.y0 + e1.y1)/2.0 - ycg
                 for e2 in geom.elements:
-                    m2x, m2y = (e2.x0 + e2.x1)/2.0, (e2.y0 + e2.y1)/2.0
+                    m2x = (e2.x0 + e2.x1)/2.0 - xcg
+                    m2y = (e2.y0 + e2.y1)/2.0 - ycg
                     if abs(m1x + m2x) < 1e-3 and abs(m1y + m2y) < 1e-3 and abs(e1.length - e2.length) < 1e-3:
                         matched += 1
                         break
@@ -152,24 +179,26 @@ class SectionPropertiesCalculator:
         if is_point_sym:
             props.x0 = 0.0
             props.y0 = 0.0
-            SectionPropertiesCalculator._compute_cw_only(geom, props)
+            SectionPropertiesCalculator._compute_cw_only(geom, props, xcg, ycg)
         else:
-            SectionPropertiesCalculator._compute_warping_principal(geom, props, alpha_rad)
+            SectionPropertiesCalculator._compute_warping_principal(geom, props, alpha_rad, xcg, ycg)
 
         # Polar radius of gyration
         props.ro = math.sqrt(props.rx * props.rx + props.ry * props.ry + props.x0 * props.x0 + props.y0 * props.y0)
         return props
 
     @staticmethod
-    def _compute_cw_only(geom: SectionGeometry, props: GrossProperties):
+    def _compute_cw_only(geom: SectionGeometry, props: GrossProperties, xcg: float = 0.0, ycg: float = 0.0):
         """
-        Computes Cw for point symmetric sections where shear center is at the centroid (0,0).
+        Computes Cw for point symmetric sections where shear center is at the centroid.
         """
         t = geom.thickness
         w_accum = 0.0
         w_vals = [0.0]
         for elem in geom.elements:
-            h_p = elem.x0 * math.sin(elem.angle) - elem.y0 * math.cos(elem.angle)
+            ex0 = elem.x0 - xcg
+            ey0 = elem.y0 - ycg
+            h_p = ex0 * math.sin(elem.angle) - ey0 * math.cos(elem.angle)
             w_accum += h_p * elem.length
             w_vals.append(w_accum)
 
@@ -182,9 +211,10 @@ class SectionPropertiesCalculator:
         props.cw = max(cw, 0.0)
 
     @staticmethod
-    def _compute_warping_principal(geom: SectionGeometry, props: GrossProperties, alpha: float):
+    def _compute_warping_principal(geom: SectionGeometry, props: GrossProperties, alpha: float, xcg: float = 0.0, ycg: float = 0.0):
         """
-        Computes Shear Center and Warping Constant in the Principal Axis coordinate system for singly/asymmetric sections.
+        Computes Shear Center (x0, y0) and Warping Constant (Cw) in the Principal Axis
+        coordinate system for open thin-walled sections (ported from CFS.exe RSG.CFS.Part.TorsionProp).
         """
         if geom.is_closed or len(geom.elements) < 2:
             props.x0 = 0.0
@@ -199,55 +229,74 @@ class SectionPropertiesCalculator:
         p_elems = []
         p_ix = 0.0
         p_iy = 0.0
+        total_l = 0.0
+
         for elem in geom.elements:
-            px0 = elem.x0 * cos_a - elem.y0 * sin_a
-            py0 = elem.x0 * sin_a + elem.y0 * cos_a
-            px1 = elem.x1 * cos_a - elem.y1 * sin_a
-            py1 = elem.x1 * sin_a + elem.y1 * cos_a
-            ang_p = elem.angle - alpha
-            p_elems.append((px0, py0, px1, py1, elem.length, ang_p))
+            ex0 = elem.x0 - xcg
+            ey0 = elem.y0 - ycg
+            ex1 = elem.x1 - xcg
+            ey1 = elem.y1 - ycg
+
+            # Rotate element coordinates into Principal axes
+            px0 = ex0 * cos_a + ey0 * sin_a
+            py0 = -ex0 * sin_a + ey0 * cos_a
+            px1 = ex1 * cos_a + ey1 * sin_a
+            py1 = -ex1 * sin_a + ey1 * cos_a
+            p_ang = elem.angle - alpha
+            l = elem.length
+            ea = l * t
+            total_l += l
 
             dx = px1 - px0
             dy = py1 - py0
             mid_x = (px0 + px1) / 2.0
             mid_y = (py0 + py1) / 2.0
-            p_ix += (t * dy * dy * elem.length / 12.0) + elem.length * t * mid_y * mid_y
-            p_iy += (t * dx * dx * elem.length / 12.0) + elem.length * t * mid_x * mid_x
+            p_ix += (t * dy * dy * l / 12.0) + ea * mid_y * mid_y
+            p_iy += (t * dx * dx * l / 12.0) + ea * mid_x * mid_x
+            p_elems.append((px0, py0, px1, py1, l, p_ang))
 
-        sum_x_int = 0.0
-        sum_y_int = 0.0
-        w_accum = 0.0
+        # Integrate sectorial moments (including thickness t)
+        sum_y_int = 0.0  # I_w_py (for xo_p)
+        sum_x_int = 0.0  # I_w_px (for yo_p)
+        w = 0.0
 
-        for px0, py0, px1, py1, l, ang_p in p_elems:
-            sin_p = math.sin(ang_p)
-            cos_p = math.cos(ang_p)
-            h_p = px0 * sin_p - py0 * cos_p
+        for px0, py0, px1, py1, l, p_ang in p_elems:
+            sin_p = math.sin(p_ang)
+            cos_p = math.cos(p_ang)
+            hp = px0 * sin_p - py0 * cos_p
 
-            sum_x_int += (w_accum * py0 * l + (w_accum * sin_p + h_p * py0) * (l ** 2) / 2.0 + (h_p * sin_p) * (l ** 3) / 3.0)
-            sum_y_int += (w_accum * px0 * l + (w_accum * cos_p + h_p * px0) * (l ** 2) / 2.0 + (h_p * cos_p) * (l ** 3) / 3.0)
-            w_accum += h_p * l
+            sum_y_int += t * (w * py0 * l + (w * sin_p + hp * py0) * (l ** 2) / 2.0 + (hp * sin_p) * (l ** 3) / 3.0)
+            sum_x_int += t * (w * px0 * l + (w * cos_p + hp * px0) * (l ** 2) / 2.0 + (hp * cos_p) * (l ** 3) / 3.0)
+            w += hp * l
 
-        x0_p = (sum_x_int / p_iy) if p_iy > 1e-9 else 0.0
-        y0_p = (-sum_y_int / p_ix) if p_ix > 1e-9 else 0.0
+        xo_p = (sum_y_int / p_ix) if p_ix > 1e-9 else 0.0
+        yo_p = (-sum_x_int / p_iy) if p_iy > 1e-9 else 0.0
 
-        props.x0 = x0_p * cos_a - y0_p * sin_a
-        props.y0 = x0_p * sin_a + y0_p * cos_a
+        # Transform Shear Center back to original section coordinate system relative to CG
+        props.x0 = xo_p * cos_a - yo_p * sin_a
+        props.y0 = xo_p * sin_a + yo_p * cos_a
 
+        # Clean numerical jitter near zero for symmetric axes
+        if abs(props.x0) < 1e-4:
+            props.x0 = 0.0
+        if abs(props.y0) < 1e-4:
+            props.y0 = 0.0
+
+        # Sectorial coordinate & Warping constant Cw about SC
         cw_sum = 0.0
-        w_p_accum = 0.0
+        w_sc_accum = 0.0
         w_avg = 0.0
-        total_l = sum(l for _, _, _, _, l, _ in p_elems)
 
-        for px0, py0, px1, py1, l, ang_p in p_elems:
-            sin_p = math.sin(ang_p)
-            cos_p = math.cos(ang_p)
-            rx0 = px0 - x0_p
-            ry0 = py0 - y0_p
+        for px0, py0, px1, py1, l, p_ang in p_elems:
+            sin_p = math.sin(p_ang)
+            cos_p = math.cos(p_ang)
+            rx0 = px0 - xo_p
+            ry0 = py0 - yo_p
             h_sc = rx0 * sin_p - ry0 * cos_p
 
-            cw_sum += (w_p_accum ** 2) * l + (w_p_accum * h_sc) * (l ** 2) + (h_sc ** 2) * (l ** 3) / 3.0
-            w_avg += w_p_accum * l + h_sc * (l ** 2) / 2.0
-            w_p_accum += h_sc * l
+            cw_sum += (w_sc_accum ** 2) * l + (w_sc_accum * h_sc) * (l ** 2) + (h_sc ** 2) * (l ** 3) / 3.0
+            w_avg += w_sc_accum * l + h_sc * (l ** 2) / 2.0
+            w_sc_accum += h_sc * l
 
         w_0 = w_avg / total_l if total_l > 1e-9 else 0.0
         props.cw = max(t * (cw_sum - total_l * (w_0 ** 2)), 0.0)

@@ -151,15 +151,8 @@ class SectionCanvas2D {
     ctx.translate(this.panX, this.panY);
     ctx.scale(this.scale, -this.scale); // Math coordinates (Y up)
 
-    // 1. Draw Global Axes Origin
-    ctx.lineWidth = 1 / this.scale;
-    ctx.strokeStyle = 'rgba(100, 116, 139, 0.4)';
-    ctx.setLineDash([4 / this.scale, 4 / this.scale]);
-    ctx.beginPath();
-    ctx.moveTo(-1000, 0); ctx.lineTo(1000, 0);
-    ctx.moveTo(0, -1000); ctx.lineTo(0, 1000);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    // 1. Draw Global Axes Origin with Arrows & Labels
+    this.drawOriginAxes(ctx);
 
     // 2. Draw Thickness Outlines
     if (this.showThickness) {
@@ -176,7 +169,7 @@ class SectionCanvas2D {
 
     // 3. Draw Centerlines
     ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 1.5 / this.scale;
+    ctx.lineWidth = 1.6 / this.scale;
     ctx.lineCap = 'round';
     ctx.beginPath();
     this.elements.forEach(e => {
@@ -197,7 +190,6 @@ class SectionCanvas2D {
         ctx.lineTo(target.x1, target.y1);
         ctx.stroke();
 
-        // Pulsing highlight start/end dots
         ctx.fillStyle = '#f59e0b';
         ctx.beginPath();
         ctx.arc(target.x0, target.y0, 4.0 / this.scale, 0, Math.PI * 2);
@@ -214,12 +206,10 @@ class SectionCanvas2D {
         ctx.lineTo(seg.x2, seg.y2);
 
         if (seg.is_effective) {
-          // Effective portion: Bold Cyan / Green
           ctx.strokeStyle = '#06b6d4';
           ctx.lineWidth = Math.max(3.0 / this.scale, (seg.thickness || this.thickness) * 1.2);
           ctx.setLineDash([]);
         } else {
-          // Ineffective (void / buckled) portion: Red Dashed / Transparent
           ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
           ctx.lineWidth = Math.max(2.0 / this.scale, (seg.thickness || this.thickness) * 0.8);
           ctx.setLineDash([4 / this.scale, 3 / this.scale]);
@@ -245,63 +235,208 @@ class SectionCanvas2D {
       });
     }
 
-    // 6. Draw Principal Axes
+    const xcg = this.properties ? (this.properties.xcg || 0) : 0;
+    const ycg = this.properties ? (this.properties.ycg || 0) : 0;
+    const scRelX = this.properties ? (this.properties.x0 || 0) : 0;
+    const scRelY = this.properties ? (this.properties.y0 || 0) : 0;
+    const scAbsX = xcg + scRelX;
+    const scAbsY = ycg + scRelY;
+
+    // 6. Draw Principal Axes (Centered at CG)
     if (this.showPrincipal && this.properties) {
       const alphaRad = (this.properties.theta_p || 0) * Math.PI / 180;
-      const axLen = 60;
+      const axLen = 80;
       const cosA = Math.cos(alphaRad);
       const sinA = Math.sin(alphaRad);
 
       ctx.strokeStyle = '#10b981';
       ctx.lineWidth = 1.2 / this.scale;
-      ctx.setLineDash([3 / this.scale, 3 / this.scale]);
+      ctx.setLineDash([4 / this.scale, 3 / this.scale]);
       ctx.beginPath();
       // Axis 1 (Major)
-      ctx.moveTo(-axLen * cosA, -axLen * sinA);
-      ctx.lineTo(axLen * cosA, axLen * sinA);
+      ctx.moveTo(xcg - axLen * cosA, ycg - axLen * sinA);
+      ctx.lineTo(xcg + axLen * cosA, ycg + axLen * sinA);
       // Axis 2 (Minor)
-      ctx.moveTo(axLen * sinA, -axLen * cosA);
-      ctx.lineTo(-axLen * sinA, axLen * cosA);
+      ctx.moveTo(xcg + axLen * sinA, ycg - axLen * cosA);
+      ctx.lineTo(xcg - axLen * sinA, ycg + axLen * cosA);
       ctx.stroke();
       ctx.setLineDash([]);
     }
 
-    // 7. Draw CG (Centroid) Marker
+    // 7. Draw CG (Centroid) Marker at (xcg, ycg)
     if (this.showCG && this.properties) {
       ctx.fillStyle = '#ef4444';
       ctx.beginPath();
-      ctx.arc(0, 0, 3.5 / this.scale, 0, Math.PI * 2);
+      ctx.arc(xcg, ycg, 4.0 / this.scale, 0, Math.PI * 2);
       ctx.fill();
+
+      // Crosshair inside CG
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0 / this.scale;
+      ctx.beginPath();
+      ctx.moveTo(xcg - 6.0 / this.scale, ycg);
+      ctx.lineTo(xcg + 6.0 / this.scale, ycg);
+      ctx.moveTo(xcg, ycg - 6.0 / this.scale);
+      ctx.lineTo(xcg, ycg + 6.0 / this.scale);
+      ctx.stroke();
     }
 
-    // 8. Draw SC (Shear Center) Marker
+    // 8. Draw SC (Shear Center) Marker at (scAbsX, scAbsY)
     if (this.showSC && this.properties) {
-      const scX = this.properties.x0 || 0;
-      const scY = this.properties.y0 || 0;
-      ctx.fillStyle = '#8b5cf6';
+      ctx.fillStyle = '#a855f7';
       ctx.beginPath();
-      ctx.arc(scX, scY, 3.5 / this.scale, 0, Math.PI * 2);
+      ctx.arc(scAbsX, scAbsY, 4.0 / this.scale, 0, Math.PI * 2);
       ctx.fill();
+
+      // Diamond marker around SC
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0 / this.scale;
+      ctx.beginPath();
+      ctx.moveTo(scAbsX, scAbsY + 6.0 / this.scale);
+      ctx.lineTo(scAbsX + 6.0 / this.scale, scAbsY);
+      ctx.lineTo(scAbsX, scAbsY - 6.0 / this.scale);
+      ctx.lineTo(scAbsX - 6.0 / this.scale, scAbsY);
+      ctx.closePath();
+      ctx.stroke();
     }
 
     ctx.restore();
 
-    // 8. Screen-space Legends (CG / SC labels)
-    if (this.showCG) {
-      const cgScreenX = this.panX;
-      const cgScreenY = this.panY;
+    // 9. Screen-space Legends (CG / SC labels)
+    if (this.showCG && this.properties) {
+      const cgScreenX = this.panX + xcg * this.scale;
+      const cgScreenY = this.panY - ycg * this.scale;
       ctx.fillStyle = '#ef4444';
-      ctx.font = 'bold 11px sans-serif';
-      ctx.fillText('CG (도심)', cgScreenX + 8, cgScreenY - 6);
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.fillText(`CG 도심 (${xcg.toFixed(1)}, ${ycg.toFixed(1)})`, cgScreenX + 10, cgScreenY - 6);
     }
 
     if (this.showSC && this.properties) {
-      const scScreenX = this.panX + (this.properties.x0 || 0) * this.scale;
-      const scScreenY = this.panY - (this.properties.y0 || 0) * this.scale;
-      ctx.fillStyle = '#8b5cf6';
-      ctx.font = 'bold 11px sans-serif';
-      ctx.fillText('SC (전단중심)', scScreenX + 8, scScreenY - 6);
+      const scScreenX = this.panX + scAbsX * this.scale;
+      const scScreenY = this.panY - scAbsY * this.scale;
+      ctx.fillStyle = '#a855f7';
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.fillText(`SC 전단중심 (${scAbsX.toFixed(1)}, ${scAbsY.toFixed(1)})`, scScreenX + 10, scScreenY - 6);
     }
+
+    // 10. Fixed Viewport Coordinate Compass (WCS / UCS Widget at bottom-left)
+    this.drawCoordinateCompass(ctx);
+  }
+
+  drawOriginAxes(ctx) {
+    const axisLen = 1500;
+    
+    // Grid reference dashed lines
+    ctx.lineWidth = 1 / this.scale;
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+    ctx.setLineDash([4 / this.scale, 4 / this.scale]);
+    ctx.beginPath();
+    ctx.moveTo(-axisLen, 0); ctx.lineTo(axisLen, 0);
+    ctx.moveTo(0, -axisLen); ctx.lineTo(0, axisLen);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // X-Axis Line (+X in red)
+    ctx.lineWidth = 1.8 / this.scale;
+    ctx.strokeStyle = 'rgba(239, 68, 68, 0.75)';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(80 / this.scale, 0);
+    ctx.stroke();
+
+    // +X Arrow
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.moveTo(80 / this.scale, 0);
+    ctx.lineTo(72 / this.scale, 3.5 / this.scale);
+    ctx.lineTo(72 / this.scale, -3.5 / this.scale);
+    ctx.closePath();
+    ctx.fill();
+
+    // Y-Axis Line (+Y in green)
+    ctx.lineWidth = 1.8 / this.scale;
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.75)';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, 80 / this.scale);
+    ctx.stroke();
+
+    // +Y Arrow
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.moveTo(0, 80 / this.scale);
+    ctx.lineTo(-3.5 / this.scale, 72 / this.scale);
+    ctx.lineTo(3.5 / this.scale, 72 / this.scale);
+    ctx.closePath();
+    ctx.fill();
+
+    // Origin (0,0) circle
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 2.5 / this.scale, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  drawCoordinateCompass(ctx) {
+    const ox = 40;
+    const oy = this.canvas.height - 40;
+    const len = 32;
+
+    ctx.save();
+    
+    // Background badge
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(ox, oy, 26, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // X Axis (Red, right)
+    ctx.strokeStyle = '#ef4444';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(ox, oy);
+    ctx.lineTo(ox + len, oy);
+    ctx.stroke();
+
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.moveTo(ox + len + 4, oy);
+    ctx.lineTo(ox + len - 3, oy - 3.5);
+    ctx.lineTo(ox + len - 3, oy + 3.5);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.font = 'bold 11px Inter, sans-serif';
+    ctx.fillText('X', ox + len + 8, oy + 4);
+
+    // Y Axis (Green, up)
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(ox, oy);
+    ctx.lineTo(ox, oy - len);
+    ctx.stroke();
+
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.moveTo(ox, oy - len - 4);
+    ctx.lineTo(ox - 3.5, oy - len + 3);
+    ctx.lineTo(ox + 3.5, oy - len + 3);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillText('Y', ox - 4, oy - len - 8);
+
+    // Center dot (0,0)
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(ox, oy, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
   }
 
   drawGrid() {

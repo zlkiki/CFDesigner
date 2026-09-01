@@ -5,10 +5,10 @@
 
 class CFDesignerApp {
   constructor() {
-    this.canvas2d = new Canvas2D('canvas2d');
-    this.fsmChart = new FSMChart('fsmChart');
-    this.viewer3d = new Viewer3D('canvas3d');
-    this.diagramViewer = new FrameDiagramViewer('canvasBeamModel', 'canvasSfd', 'canvasBmd', 'canvasDefl');
+    this.canvas2d = null;
+    this.viewer3d = null;
+    this.fsmChart = null;
+    this.diagramViewer = null;
 
     this.currentGeometry = null;
     this.currentProperties = null;
@@ -17,18 +17,148 @@ class CFDesignerApp {
     this.lastFsmResult = null;
     this.lastFrameResult = null;
 
+    // Async Request Controllers for Abort & Re-calculation
+    this.abortControllers = {
+      transform: null,
+      fsm: null,
+      design: null,
+      wizard: null,
+      quickDesign: null,
+      frame: null
+    };
+
+    this.fsmDebounceTimer = null;
+    this.statusTimer = null;
+
     // Frame Analysis State
     this.frameSpans = [{ length: 4000.0, left_sup: 'pin', right_sup: 'roller' }];
     this.frameLoads = [{ load_type: 'udl', magnitude: 10.0, x_start: 0.0, x_end: 4000.0 }];
-
-    this.initEventListeners();
-    this.initSidebarToggle();
-    this.initTabs();
-    this.initEditorTable();
-    this.initMaterialPresets();
     this.activeViewerTab = '2d'; // '2d' or '3d'
 
     this.init();
+  }
+
+  showStatus(message, type = 'ready', timeoutMs = 0) {
+    const bar = document.getElementById('globalStatusBar');
+    const dot = document.getElementById('statusDot');
+    const icon = document.getElementById('statusIcon');
+    const text = document.getElementById('statusText');
+    if (!bar || !text) return;
+
+    if (this.statusTimer) {
+      clearTimeout(this.statusTimer);
+      this.statusTimer = null;
+    }
+
+    bar.className = 'status-indicator-bar ' + type;
+    if (dot) dot.className = 'status-dot ' + type;
+    text.innerText = message;
+
+    const iconMap = {
+      ready: '⚡',
+      busy: '🔄',
+      success: '✅',
+      warning: '⚠️'
+    };
+    if (icon) icon.innerText = iconMap[type] || '⚡';
+
+    if (timeoutMs > 0) {
+      this.statusTimer = setTimeout(() => {
+        this.showStatus('준비 완료 (Ready)', 'ready', 0);
+      }, timeoutMs);
+    }
+  }
+
+  getAbortSignal(key, cancelMessage = null) {
+    if (this.abortControllers[key]) {
+      try {
+        this.abortControllers[key].abort();
+        if (cancelMessage) {
+          this.showStatus(cancelMessage, 'busy');
+        }
+      } catch (e) {}
+    }
+    const controller = new AbortController();
+    this.abortControllers[key] = controller;
+    return controller.signal;
+  }
+
+  applyOptimisticTransform(elements, transformType, angleDeg = 0) {
+    if (!elements || !elements.length) return elements;
+
+    let sumX = 0, sumY = 0, totalL = 0;
+    elements.forEach(el => {
+      const isArr = Array.isArray(el);
+      const x0 = isArr ? el[1] : (el.x0 !== undefined ? el.x0 : el[1]);
+      const y0 = isArr ? el[2] : (el.y0 !== undefined ? el.y0 : el[2]);
+      const x1 = isArr ? el[3] : (el.x1 !== undefined ? el.x1 : el[3]);
+      const y1 = isArr ? el[4] : (el.y1 !== undefined ? el.y1 : el[4]);
+
+      const len = Math.hypot(x1 - x0, y1 - y0);
+      sumX += ((x0 + x1) / 2) * len;
+      sumY += ((y0 + y1) / 2) * len;
+      totalL += len;
+    });
+    const cx = totalL > 0 ? sumX / totalL : 0;
+    const cy = totalL > 0 ? sumY / totalL : 0;
+
+    const transformPoint = (x, y) => {
+      let nx = x, ny = y;
+      if (transformType === 'rotate_90_cw') {
+        const dx = x - cx, dy = y - cy;
+        nx = cx + dy;
+        ny = cy - dx;
+      } else if (transformType === 'rotate_90_ccw') {
+        const dx = x - cx, dy = y - cy;
+        nx = cx - dy;
+        ny = cy + dx;
+      } else if (transformType === 'rotate_angle') {
+        const rad = (angleDeg * Math.PI) / 180.0;
+        const dx = x - cx, dy = y - cy;
+        nx = cx + dx * Math.cos(rad) - dy * Math.sin(rad);
+        ny = cy + dx * Math.sin(rad) + dy * Math.cos(rad);
+      } else if (transformType === 'mirror_h') {
+        const dy = y - cy;
+        nx = x;
+        ny = cy - dy;
+      } else if (transformType === 'mirror_v') {
+        const dx = x - cx;
+        nx = cx - dx;
+        ny = y;
+      } else if (transformType === 'align_cg') {
+        nx = x - cx;
+        ny = y - cy;
+      }
+      return [nx, ny];
+    };
+
+    return elements.map(el => {
+      const isArr = Array.isArray(el);
+      const x0 = isArr ? el[1] : (el.x0 !== undefined ? el.x0 : el[1]);
+      const y0 = isArr ? el[2] : (el.y0 !== undefined ? el.y0 : el[2]);
+      const x1 = isArr ? el[3] : (el.x1 !== undefined ? el.x1 : el[3]);
+      const y1 = isArr ? el[4] : (el.y1 !== undefined ? el.y1 : el[4]);
+
+      const [nx1, ny1] = transformPoint(x0, y0);
+      const [nx2, ny2] = transformPoint(x1, y1);
+
+      if (isArr) {
+        const newEl = [...el];
+        newEl[1] = nx1;
+        newEl[2] = ny1;
+        newEl[3] = nx2;
+        newEl[4] = ny2;
+        return newEl;
+      } else {
+        return {
+          ...el,
+          x0: nx1,
+          y0: ny1,
+          x1: nx2,
+          y1: ny2
+        };
+      }
+    });
   }
 
   init() {
@@ -38,6 +168,7 @@ class CFDesignerApp {
     this.fsmChart = new FSMSignatureChart('fsmChartCanvas', (lVal, pVal) => {
       console.log(`Selected Wavelength L: ${lVal} mm, Pcr: ${pVal} kN`);
     });
+    this.diagramViewer = new FrameDiagramViewer('canvasBeamModel', 'canvasSfd', 'canvasBmd', 'canvasDefl');
 
     // 2. Bind DOM Events
     this.bindEvents();
@@ -279,16 +410,23 @@ class CFDesignerApp {
     const t = parseFloat(document.getElementById('wizT').value) || 2.0;
     const r = parseFloat(document.getElementById('wizR').value) || 2.0;
 
+    this.showStatus('📐 단면 마법사 생성 및 기하 계산 중...', 'busy');
+    const signal = this.getAbortSignal('wizard', '이전 마법사 생성 취소 후 재연산 중...');
+
     try {
       const res = await fetch('/api/section/wizard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shape_type: shape, h, b, c, t, r })
+        body: JSON.stringify({ shape_type: shape, h, b, c, t, r }),
+        signal: signal
       });
+      if (!res.ok) return;
       const data = await res.json();
       this.updateSectionData(data);
     } catch (err) {
+      if (err.name === 'AbortError') return;
       console.error('Wizard API error:', err);
+      this.showStatus('단면 마법사 생성 실패', 'warning', 3000);
     }
   }
 
@@ -299,19 +437,27 @@ class CFDesignerApp {
     formData.append('default_thickness', t);
     formData.append('unit', 'mm');
 
+    this.showStatus('📐 DXF 도면 파싱 및 중심선 메싱 중...', 'busy');
+    const signal = this.getAbortSignal('wizard', '이전 DXF 파싱 취소 후 재연산 중...');
+
     try {
       const res = await fetch('/api/section/upload-dxf', {
         method: 'POST',
-        body: formData
+        body: formData,
+        signal: signal
       });
       if (!res.ok) {
         alert('DXF 파싱 실패: ' + (await res.json()).detail);
+        this.showStatus('DXF 파싱 오류', 'warning', 3000);
         return;
       }
       const data = await res.json();
       this.updateSectionData(data);
+      this.showStatus('✅ DXF 단면 로드 완료', 'success', 3000);
     } catch (err) {
+      if (err.name === 'AbortError') return;
       console.error('DXF Upload Error:', err);
+      this.showStatus('DXF 업로드 실패', 'warning', 3000);
     }
   }
 
@@ -319,13 +465,13 @@ class CFDesignerApp {
     this.currentGeometry = data.geometry;
     this.currentProperties = data.properties;
 
-    // 1. Update 2D Canvas
+    // 1. Update 2D Canvas immediately
     this.canvas2d.setData(this.currentGeometry, this.currentProperties);
 
-    // 2. Update Properties Table
+    // 2. Update Properties Table immediately
     this.renderPropertiesTable(this.currentProperties);
 
-    // 3. Trigger FSM Buckling Analysis & Design Check
+    // 3. Trigger FSM Buckling Analysis & Design Check asynchronously with debouncing
     this.runFSM();
     this.runDesignCheck();
   }
@@ -356,38 +502,55 @@ class CFDesignerApp {
   async runFSM() {
     if (!this.currentGeometry) return;
 
-    const fy = parseFloat(document.getElementById('yieldStress').value) || 345;
-    const lMem = parseFloat(document.getElementById('memberLength').value) || 3000;
-
-    try {
-      const res = await fetch('/api/fsm/solve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          elements: this.currentGeometry.elements,
-          thickness: this.currentGeometry.thickness,
-          yield_stress: fy,
-          member_length: lMem,
-          num_points: 35
-        })
-      });
-      const data = await res.json();
-      this.currentFsmResult = data;
-
-      // Update FSM Signature Chart
-      this.fsmChart.updateData(data.signature_curve);
-
-      // Update 3D Viewer Mesh & Modes
-      this.viewer3d.setData(data.nodes, data.strips, 'local_mode');
-
-      // Update FSM Key Indicator Labels
-      const modes = data.critical_modes;
-      document.getElementById('valPcrl').innerText = `${modes.p_crl} kN (${modes.l_local} mm)`;
-      document.getElementById('valPcrd').innerText = `${modes.p_crd} kN (${modes.l_distortional} mm)`;
-      document.getElementById('valPcre').innerText = `${modes.p_cre} kN (${modes.l_global} mm)`;
-    } catch (err) {
-      console.error('FSM solve error:', err);
+    if (this.fsmDebounceTimer) {
+      clearTimeout(this.fsmDebounceTimer);
     }
+
+    this.fsmDebounceTimer = setTimeout(async () => {
+      const fy = parseFloat(document.getElementById('yieldStress').value) || 345;
+      const lMem = parseFloat(document.getElementById('memberLength').value) || 3000;
+      const startTime = performance.now();
+
+      this.showStatus('🔬 FSM 탄성 좌굴해석 연산 중 (35개 스윕)...', 'busy');
+      const signal = this.getAbortSignal('fsm', '이전 FSM 연산 취소 후 최신 단면 재해석 중...');
+
+      try {
+        const res = await fetch('/api/fsm/solve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            elements: this.currentGeometry.elements,
+            thickness: this.currentGeometry.thickness,
+            yield_stress: fy,
+            member_length: lMem,
+            num_points: 35
+          }),
+          signal: signal
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        this.currentFsmResult = data;
+
+        // Update FSM Signature Chart
+        this.fsmChart.updateData(data.signature_curve);
+
+        // Update 3D Viewer Mesh & Modes
+        this.viewer3d.setData(data.nodes, data.strips, 'local_mode');
+
+        // Update FSM Key Indicator Labels
+        const modes = data.critical_modes;
+        document.getElementById('valPcrl').innerText = `${modes.p_crl} kN (${modes.l_local} mm)`;
+        document.getElementById('valPcrd').innerText = `${modes.p_crd} kN (${modes.l_distortional} mm)`;
+        document.getElementById('valPcre').innerText = `${modes.p_cre} kN (${modes.l_global} mm)`;
+
+        const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+        this.showStatus(`✅ 해석 및 부재설계 완료 (${elapsed}s)`, 'success', 3500);
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        console.error('FSM solve error:', err);
+        this.showStatus('FSM 좌굴해석 실패', 'warning', 3000);
+      }
+    }, 50);
   }
 
   async runDesignCheck() {
@@ -398,6 +561,8 @@ class CFDesignerApp {
     const pu = parseFloat(document.getElementById('loadPu').value) || 50;
     const mux = parseFloat(document.getElementById('loadMux').value) || 5.0;
     const vu = parseFloat(document.getElementById('loadVu').value) || 15.0;
+
+    const signal = this.getAbortSignal('design');
 
     try {
       const res = await fetch('/api/design/check', {
@@ -414,13 +579,16 @@ class CFDesignerApp {
           mux: mux,
           muy: 0.0,
           vu: vu
-        })
+        }),
+        signal: signal
       });
+      if (!res.ok) return;
       const data = await res.json();
       this.currentDesignResult = data;
       this.renderDesignDashboard(data);
       this.calculateWebCrippling();
     } catch (err) {
+      if (err.name === 'AbortError') return;
       console.error('Design Check Error:', err);
     }
   }
@@ -622,11 +790,91 @@ class CFDesignerApp {
   }
 
   // ================= Phase 1: Geometric Transforms =================
+  applyOptimisticTransform(elements, type, angleDeg = 0) {
+    if (!elements || elements.length === 0) return [];
+
+    let totA = 0, sumXA = 0, sumYA = 0;
+    elements.forEach(e => {
+      const ea = (e.length || 10) * (e.thickness || 2.0);
+      totA += ea;
+      sumXA += ea * (e.x0 + e.x1) / 2.0;
+      sumYA += ea * (e.y0 + e.y1) / 2.0;
+    });
+    const cx = totA > 0 ? sumXA / totA : 0;
+    const cy = totA > 0 ? sumYA / totA : 0;
+
+    let rad = 0;
+    if (type === 'rotate_90_cw') rad = -Math.PI / 2;
+    else if (type === 'rotate_90_ccw') rad = Math.PI / 2;
+    else if (type === 'rotate_angle') rad = (angleDeg * Math.PI) / 180;
+
+    const cosA = Math.cos(rad);
+    const sinA = Math.sin(rad);
+
+    return elements.map((e, idx) => {
+      let x0 = e.x0, y0 = e.y0, x1 = e.x1, y1 = e.y1, ang = e.angle || 0;
+
+      if (type.startsWith('rotate')) {
+        const dx0 = x0 - cx, dy0 = y0 - cy;
+        const dx1 = x1 - cx, dy1 = y1 - cy;
+        x0 = dx0 * cosA - dy0 * sinA + cx;
+        y0 = dx0 * sinA + dy0 * cosA + cy;
+        x1 = dx1 * cosA - dy1 * sinA + cx;
+        y1 = dx1 * sinA + dy1 * cosA + cy;
+        ang = (ang + rad) % (Math.PI * 2);
+      } else if (type === 'mirror_h') {
+        y0 = 2 * cy - y0;
+        y1 = 2 * cy - y1;
+        ang = -ang;
+      } else if (type === 'mirror_v') {
+        x0 = 2 * cx - x0;
+        x1 = 2 * cx - x1;
+        ang = Math.PI - ang;
+      } else if (type === 'align_cg') {
+        x0 -= cx; x1 -= cx;
+        y0 -= cy; y1 -= cy;
+      }
+
+      return {
+        ...e,
+        elem_id: e.elem_id || (idx + 1),
+        x0, y0, x1, y1,
+        angle: ang
+      };
+    });
+  }
+
   async transformSection(transformType, angleDeg = 0) {
     if (!this.currentGeometry || !this.currentGeometry.elements) return;
 
+    // 1. 기존 변환 전 원본 elements 보관
+    const originalElements = this.currentGeometry.elements;
+
+    // 2. [즉시 수행] 클라이언트 측 옵티미스틱 기하 변환 및 2D 캔버스 0ms 렌더링
+    const optimisticElements = this.applyOptimisticTransform(originalElements, transformType, angleDeg);
+    const optimisticGeom = {
+      ...this.currentGeometry,
+      elements: optimisticElements
+    };
+    this.currentGeometry = optimisticGeom;
+    this.canvas2d.setData(this.currentGeometry, this.currentProperties);
+
+    const typeNames = {
+      rotate_90_cw: '90° 시계방향 회전',
+      rotate_90_ccw: '90° 반시계방향 회전',
+      mirror_h: '상하 대칭 (Mirror X)',
+      mirror_v: '좌우 대칭 (Mirror Y)',
+      align_cg: '도심 원점 정렬',
+      rotate_angle: `${angleDeg}° 회전`
+    };
+    const desc = typeNames[transformType] || '단면 변환';
+    this.showStatus(`🔄 ${desc} 적용 및 정밀 단면해석 중...`, 'busy');
+
+    // 3. [연산 중단 후 최신 재연산] 서버에는 원본 originalElements를 전송하여 2중 변환 방지
+    const signal = this.getAbortSignal('transform', `이전 변환 취소 후 ${desc} 재연산 중...`);
+
     const payload = {
-      elements: this.currentGeometry.elements,
+      elements: originalElements,
       thickness: this.currentGeometry.thickness || 2.0,
       transform_type: transformType,
       angle_deg: angleDeg,
@@ -637,12 +885,16 @@ class CFDesignerApp {
       const res = await fetch('/api/section/transform', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: signal
       });
+      if (!res.ok) return;
       const data = await res.json();
       this.updateSectionData(data);
     } catch (err) {
+      if (err.name === 'AbortError') return;
       console.error('Transform error:', err);
+      this.showStatus('단면 변환 오류 발생', 'warning', 3000);
     }
   }
 
@@ -660,8 +912,24 @@ class CFDesignerApp {
 
     if (!this.currentGeometry || !this.currentGeometry.elements) return;
 
+    // 1. 기존 변환 전 원본 elements 보관
+    const originalElements = this.currentGeometry.elements;
+
+    // 2. [즉시 수행] 클라이언트 측 0ms 캔버스 렌더링
+    const optimisticElements = this.applyOptimisticTransform(originalElements, 'rotate_angle', angle);
+    const optimisticGeom = {
+      ...this.currentGeometry,
+      elements: optimisticElements
+    };
+    this.currentGeometry = optimisticGeom;
+    this.canvas2d.setData(this.currentGeometry, this.currentProperties);
+    this.closeRotateModal();
+
+    this.showStatus(`🔄 ${angle}° 임의각도 회전 적용 및 정밀 단면해석 중...`, 'busy');
+    const signal = this.getAbortSignal('transform', `이전 회전 취소 후 ${angle}° 재회전 중...`);
+
     const payload = {
-      elements: this.currentGeometry.elements,
+      elements: originalElements,
       thickness: this.currentGeometry.thickness || 2.0,
       transform_type: 'rotate_angle',
       angle_deg: angle,
@@ -672,13 +940,16 @@ class CFDesignerApp {
       const res = await fetch('/api/section/transform', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: signal
       });
+      if (!res.ok) return;
       const data = await res.json();
       this.updateSectionData(data);
-      this.closeRotateModal();
     } catch (err) {
+      if (err.name === 'AbortError') return;
       console.error('Rotate submit error:', err);
+      this.showStatus('회전 연산 실패', 'warning', 3000);
     }
   }
 

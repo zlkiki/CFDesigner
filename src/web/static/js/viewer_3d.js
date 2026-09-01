@@ -39,12 +39,12 @@ class BucklingViewer3D {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0f172a);
 
-    this.camera = new THREE.PerspectiveCamera(45, w / h, 1, 5000);
+    this.camera = new THREE.PerspectiveCamera(45, w / h, 5, 3500);
     this.updateCamera();
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
     this.renderer.setSize(w, h);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.container.appendChild(this.renderer.domElement);
 
     // Lights
@@ -174,7 +174,7 @@ class BucklingViewer3D {
       }
     }
 
-    // Build Triangles along strips
+    // Build Triangles along strips (Single-sided indexed, rendered with THREE.DoubleSide)
     for (let iz = 0; iz < numZ; iz++) {
       const row1 = iz * numNodes;
       const row2 = (iz + 1) * numNodes;
@@ -188,11 +188,9 @@ class BucklingViewer3D {
         const c = row2 + n2;
         const d = row2 + n1;
 
+        // Counter-clockwise CCW quad split into 2 triangles
         indices.push(a, b, c);
         indices.push(a, c, d);
-        // Double-sided faces
-        indices.push(c, b, a);
-        indices.push(d, c, a);
       }
     }
 
@@ -201,21 +199,28 @@ class BucklingViewer3D {
     geometry.setIndex(indices);
     geometry.computeVertexNormals();
 
+    // Solid Shell Surface Material with Polygon Offset to prevent Z-Fighting with wireframe
     const material = new THREE.MeshStandardMaterial({
       vertexColors: true,
-      roughness: 0.3,
-      metalness: 0.2,
-      side: THREE.DoubleSide
+      roughness: 0.35,
+      metalness: 0.15,
+      side: THREE.DoubleSide,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.0,
+      polygonOffsetUnits: 4.0
     });
 
     this.mesh = new THREE.Mesh(geometry, material);
     this.scene.add(this.mesh);
 
+    // Clean overlay wireframe without depth conflicts
     const wireMat = new THREE.MeshBasicMaterial({
-      color: 0x475569,
+      color: 0x64748b,
       wireframe: true,
       transparent: true,
-      opacity: 0.4
+      opacity: 0.35,
+      depthTest: true,
+      depthWrite: false
     });
     this.wireframeMesh = new THREE.Mesh(geometry, wireMat);
     this.scene.add(this.wireframeMesh);

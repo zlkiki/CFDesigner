@@ -17,7 +17,50 @@ if ($ScriptDir) {
     Set-Location $ScriptDir
 }
 
-# Detect Python Environment
+# -----------------------------------------------------------------------
+# 1. Check and terminate existing CFDesigner or Port 8000 instances
+# -----------------------------------------------------------------------
+$Port = 8000
+$terminated = $false
+
+# 1-A. Terminate processes running CFDesigner uvicorn server
+try {
+    $existingServers = Get-CimInstance Win32_Process -Filter "CommandLine LIKE '%src.api.server:app%'" -ErrorAction SilentlyContinue
+    if ($existingServers) {
+        foreach ($srv in $existingServers) {
+            Write-Host "[!] Existing CFDesigner server detected (PID: $($srv.ProcessId)). Terminating..." -ForegroundColor Yellow
+            Stop-Process -Id $srv.ProcessId -Force -ErrorAction SilentlyContinue
+            $terminated = $true
+        }
+    }
+} catch {}
+
+# 1-B. Terminate any remaining process occupying port 8000
+try {
+    $portConnections = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
+    if ($portConnections) {
+        $occupyingPids = $portConnections | Select-Object -ExpandProperty OwningProcess -Unique
+        foreach ($pidToKill in $occupyingPids) {
+            if ($pidToKill -gt 0) {
+                $proc = Get-Process -Id $pidToKill -ErrorAction SilentlyContinue
+                $procName = if ($proc) { $proc.ProcessName } else { "Unknown" }
+                Write-Host "[!] Port $Port is in use by '$procName' (PID: $pidToKill). Terminating..." -ForegroundColor Yellow
+                Stop-Process -Id $pidToKill -Force -ErrorAction SilentlyContinue
+                $terminated = $true
+            }
+        }
+    }
+} catch {}
+
+if ($terminated) {
+    Start-Sleep -Milliseconds 700
+    Write-Host "[✓] Previous instance cleaned up successfully." -ForegroundColor Green
+    Write-Host ""
+}
+
+# -----------------------------------------------------------------------
+# 2. Detect Python Environment
+# -----------------------------------------------------------------------
 $PythonExe = "$PSScriptRoot\.venv\Scripts\python.exe"
 if (-not (Test-Path $PythonExe)) {
     $PythonExe = "python"
