@@ -1,10 +1,10 @@
-# [요구사항 08-4] Phase 4: CFS 원본 대화창(frmQuickDesign.cs) 100% 풀스펙 UI 및 최적설계 엔진 전수 이식
+# [요구사항 08-4] Phase 4: CFS 원본 대화창(frmQuickDesign.cs) 100% 풀스펙 UI 및 최적설계 엔진 전수 이식 & 원본 교차 검증
 
 > **상위 마스터**: [`요구사항08_UI테마_FSM응력구배_온라인도움말전수동기화_퀵디자인풀스펙이식.md`](file:///f:/PyProject/CFDesigner/요구사항/요구사항08_UI테마_FSM응력구배_온라인도움말전수동기화_퀵디자인풀스펙이식.md)  
 > **상태**: 🚀 `진행 중 (Active)`  
 > **작성 일자**: 2026-09-01  
 > **원본 레퍼런스 (Ground Truth)**:
-> - [`decompiled_src/_Global/frmQuickDesign.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/_Global/frmQuickDesign.cs) (2,268줄 오리지널 C# 대화상자 전체)
+> - [`decompiled_src/_Global/frmQuickDesign.cs`](file:///f:/PyProject/CFDesigner/decompiled_src/_Global/frmQuickDesign.cs) (2,268줄 오리지널 C# 대화상자 전체 - 절대적 정답 기준)
 > **관련 파일**:
 > - `src/design/quick_design.py`
 > - `src/geometry/library_parser.py`
@@ -19,6 +19,7 @@
 
 1. 원본 상용 프로그램의 **`frmQuickDesign.cs` 대화상자에 존재하는 모든 입력 파라메터(단면 필터, 재료 옵션, 경간/배치, 설계 하중, 횡지지, 처짐 한계 등)를 100% 빠짐없이 웹 UI로 이식**.
 2. **강도(Strength), 처짐(Deflection), 웨브 크리플링(Web Crippling) 3대 통합 D/C 검토 엔진**을 완성하여 최적의 표준 단면을 실시간 자동 추천.
+3. **엔진 수정 시 원본 동일성 검증**: 원본 C#(`frmQuickDesign.cs`) 계산 루틴과 오차 0.1% 미만의 무결성을 입증.
 
 ---
 
@@ -49,12 +50,12 @@
 ## 3. 세부 개발 명세
 
 ### 3.1 퀵 디자인 웹 모달 풀스펙 재설계 (`index.html`)
-* **3열 그리드 레이아웃**:
+* **3열 반응형 그리드 레이아웃**:
   - 좌측 컬럼: **[단면 및 재료 필터]** (Depth, Type, Flange, Thickness, Punched, Config, Fy, ColdWork, Reserve).
   - 중앙 컬럼: **[경간 및 설계 하중]** (Span, Spacing, Bracing, Dead, Live, Wind, Axial Dead/Live, Deflection Limit, Bearing Length).
   - 우측 컬럼: **[최적 단면 추천 랭킹 리스트 및 3대 D/C 게이지]** (Strength, Deflection, Web Crippling).
 
-### 3.2 3대 다축 검토 엔진 확장 (`quick_design.py`)
+### 3.2 3대 다축 검토 엔진 확장 및 원본 동일성 검증 (`quick_design.py`)
 * **1. 강도 검토 (Strength)**:
   - 축압축 + 이축휨 P-M 조합 D/C ratio 계산.
 * **2. 사용성 처짐 검토 (Deflection)**:
@@ -63,6 +64,8 @@
   - 지압길이 $N$ 및 지점 반력 $R$에 대한 $\phi P_n$ 및 D/C ratio 계산.
 * **최적화 랭킹 정렬**:
   - $\max(\text{Strength D/C}, \text{Deflection D/C}, \text{Crippling D/C}) \le 1.0$을 만족하는 단면들을 단위중량($\text{kg/m}$) 오름차순으로 1위~10위 정렬하여 추천.
+* **원본 교차 검증**:
+  - SSMA 표준 단면에 대해 원본 `frmQuickDesign.cs`의 계산 결과와 대조하여 0.1% 오차 미만의 무결성을 입증.
 
 ---
 
@@ -71,4 +74,4 @@
 - [ ] **AC 4-1**: 퀵 디자인 모달 열기 시 CFS 원본 `frmQuickDesign.cs`의 모든 입력 항목(단면 6종 필터, 하중 5종, 지지/처짐/지압길이)이 충실히 제공되는가?
 - [ ] **AC 4-2**: 소요 설계조건 입력 후 [⚡ 최적 단면 자동 추천] 클릭 시 강도, 처짐, 웨브 크리플링 3대 D/C를 모두 만족하는 최적 경량 단면 목록이 정상 출력되는가?
 - [ ] **AC 4-3**: 추천된 단면 중 하나를 클릭했을 때 메인 캔버스와 설계 화면으로 해당 단면의 제원과 물성치가 원클릭 로드되는가?
-- [ ] **AC 4-4**: `pytest tests/ui/test_quick_design.py` 단위 테스트가 100% Pass 통과하는가?
+- [ ] **AC 4-4**: CFS 원본 계산치와 대조한 단위 테스트 `pytest tests/ui/test_quick_design.py`가 100% Pass 통과하는가?
