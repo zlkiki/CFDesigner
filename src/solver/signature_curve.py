@@ -14,17 +14,26 @@ from .eigen_solver import FSMEigenSolver
 @dataclass
 class BucklingPoint:
     length: float       # Half-wavelength L
-    load_factor: float  # Critical load factor (LF = Pcr / Py)
-    critical_load: float = 0.0 # Pcr (N or kips)
-    critical_moment: float = 0.0 # Mcr (N-mm or kip-in)
+    load_factor: float  # Critical load factor (LF = Pcr / Py) for Mode 1
+    critical_load: float = 0.0 # Pcr (N or kips) for Mode 1
+    critical_moment: float = 0.0 # Mcr (N-mm or kip-in) for Mode 1
+    # Multi-mode extensions (Mode 1, Mode 2, Mode 3, ...)
+    mode_load_factors: List[float] = field(default_factory=list)
+    mode_critical_loads: List[float] = field(default_factory=list)
+    mode_critical_moments: List[float] = field(default_factory=list)
 
 
 @dataclass
 class BucklingCurveResult:
     lengths: List[float] = field(default_factory=list)
-    load_factors: List[float] = field(default_factory=list)
+    load_factors: List[float] = field(default_factory=list) # Mode 1 load factors
     points: List[BucklingPoint] = field(default_factory=list)
     load_type: str = "compression"
+    
+    # Multi-mode curves (mode_index -> list of load factors)
+    mode_1_lfs: List[float] = field(default_factory=list)
+    mode_2_lfs: List[float] = field(default_factory=list)
+    mode_3_lfs: List[float] = field(default_factory=list)
 
     # Key Buckling Modes (Loads in N)
     p_crl: float = 0.0  # Elastic local buckling load
@@ -79,15 +88,34 @@ class SignatureCurveAnalyzer:
 
         for l_val in sweep_lengths:
             ke, kg = self.assembler.assemble_matrices(half_wavelength=float(l_val))
-            lf, _ = FSMEigenSolver.solve_min_eigenvalue(ke, kg)
+            modes = FSMEigenSolver.solve_eigenvalues(ke, kg, num_modes=3)
 
-            if not np.isinf(lf) and lf > 0:
-                p_cr = lf * p_y
-                m_cr = lf * m_y
-                pt = BucklingPoint(length=float(l_val), load_factor=float(lf), critical_load=float(p_cr), critical_moment=float(m_cr))
-                res.lengths.append(float(l_val))
-                res.load_factors.append(float(lf))
-                res.points.append(pt)
+            if modes:
+                lf_1 = modes[0][0]
+                if not np.isinf(lf_1) and lf_1 > 0:
+                    p_cr_1 = lf_1 * p_y
+                    m_cr_1 = lf_1 * m_y
+
+                    m_lfs = [float(m[0]) for m in modes]
+                    m_pcrs = [float(m[0] * p_y) for m in modes]
+                    m_mcrs = [float(m[0] * m_y) for m in modes]
+
+                    pt = BucklingPoint(
+                        length=float(l_val),
+                        load_factor=float(lf_1),
+                        critical_load=float(p_cr_1),
+                        critical_moment=float(m_cr_1),
+                        mode_load_factors=m_lfs,
+                        mode_critical_loads=m_pcrs,
+                        mode_critical_moments=m_mcrs,
+                    )
+                    res.lengths.append(float(l_val))
+                    res.load_factors.append(float(lf_1))
+                    res.points.append(pt)
+
+                    res.mode_1_lfs.append(m_lfs[0] if len(m_lfs) > 0 else float(lf_1))
+                    res.mode_2_lfs.append(m_lfs[1] if len(m_lfs) > 1 else float(lf_1))
+                    res.mode_3_lfs.append(m_lfs[2] if len(m_lfs) > 2 else (m_lfs[1] if len(m_lfs) > 1 else float(lf_1)))
 
         # Detect Local and Distortional minima
         self._classify_modes(res, p_y, m_y, member_length)

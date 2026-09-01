@@ -239,59 +239,11 @@ class BucklingViewer3D {
     this.buildStressProfile();
   }
 
-  setMode(modeKey) {
+  setMode(modeKey, modeIndex = 1) {
     this.currentModeKey = modeKey;
+    this.currentModeIndex = modeIndex;
     this.buildGeometry();
     this.buildStressProfile();
-  }
-
-  buildStressProfile() {
-    if (!this.stressProfileGroup) return;
-    while (this.stressProfileGroup.children.length > 0) {
-      const obj = this.stressProfileGroup.children[0];
-      this.stressProfileGroup.remove(obj);
-      if (obj.geometry) obj.geometry.dispose();
-    }
-
-    if (!this.nodes || this.nodes.length === 0) return;
-
-    // Draw stress profile arrows and boundary lines at mid-span z = 0
-    const points = [];
-    const lengthZ = 200;
-    const zMid = 0;
-
-    for (let inod = 0; inod < this.nodes.length; inod++) {
-      const n = this.nodes[inod];
-      const stressVal = n.stress !== undefined ? n.stress : -345.0; // Negative for compression
-      const arrowLen = (stressVal / 345.0) * 20.0;
-
-      // Line from node outward
-      const p1 = new THREE.Vector3(n.x, n.y, zMid);
-      const p2 = new THREE.Vector3(n.x, n.y + arrowLen, zMid);
-
-      const lineGeom = new THREE.BufferGeometry().setFromPoints([p1, p2]);
-      const lineMat = new THREE.LineBasicMaterial({
-        color: stressVal < 0 ? 0xef4444 : 0x3b82f6,
-        linewidth: 2
-      });
-      const line = new THREE.Line(lineGeom, lineMat);
-      this.stressProfileGroup.add(line);
-      points.push(p2);
-    }
-
-    if (points.length > 1) {
-      const profileGeom = new THREE.BufferGeometry().setFromPoints(points);
-      const profileMat = new THREE.LineDashedMaterial({
-        color: 0xf59e0b,
-        dashSize: 4,
-        gapSize: 2
-      });
-      const profileLine = new THREE.Line(profileGeom, profileMat);
-      profileLine.computeLineDistances();
-      this.stressProfileGroup.add(profileLine);
-    }
-
-    this.stressProfileGroup.visible = this.showStressProfile;
   }
 
   buildGeometry() {
@@ -308,8 +260,8 @@ class BucklingViewer3D {
 
     if (!this.nodes || this.nodes.length === 0) return;
 
-    const numZ = 24; // Longitudinal segments
-    const lengthZ = 200; // Visual length
+    const numZ = 36; // Longitudinal segments for smooth sine wave (도해4)
+    const lengthZ = 220; // Visual length
     const geometry = new THREE.BufferGeometry();
 
     const positions = [];
@@ -318,15 +270,23 @@ class BucklingViewer3D {
 
     // Construct grid of vertices along length Z
     const numNodes = this.nodes.length;
+    const mIdx = this.currentModeIndex || 1;
+
+    let targetKey = this.currentModeKey || 'local_mode';
+    if (mIdx === 2) {
+      targetKey = targetKey.includes('dist') ? 'dist_mode_2' : (targetKey.includes('glob') ? 'glob_mode_2' : 'local_mode_2');
+    } else if (mIdx === 3) {
+      targetKey = targetKey.includes('dist') ? 'dist_mode_3' : (targetKey.includes('glob') ? 'glob_mode_3' : 'local_mode_3');
+    }
 
     for (let iz = 0; iz <= numZ; iz++) {
       const zFrac = iz / numZ;
       const z = (zFrac - 0.5) * lengthZ;
-      const sinZ = Math.sin(zFrac * Math.PI); // Longitudinal Half-sine wave (도해4)
+      const sinZ = Math.sin(zFrac * Math.PI); // Longitudinal Half-sine wave (도해4: CFS sin(pi*z/L))
 
       for (let inod = 0; inod < numNodes; inod++) {
         const n = this.nodes[inod];
-        const disp = n[this.currentModeKey] || [0, 0, 0, 0];
+        const disp = n[targetKey] || n[this.currentModeKey] || [0, 0, 0, 0];
         const u = disp[0] || 0; // X disp
         const v = disp[1] || 0; // Y disp
 
@@ -335,9 +295,10 @@ class BucklingViewer3D {
 
         positions.push(defX, defY, z);
 
-        // Color based on displacement magnitude
+        // Color based on displacement magnitude and depth shading
         const dispMag = Math.sqrt(u * u + v * v) * Math.abs(sinZ);
-        const col = new THREE.Color().setHSL(0.6 - Math.min(dispMag * 0.4, 0.6), 1.0, 0.5);
+        const hue = mIdx === 2 ? 0.35 : (mIdx === 3 ? 0.8 : 0.58); // Mode 1: Blue/Cyan, Mode 2: Green, Mode 3: Purple
+        const col = new THREE.Color().setHSL(hue - Math.min(dispMag * 0.3, 0.4), 0.95, 0.5 + 0.15 * Math.sin(zFrac * Math.PI));
         colors.push(col.r, col.g, col.b);
       }
     }
@@ -401,17 +362,25 @@ class BucklingViewer3D {
       this.time += 0.04;
       const osc = Math.sin(this.time);
       const positions = this.mesh.geometry.attributes.position.array;
-      const numZ = 24;
+      const numZ = 36;
       const numNodes = this.nodes.length;
-      let ptr = 0;
+      const mIdx = this.currentModeIndex || 1;
 
+      let targetKey = this.currentModeKey || 'local_mode';
+      if (mIdx === 2) {
+        targetKey = targetKey.includes('dist') ? 'dist_mode_2' : (targetKey.includes('glob') ? 'glob_mode_2' : 'local_mode_2');
+      } else if (mIdx === 3) {
+        targetKey = targetKey.includes('dist') ? 'dist_mode_3' : (targetKey.includes('glob') ? 'glob_mode_3' : 'local_mode_3');
+      }
+
+      let ptr = 0;
       for (let iz = 0; iz <= numZ; iz++) {
         const zFrac = iz / numZ;
         const sinZ = Math.sin(zFrac * Math.PI) * osc;
 
         for (let inod = 0; inod < numNodes; inod++) {
           const n = this.nodes[inod];
-          const disp = n[this.currentModeKey] || [0, 0, 0, 0];
+          const disp = n[targetKey] || n[this.currentModeKey] || [0, 0, 0, 0];
           positions[ptr] = n.x + disp[0] * this.amplitude * sinZ;
           positions[ptr + 1] = n.y + disp[1] * this.amplitude * sinZ;
           ptr += 3;

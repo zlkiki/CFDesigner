@@ -272,10 +272,14 @@
 
           <!-- Mode Selector for 3D Viewer -->
           <div id="modeSelectorBar" style="display: none; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span style="font-size: 11.5px; color: var(--text-secondary);">모드:</span>
-            <button class="btn btn-outline btn-mode-select active btn-primary" data-mode-key="local_mode" style="padding: 3px 8px; font-size: 11px;">로컬 버클링(Local)</button>
-            <button class="btn btn-outline btn-mode-select" data-mode-key="dist_mode" style="padding: 3px 8px; font-size: 11px;">디스토셔널 버클링(Distortional)</button>
-            <button class="btn btn-outline btn-mode-select" data-mode-key="glob_mode" style="padding: 3px 8px; font-size: 11px;">글로벌 버클링(Global)</button>
+            <span style="font-size: 11.5px; color: var(--text-secondary);">유형:</span>
+            <button class="btn btn-outline btn-mode-select active btn-primary" data-mode-key="local_mode" style="padding: 3px 8px; font-size: 11px;">로컬(Local)</button>
+            <button class="btn btn-outline btn-mode-select" data-mode-key="dist_mode" style="padding: 3px 8px; font-size: 11px;">디스토셔널(Distortional)</button>
+            <button class="btn btn-outline btn-mode-select" data-mode-key="glob_mode" style="padding: 3px 8px; font-size: 11px;">글로벌(Global)</button>
+            <span style="font-size: 11.5px; color: var(--text-secondary); margin-left: 4px;">차수:</span>
+            <button class="btn btn-outline btn-eigen-mode active btn-primary" data-mode-idx="1" style="padding: 3px 7px; font-size: 11px;">1차 (Mode 1)</button>
+            <button class="btn btn-outline btn-eigen-mode" data-mode-idx="2" style="padding: 3px 7px; font-size: 11px;">2차 (Mode 2)</button>
+            <button class="btn btn-outline btn-eigen-mode" data-mode-idx="3" style="padding: 3px 7px; font-size: 11px;">3차 (Mode 3)</button>
             <span style="font-size: 11.5px; color: var(--text-secondary); margin-left: 4px;">진폭:</span>
             <input type="range" id="ampSlider" min="1" max="40" value="15" style="width: 60px;">
             <button class="btn btn-outline" id="btnToggleAnim3d" style="padding: 3px 7px; font-size: 11px;" title="진동 애니메이션 재생/일시정지">⏸️ 정지</button>
@@ -307,7 +311,12 @@
             <button class="overlay-btn" id="btnFitView" title="화면 맞춤 (Fit View)">⛶</button>
             <div class="overlay-divider"></div>
             <button class="overlay-btn" id="btnToggleEffective" title="Winter 식 기반 유효단면(Effective Section) 2D 오버레이 렌더링 토글">👁️ 유효단면</button>
-            <button class="overlay-btn" id="btnToggle2dModeShape" title="FSM 2D 단면 변형 모드형상(도해3) 렌더링 토글">🌀 2D 변형모드</button>
+            <button class="overlay-btn" id="btnToggle2dModeShape" title="FSM 2D 단면 변형 모드형상(도해3: Hermite 3차 곡선) 렌더링 토글">🌀 2D 변형모드</button>
+            <div class="overlay-btn-group" id="btnGroup2dModes" style="display: flex; gap: 2px;">
+              <button class="overlay-btn active btn-2d-mode-idx" data-idx="1" style="font-size: 10.5px; padding: 2px 6px;">Mode 1</button>
+              <button class="overlay-btn btn-2d-mode-idx" data-idx="2" style="font-size: 10.5px; padding: 2px 6px;">Mode 2</button>
+              <button class="overlay-btn btn-2d-mode-idx" data-idx="3" style="font-size: 10.5px; padding: 2px 6px;">Mode 3</button>
+            </div>
             <div class="overlay-divider"></div>
             <button class="overlay-btn" id="btnOpenElementEditor" title="요소 편집 (Element Spreadsheet)">📋 요소편집</button>
             <button class="overlay-btn" id="btnRotateCw" title="90° 시계방향 회전">↻ 90°</button>

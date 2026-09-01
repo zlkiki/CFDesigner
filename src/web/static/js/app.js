@@ -165,8 +165,12 @@ class CFDesignerApp {
     // 1. Initialize Viewers
     this.canvas2d = new SectionCanvas2D('canvas2d');
     this.viewer3d = new BucklingViewer3D('viewer3dContainer');
-    this.fsmChart = new FSMSignatureChart('fsmChartCanvas', (lVal, pVal) => {
-      console.log(`Selected Wavelength L: ${lVal} mm, Pcr: ${pVal} kN`);
+    this.currentFsmModeIndex = 1;
+    this.currentFsmModeKey = 'local_mode';
+    this.fsmChart = new FSMSignatureChart('fsmChartCanvas', (lVal, pVal, modeIdx, ptData) => {
+      console.log(`Selected Mode ${modeIdx}, Wavelength L: ${lVal} mm, Value: ${pVal}`);
+      this.setGlobalModeIndex(modeIdx);
+      this.showStatus(`선택: Mode ${modeIdx} (L = ${lVal.toLocaleString()} mm, ${pVal.toFixed(2)})`, 'info', 2500);
     });
     this.diagramViewer = new FrameDiagramViewer('canvasBeamModel', 'canvasSfd', 'canvasBmd', 'canvasDefl');
 
@@ -175,6 +179,40 @@ class CFDesignerApp {
 
     // 3. Load Initial C-Section
     this.runWizard();
+  }
+
+  setGlobalModeIndex(modeIdx) {
+    this.currentFsmModeIndex = modeIdx;
+    
+    // Sync 3D buttons
+    document.querySelectorAll('.btn-eigen-mode').forEach(b => {
+      const idx = parseInt(b.getAttribute('data-mode-idx'), 10);
+      b.classList.toggle('active', idx === modeIdx);
+      b.classList.toggle('btn-primary', idx === modeIdx);
+    });
+
+    // Sync 2D buttons
+    document.querySelectorAll('.btn-2d-mode-idx').forEach(b => {
+      const idx = parseInt(b.getAttribute('data-idx'), 10);
+      b.classList.toggle('active', idx === modeIdx);
+      b.classList.toggle('btn-primary', idx === modeIdx);
+    });
+
+    // Update 3D viewer
+    const modeKey = this.currentFsmModeKey || 'local_mode';
+    if (this.viewer3d) {
+      this.viewer3d.setMode(modeKey, modeIdx);
+    }
+
+    // Update 2D canvas
+    if (this.canvas2d) {
+      this.canvas2d.fsmModeIndex = modeIdx;
+      if (this.canvas2d.showModeShape2D) {
+        this.canvas2d.render();
+      }
+    }
+
+    this.update3dOverlayInfo(modeKey, modeIdx);
   }
 
   bindEvents() {
@@ -284,9 +322,35 @@ class CFDesignerApp {
         btn.classList.add('btn-primary');
         btn.classList.add('active');
         const modeKey = btn.getAttribute('data-mode-key');
-        if (this.viewer3d) this.viewer3d.setMode(modeKey);
-        if (this.canvas2d) this.canvas2d.setFsmModeData(this.lastFsmNodes, this.lastFsmStrips, modeKey, this.viewer3d ? this.viewer3d.amplitude : 15.0);
-        this.update3dOverlayInfo(modeKey);
+        this.currentFsmModeKey = modeKey;
+        const modeIdx = this.currentFsmModeIndex || 1;
+        if (this.viewer3d) this.viewer3d.setMode(modeKey, modeIdx);
+        if (this.canvas2d) {
+          this.canvas2d.fsmModeIndex = modeIdx;
+          this.canvas2d.setFsmModeData(this.lastFsmNodes, this.lastFsmStrips, modeKey, this.viewer3d ? this.viewer3d.amplitude : 20.0);
+        }
+        this.update3dOverlayInfo(modeKey, modeIdx);
+      });
+    });
+
+    // 3D / 2D Eigen Mode Index Switcher (Mode 1, Mode 2, Mode 3)
+    document.querySelectorAll('.btn-eigen-mode').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-eigen-mode').forEach(b => {
+          b.classList.remove('btn-primary');
+          b.classList.remove('active');
+        });
+        btn.classList.add('btn-primary');
+        btn.classList.add('active');
+        const modeIdx = parseInt(btn.getAttribute('data-mode-idx'), 10) || 1;
+        this.setGlobalModeIndex(modeIdx);
+      });
+    });
+
+    document.querySelectorAll('.btn-2d-mode-idx').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modeIdx = parseInt(btn.getAttribute('data-idx'), 10) || 1;
+        this.setGlobalModeIndex(modeIdx);
       });
     });
 
@@ -733,25 +797,26 @@ class CFDesignerApp {
     }, 50);
   }
 
-  update3dOverlayInfo(modeKey) {
+  update3dOverlayInfo(modeKey, modeIndex = 1) {
     if (!this.currentFsmResult || !this.currentFsmResult.critical_modes) return;
     const modes = this.currentFsmResult.critical_modes;
     const isBending = modes.load_type && modes.load_type.startsWith('bending');
+    const modeIdxStr = modeIndex === 1 ? '1차' : (modeIndex === 2 ? '2차' : '3차');
 
-    let title = '로컬 버클링 모드 (Local Buckling)';
+    let title = `${modeIdxStr} 로컬 버클링 (Mode ${modeIndex} Local)`;
     let len = modes.l_local || 80.0;
     let beta = 1.0;
     let wr = 'Wflex: 68%, Wtrans: 32%';
     let cap = isBending ? `${modes.m_crl || '-'} kN·m` : `${modes.p_crl || '-'} kN`;
 
     if (modeKey === 'dist_mode') {
-      title = '디스토셔널 버클링 모드 (Distortional Buckling)';
+      title = `${modeIdxStr} 디스토셔널 버클링 (Mode ${modeIndex} Distortional)`;
       len = modes.l_distortional || 300.0;
       beta = 1.0;
       wr = 'Wflex: 52%, Wtrans: 48%';
       cap = isBending ? `${modes.m_crd || '-'} kN·m` : `${modes.p_crd || '-'} kN`;
     } else if (modeKey === 'glob_mode') {
-      title = '글로벌 버클링 모드 (Global Buckling)';
+      title = `${modeIdxStr} 글로벌 버클링 (Mode ${modeIndex} Global)`;
       len = modes.l_global || 3000.0;
       beta = 1.0;
       wr = 'Wflex: 12%, Wshear: 88%';

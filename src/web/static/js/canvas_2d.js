@@ -351,32 +351,103 @@ class SectionCanvas2D {
       ctx.stroke();
     }
 
-    // 8.5 FSM 2D Deformed Cross-Section Mode Shape (도해3)
+    // 8.5 FSM 2D Deformed Cross-Section Mode Shape (도해3: CFS Hermite 3차 보간 곡선)
     if (this.showModeShape2D && this.fsmNodes && this.fsmNodes.length > 0 && this.fsmStrips) {
       ctx.save();
-      ctx.lineWidth = 2.0 / this.scale;
-      ctx.strokeStyle = '#ec4899'; // Vivid pink for buckling mode shape
-      ctx.setLineDash([4 / this.scale, 3 / this.scale]);
+      const modeIdx = this.fsmModeIndex || 1; // 1: Mode 1, 2: Mode 2, 3: Mode 3
+      const modeColors = {
+        1: '#ec4899', // Vivid pink for Mode 1
+        2: '#10b981', // Emerald green for Mode 2
+        3: '#a855f7', // Purple for Mode 3
+      };
+      const strokeColor = modeColors[modeIdx] || '#ec4899';
 
-      const amp = this.fsmAmplitude || 15.0;
-      const key = this.fsmModeKey || 'local_mode';
+      ctx.lineWidth = 2.2 / this.scale;
+      ctx.strokeStyle = strokeColor;
+      ctx.setLineDash([]); // Smooth solid line for true deformed curve
+
+      const amp = this.fsmAmplitude || 20.0;
+      
+      // Determine displacement key based on mode and active type
+      let key = this.fsmModeKey || 'local_mode';
+      if (modeIdx === 2) {
+        key = key.includes('dist') ? 'dist_mode_2' : (key.includes('glob') ? 'glob_mode_2' : 'local_mode_2');
+      } else if (modeIdx === 3) {
+        key = key.includes('dist') ? 'dist_mode_3' : (key.includes('glob') ? 'glob_mode_3' : 'local_mode_3');
+      }
 
       for (const strip of this.fsmStrips) {
         const n1 = this.fsmNodes[strip.node_i];
         const n2 = this.fsmNodes[strip.node_j];
         if (!n1 || !n2) continue;
 
-        const d1 = n1[key] || [0, 0, 0, 0];
-        const d2 = n2[key] || [0, 0, 0, 0];
+        const d1 = n1[key] || n1['local_mode'] || [0, 0, 0, 0];
+        const d2 = n2[key] || n2['local_mode'] || [0, 0, 0, 0];
 
-        const x1 = n1.x + (d1[0] || 0) * amp;
-        const y1 = n1.y + (d1[1] || 0) * amp;
-        const x2 = n2.x + (d2[0] || 0) * amp;
-        const y2 = n2.y + (d2[1] || 0) * amp;
+        // Original strip coordinates
+        const x1 = n1.x, y1 = n1.y;
+        const x2 = n2.x, y2 = n2.y;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const stripLen = Math.hypot(dx, dy);
+        if (stripLen < 1e-6) continue;
 
+        const stripAngle = Math.atan2(dy, dx);
+        const sinA = Math.sin(stripAngle);
+        const cosA = Math.cos(stripAngle);
+
+        // Global nodal displacements: u (in-plane x), v (longitudinal z), w (in-plane y), rot (out-of-plane theta)
+        // Scaled by amplitude
+        const u1_g = (d1[0] || 0) * amp;
+        const w1_g = (d1[1] || 0) * amp;
+        const rot1 = (d1[3] || 0) * amp;
+
+        const u2_g = (d2[0] || 0) * amp;
+        const w2_g = (d2[1] || 0) * amp;
+        const rot2 = (d2[3] || 0) * amp;
+
+        // Transform displacements to strip local coordinates: (u_local: along strip, w_local: normal to strip)
+        const u1_loc = u1_g * cosA + w1_g * sinA;
+        const w1_loc = -u1_g * sinA + w1_g * cosA;
+
+        const u2_loc = u2_g * cosA + w2_g * sinA;
+        const w2_loc = -u2_g * sinA + w2_g * cosA;
+
+        // CFS 14.0 Hermite Cubic Polynomial Coefficients for out-of-plane deflection w(s)
+        // w(s) = a0 + a1*s + a2*s^2 + a3*s^3
+        const b = stripLen;
+        const b2 = b * b;
+        const b3 = b2 * b;
+
+        const a0 = w1_loc;
+        const a1 = rot1;
+        const a3 = (rot1 + rot2) / b2 - 2.0 * (w2_loc - w1_loc) / b3;
+        const a2 = 0.5 * (rot2 - rot1) / b - 1.5 * a3 * b;
+
+        // Subdivide strip into 16 smooth Hermite segments (CFS PlotModeShape algorithm)
+        const numSub = 16;
         ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
+
+        for (let sub = 0; sub <= numSub; sub++) {
+          const s = (b * sub) / numSub;
+          // In-plane linear interpolation
+          const u_s = (1.0 - s / b) * u1_loc + (s / b) * u2_loc;
+          // Out-of-plane Hermite cubic interpolation
+          const w_s = a0 + a1 * s + a2 * s * s + a3 * s * s * s;
+
+          // Back-transform local (s + u_s, w_s) to global coordinates
+          const origX = x1 + s * cosA;
+          const origY = y1 + s * sinA;
+
+          const defX = origX + u_s * cosA - w_s * sinA;
+          const defY = origY + u_s * sinA + w_s * cosA;
+
+          if (sub === 0) {
+            ctx.moveTo(defX, defY);
+          } else {
+            ctx.lineTo(defX, defY);
+          }
+        }
         ctx.stroke();
       }
       ctx.restore();

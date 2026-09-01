@@ -153,3 +153,36 @@ def test_fsm_closed_tube_node_coincidence():
     assert res.p_crl > 0.0
     assert res.p_cre > 0.0
 
+
+def test_fsm_multi_mode_eigenvalues_ascending():
+    """AC 10-1: Test that FSMEigenSolver and SignatureCurveAnalyzer produce multiple positive eigenvalues in ascending order."""
+    geom = SectionWizard.create_c_section(h=150.0, b=65.0, c=20.0, t=2.0, r=2.0)
+    props = SectionPropertiesCalculator.calculate(geom)
+
+    assembler = StripAssembler(geom=geom, props=props, e_modulus=203000.0, poisson=0.3)
+    assembler.apply_loading(load_type="compression")
+
+    ke, kg = assembler.assemble_matrices(half_wavelength=100.0)
+    modes = FSMEigenSolver.solve_eigenvalues(ke, kg, num_modes=3)
+
+    assert len(modes) == 3
+    # Check ascending order: lambda_1 <= lambda_2 <= lambda_3
+    lf1, v1 = modes[0]
+    lf2, v2 = modes[1]
+    lf3, v3 = modes[2]
+
+    assert 0.0 < lf1 <= lf2 <= lf3
+    assert v1.shape == v2.shape == v3.shape
+    assert np.max(np.abs(v1)) == pytest.approx(1.0, rel=1e-3)
+    assert np.max(np.abs(v2)) == pytest.approx(1.0, rel=1e-3)
+    assert np.max(np.abs(v3)) == pytest.approx(1.0, rel=1e-3)
+
+    # Check multi-mode signature curve arrays
+    analyzer = SignatureCurveAnalyzer(assembler)
+    res = analyzer.analyze(l_min=20.0, l_max=2000.0, num_points=10)
+    assert len(res.mode_1_lfs) == 10
+    assert len(res.mode_2_lfs) == 10
+    assert len(res.mode_3_lfs) == 10
+    assert all(m1 <= m2 for m1, m2 in zip(res.mode_1_lfs, res.mode_2_lfs))
+
+

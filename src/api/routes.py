@@ -367,48 +367,85 @@ async def solve_fsm(req: FSMRequest):
     )
 
     # Compute 3D Mode Displacement vectors for visualization
-    # 1. Local Mode Shape
+    # 1. Local Mode Shape (Mode 1, Mode 2, Mode 3 at local wavelength)
     l_loc = result.l_local if result.l_local > 0 else 50.0
     ke_loc, kg_loc = assembler.assemble_matrices(half_wavelength=l_loc)
-    lf_loc, mode_loc = FSMEigenSolver.solve_min_eigenvalue(ke_loc, kg_loc)
+    modes_loc = FSMEigenSolver.solve_eigenvalues(ke_loc, kg_loc, num_modes=3)
+    mode_loc_1 = modes_loc[0][1] if len(modes_loc) > 0 else None
+    mode_loc_2 = modes_loc[1][1] if len(modes_loc) > 1 else mode_loc_1
+    mode_loc_3 = modes_loc[2][1] if len(modes_loc) > 2 else mode_loc_2
 
     # 2. Distortional Mode Shape
     l_dist = result.l_distortional if result.l_distortional > 0 else 250.0
     ke_dist, kg_dist = assembler.assemble_matrices(half_wavelength=l_dist)
-    lf_dist, mode_dist = FSMEigenSolver.solve_min_eigenvalue(ke_dist, kg_dist)
+    modes_dist = FSMEigenSolver.solve_eigenvalues(ke_dist, kg_dist, num_modes=3)
+    mode_dist_1 = modes_dist[0][1] if len(modes_dist) > 0 else None
+    mode_dist_2 = modes_dist[1][1] if len(modes_dist) > 1 else mode_dist_1
+    mode_dist_3 = modes_dist[2][1] if len(modes_dist) > 2 else mode_dist_2
 
     # 3. Global Mode Shape
     l_glob = req.member_length if req.member_length > 0 else 3000.0
     ke_glob, kg_glob = assembler.assemble_matrices(half_wavelength=l_glob)
-    lf_glob, mode_glob = FSMEigenSolver.solve_min_eigenvalue(ke_glob, kg_glob)
+    modes_glob = FSMEigenSolver.solve_eigenvalues(ke_glob, kg_glob, num_modes=3)
+    mode_glob_1 = modes_glob[0][1] if len(modes_glob) > 0 else None
+    mode_glob_2 = modes_glob[1][1] if len(modes_glob) > 1 else mode_glob_1
+    mode_glob_3 = modes_glob[2][1] if len(modes_glob) > 2 else mode_glob_2
 
     # Convert mode shapes to serializable node displacement arrays
     nodes_data = []
     for node_idx, n in enumerate(assembler.nodes):
         # 4 DOFs per node: u, v, w, theta
         dof_start = node_idx * 4
-        loc_disp = mode_loc[dof_start:dof_start+4].tolist() if mode_loc is not None else [0,0,0,0]
-        dist_disp = mode_dist[dof_start:dof_start+4].tolist() if mode_dist is not None else [0,0,0,0]
-        glob_disp = mode_glob[dof_start:dof_start+4].tolist() if mode_glob is not None else [0,0,0,0]
+        loc_disp_1 = mode_loc_1[dof_start:dof_start+4].tolist() if mode_loc_1 is not None else [0,0,0,0]
+        loc_disp_2 = mode_loc_2[dof_start:dof_start+4].tolist() if mode_loc_2 is not None else loc_disp_1
+        loc_disp_3 = mode_loc_3[dof_start:dof_start+4].tolist() if mode_loc_3 is not None else loc_disp_2
+
+        dist_disp_1 = mode_dist_1[dof_start:dof_start+4].tolist() if mode_dist_1 is not None else [0,0,0,0]
+        dist_disp_2 = mode_dist_2[dof_start:dof_start+4].tolist() if mode_dist_2 is not None else dist_disp_1
+        dist_disp_3 = mode_dist_3[dof_start:dof_start+4].tolist() if mode_dist_3 is not None else dist_disp_2
+
+        glob_disp_1 = mode_glob_1[dof_start:dof_start+4].tolist() if mode_glob_1 is not None else [0,0,0,0]
+        glob_disp_2 = mode_glob_2[dof_start:dof_start+4].tolist() if mode_glob_2 is not None else glob_disp_1
+        glob_disp_3 = mode_glob_3[dof_start:dof_start+4].tolist() if mode_glob_3 is not None else glob_disp_2
 
         nodes_data.append({
             "node_idx": node_idx,
             "x": round(n.x, 4),
             "y": round(n.y, 4),
-            "local_mode": [round(val, 5) for val in loc_disp],
-            "dist_mode": [round(val, 5) for val in dist_disp],
-            "glob_mode": [round(val, 5) for val in glob_disp],
+            "local_mode": [round(val, 5) for val in loc_disp_1],
+            "local_mode_2": [round(val, 5) for val in loc_disp_2],
+            "local_mode_3": [round(val, 5) for val in loc_disp_3],
+            "dist_mode": [round(val, 5) for val in dist_disp_1],
+            "dist_mode_2": [round(val, 5) for val in dist_disp_2],
+            "dist_mode_3": [round(val, 5) for val in dist_disp_3],
+            "glob_mode": [round(val, 5) for val in glob_disp_1],
+            "glob_mode_2": [round(val, 5) for val in glob_disp_2],
+            "glob_mode_3": [round(val, 5) for val in glob_disp_3],
         })
 
-    # Prepare signature curve chart data
+    # Prepare signature curve chart data (with multi-mode series)
     chart_points = []
+    mode_1_curve = []
+    mode_2_curve = []
+    mode_3_curve = []
+
     for pt in result.points:
         chart_points.append({
             "length": round(pt.length, 2),
             "load_factor": round(pt.load_factor, 4),
             "p_cr": round(pt.critical_load / 1000.0, 2), # kN
             "m_cr": round(pt.critical_moment / 1e6, 3), # kN·m
+            "mode_lfs": [round(lf, 4) for lf in pt.mode_load_factors],
+            "mode_pcrs": [round(p / 1000.0, 2) for p in pt.mode_critical_loads],
+            "mode_mcrs": [round(m / 1e6, 3) for m in pt.mode_critical_moments],
         })
+
+        if pt.mode_load_factors:
+            mode_1_curve.append({"x": round(pt.length, 2), "y": round(pt.mode_load_factors[0], 4)})
+            if len(pt.mode_load_factors) > 1:
+                mode_2_curve.append({"x": round(pt.length, 2), "y": round(pt.mode_load_factors[1], 4)})
+            if len(pt.mode_load_factors) > 2:
+                mode_3_curve.append({"x": round(pt.length, 2), "y": round(pt.mode_load_factors[2], 4)})
 
     strips_data = [
         {
@@ -423,6 +460,11 @@ async def solve_fsm(req: FSMRequest):
 
     return {
         "signature_curve": chart_points,
+        "curves": {
+            "mode_1": mode_1_curve,
+            "mode_2": mode_2_curve,
+            "mode_3": mode_3_curve,
+        },
         "critical_modes": {
             "load_type": req.load_type,
             "p_crl": round(result.p_crl / 1000.0, 2), # kN
