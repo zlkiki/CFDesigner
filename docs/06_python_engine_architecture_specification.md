@@ -102,15 +102,21 @@ graph TD
   - KDS 4.4 웨브 크리플링 지압강도 $P_{nc}$ 산정 (4대 지지조건: IOF, EOF, ITF, ETF 지원).
 * **[`beam_column.py`](file:///f:/PyProject/CFDesigner/src/design/beam_column.py)**:
   - KDS 4.5 휨-압축 2축 조합응력 상관식 $\frac{P_u}{\phi_c P_n} + \frac{C_{mx} M_{ux}}{\phi_b M_{nx} (1 - P_u/P_{Ex})} + \frac{C_{my} M_{uy}}{\phi_b M_{ny} (1 - P_u/P_{Ey})} \le 1.0$ 검토.
+* **[`kds_trace_engine.py`](file:///f:/PyProject/CFDesigner/src/design/kds_trace_engine.py)**:
+  - CFS 원본 `CFS.strTrace` 및 `Check.EqText`를 100% 완전 대체하는 KDS 14 31 10 / AISI S100-16 전문 Trace 생성기.
+  - 인장($T_n$), 압축($P_{ne}, P_{nl}, P_{nd}, P_n$), 휨($M_{ne}, M_{nl}, M_{nd}, M_n$), 전단($V_n$), 웨브 크리플링($P_{nc}$), P-M 상관식 및 휨-전단/휨-크리플링 상관식의 **[설계 기준 조항 번호], [공학 수식 정의], [실제 파라미터 대입 전개식], [D/C 안전율 및 판정]**을 KaTeX/HTML 및 CFS 원본 텍스트로 조립.
 * **[`quick_design.py`](file:///f:/PyProject/CFDesigner/src/design/quick_design.py)**:
   - CFS 원본 `frmQuickDesign.cs` 100% 완전 포팅: 6대 단면 형상 필터, 재료 강종, 소요 하중($P_u, M_{ux}, M_{uy}, V_u$), 경간 길이, 허용처짐 기준($L/240, L/360$ 등) 및 웨브 크리플링 지점반력 조건 입력.
   - 강도 한계상태($D/C_{strength}$), 사용성 처짐 한계상태($D/C_{defl}$), 웨브 크리플링 지압 한계상태($D/C_{crip}$)의 3대 한계상태를 동시 검토하여 최대 D/C $\le 1.0$ 만족 최경량 단면 자동 정렬 및 추천.
 
 ### 3.5 리포트 및 웹 API 서브패키지 (`src/report/`, `src/api/`)
-* **[`html_report.py`](file:///f:/PyProject/CFDesigner/src/report/html_report.py)**:
-  - KDS 14 31 10 표준 서식 기반의 정밀 A4 구조계산서 HTML 생성. 단면도 SVG, FSM 차트, 수식 근거표, D/C 내력비 요약 포함.
+* **[`summary_report.py`](file:///f:/PyProject/CFDesigner/src/report/summary_report.py)** & **[`detailed_report.py`](file:///f:/PyProject/CFDesigner/src/report/detailed_report.py)**:
+  - 구조계산서 듀얼 모드 아키텍처: **[간략 요약 보고서 (Summary Report)]** 및 **[정식 상세 구조계산서 (Detailed Calculation Sheet)]** 지원.
+  - 제1장(단면 제원)부터 제8장(웨브 크리플링) 및 제9장(1D 해석)까지 10대 장별 SVG 다이어그램, 메타데이터 결재 서명란, 인터랙티브 Trace 아코디언(`<details class="trace-accordion">`), KaTeX 실시간 수식 렌더러 통합.
+* **[`svg_diagrams.py`](file:///f:/PyProject/CFDesigner/src/report/svg_diagrams.py)**:
+  - 단면도, 도심/전단중심 마커, 요소 번호 배지, FSM 시그니처 커브 및 SFD/BMD/처짐 벡터 다이어그램의 순수 SVG 생성기.
 * **[`routes.py`](file:///f:/PyProject/CFDesigner/src/api/routes.py)**:
-  - 마법사, DXF 업로드, 단면특성, 기하변환, 리브추가, 유효폭, FSM 좌굴, 부재설계, 크리플링, 퀵디자인, 1D 구조해석, 리포트 엔드포인트 총괄 라우터.
+  - 마법사, DXF 업로드, 단면특성, 기하변환, 리브추가, 유효폭, FSM 좌굴, 부재설계, 크리플링, 퀵디자인, 1D 구조해석, 구조계산서 HTML 생성(`POST /api/report/html`) 엔드포인트 총괄 라우터.
 
 ---
 

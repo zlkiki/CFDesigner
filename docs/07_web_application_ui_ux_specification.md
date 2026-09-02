@@ -134,7 +134,8 @@ graph TD
 |---|---|---|---|
 | `quickDesignModal` | **퀵 디자인 3열 풀스펙 모달** | 6대 단면/재료 필터, 경간/하중/처짐/지압 입력, 강도·처짐·크리플링 3대 D/C 만족 최경량 단면 자동 탐색 및 원클릭 단면 로드 | [`quick_design.py`](file:///f:/PyProject/CFDesigner/src/design/quick_design.py) |
 | `frameAnalysisModal` | **1D 구조해석 & 다이어그램** | 단순보/2경간/3경간/캔틸레버 지점·하중 설정, SFD/BMD/처짐 실시간 연산, $M_{max}, V_{max}$ 부재설계 연동 | [`frame1d.py`](file:///f:/PyProject/CFDesigner/src/solver/frame1d.py) |
-| `reportModal` | **A4 구조계산서 뷰어** | "요약 보고서" / "상세 보고서" 듀얼 모드 선택, 헤더 인쇄/PDF 저장 단일화 | [`html_report.py`](file:///f:/PyProject/CFDesigner/src/report/html_report.py) |
+| `reportModal` | **A4 구조계산서 & 수식 Trace 뷰어** | "간략 요약" / "정식 상세" 듀얼 모드, KaTeX 수식 전개 블록, 아코디언(`<details>`) 일괄 펼치기/접기, 출력 설정 드로어(`#reportConfigDrawer`), iframe A4 인쇄/PDF 저장 | [`detailed_report.py`](file:///f:/PyProject/CFDesigner/src/report/detailed_report.py), [`kds_trace_engine.py`](file:///f:/PyProject/CFDesigner/src/design/kds_trace_engine.py) |
+
 | `effectiveModal` | **Winter 유효단면 해석** | KaTeX 수식 렌더링, 모달 내 실시간 연산 완결, 2D 오버레이 전용 버튼 & 우측 단면성질 연동 | [`effective_width.py`](file:///f:/PyProject/CFDesigner/src/geometry/effective_width.py) |
 | `sectionLibraryModal` | **표준 단면 라이브러리** | SSMA, SFIA, AISI, LGSI, HUD 1,000+개 단면 검색, 2D 미니 프리뷰, 원클릭 로드 | [`library_parser.py`](file:///f:/PyProject/CFDesigner/src/geometry/library_parser.py) |
 | `materialModal` | **재료 DB & 가공경화 계산기** | KS/ASTM 강종 프리셋, 코너 가공경화 유효항복강도($F_{ya}$) 자동 산정 및 적용 | [`library_parser.py`](file:///f:/PyProject/CFDesigner/src/geometry/library_parser.py) |

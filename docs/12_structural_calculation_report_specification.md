@@ -176,16 +176,17 @@ class ReportOptions:
 ## 6. 웹 UI/UX 및 인쇄/PDF 파이프라인
 
 ### 6.1 인쇄 모달 UI 구성 (`#reportModal`)
-* **상단 툴바**:
-  * 듀얼 모드 토글 세그먼트: `[ 📋 간략 요약 보고서 ]` / `[ 📑 정식 상세 계산서 ]`
-  * `⚙️ 인쇄 항목 및 결재란 설정` 토글 드로어
-  * `🖨️ 인쇄 / PDF 저장` (iframe 자동 프린트 연동)
-  * `✕ 닫기`
-* **설정 드로어 (`#reportConfigDrawer`)**:
-  * 좌측: 프로젝트명, 부재명, 문서번호, 회사명, 작성자, 검토자, 승인자, 비고 입력 폼
-  * 우측: 8개 섹션별 다중 선택 체크박스 및 [전체 선택] / [전체 해제] 버튼, [⚡ 계산서 새로고침 적용] 버튼
+* **상단 툴바 (`.report-modal-toolbar`)**:
+  * 듀얼 모드 토글 세그먼트: `[ 📋 간략 요약 ]` / `[ 📑 정식 상세 ]`
+  * `📂 수식 전체 펼치기 / 접기` (`#btnToggleAllTrace`): 계산서 내 모든 `<details class="trace-accordion">` 일괄 개폐
+  * `⚙️ 출력 설정` (`#btnToggleReportConfig`): 우측 슬라이드 드로어 토글
+  * `🖨️ 인쇄 / PDF 저장` (`#btnPrintReportFrame`): iframe `contentWindow.print()` 연동
+  * `✕ 닫기` (`#btnCloseReportModal`)
+* **출력 설정 드로어 (`#reportConfigDrawer`)**:
+  * 제1장부터 제8장/제9장 체크박스 필터링 및 "📝 상세 계산 과정(Trace) 수식 포함" 옵션 지원.
+  * [🔄 계산서 다시 생성] 버튼 클릭 시 실시간 갱신.
 
-### 6.2 A4 인쇄 CSS 최적화
+### 6.2 A4 인쇄 CSS 최적화 및 Trace 아코디언 강제 개폐
 ```css
 @page {
   size: A4 portrait;
@@ -202,6 +203,13 @@ class ReportOptions:
     border-radius: 0;
     page-break-after: always;
   }
+  .trace-accordion {
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    page-break-inside: avoid;
+  }
+  .trace-accordion > summary { display: none !important; }
+  .trace-accordion-content { display: block !important; padding: 4px 0 !important; }
   .page-break { page-break-before: always; }
   .no-print { display: none !important; }
 }
@@ -213,7 +221,7 @@ class ReportOptions:
 
 | 엔드포인트 | 메서드 | 파라미터 | 반환값 | 설명 |
 |---|---|---|---|---|
-| `/api/report/html` | `POST` | `payload: Dict[str, Any]` | `{"html": "..."}` | `options.report_mode`에 따라 summary/detailed 자동 분기 |
+| `/api/report/html` | `POST` | `payload: Dict[str, Any]` | `{"html": "..."}` | `options.report_mode`에 따라 summary/detailed 자동 분기 및 KaTeX 수식 전개(Trace) 주입 |
 | `/api/report/summary` | `POST` | `payload: Dict[str, Any]` | `{"html": "..."}` | 1~2페이지 간략 요약 보고서 HTML 반환 |
 | `/api/report/detailed` | `POST` | `payload: Dict[str, Any]` | `{"html": "..."}` | 10대 장 다중 페이지 정식 상세 구조계산서 HTML 반환 |
 
@@ -221,8 +229,10 @@ class ReportOptions:
 
 ## 8. 테스트 및 품질 검증 명세 (`tests/ui/test_report_generation.py`)
 
+* **AC 11-1 ~ 11-5 (Trace 엔진 및 수식 렌더링)**: `test_trace_rendering_in_detailed_report`
 * **AC 7-1 (듀얼 리포트)**: `test_summary_report_generation`, `test_detailed_report_generation`
 * **AC 7-2 (SVG 다이어그램)**: `test_svg_diagram_generator`
 * **AC 7-3 (디스패처 검증)**: `test_html_report_dispatcher`
 * **AC 7-4 (API 라우트 검증)**: `test_api_report_endpoints`
-* **검증 명령**: `pytest tests/ui/test_report_generation.py` (0.6초 소요, 100% Pass)
+* **검증 명령**: `pytest tests/ui/test_report_generation.py` (6개 테스트 100% Pass)
+
