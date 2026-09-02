@@ -471,73 +471,6 @@
     </aside>
   </div>
 
-  <!-- ================= A4 Engineering Report Modal ================= -->
-  <div class="modal-backdrop" id="reportModal">
-    <div class="modal-dialog modal-dialog-lg" style="width: 92vw; max-width: 1200px; height: 92vh; display: flex; flex-direction: column;">
-      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color);">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <strong style="font-size: 15px; color: var(--text-primary);">📑 구조계산서 출력 (KDS 14 31 10 / AISI S100)</strong>
-          <div style="display: inline-flex; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 2px;">
-            <button class="btn btn-xs active" id="btnReportModeSummary" style="padding: 4px 10px; font-size: 11.5px; border-radius: 4px;">📋 요약 보고서 (Summary Report)</button>
-            <button class="btn btn-xs" id="btnReportModeDetailed" style="padding: 4px 10px; font-size: 11.5px; border-radius: 4px;">📑 상세 보고서 (Detailed Calculation Report)</button>
-          </div>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <button class="btn btn-outline" id="btnToggleReportConfig" style="padding: 4px 10px; font-size: 12px;">⚙️ 인쇄 항목 및 결재란 설정</button>
-          <button class="btn btn-primary" id="btnPrintReportFromModal" style="padding: 4px 12px; font-size: 12px;">🖨️ 인쇄 / PDF 저장</button>
-          <button class="btn btn-outline" id="btnCloseReport" style="padding: 4px 10px; font-size: 12px;">✕ 닫기</button>
-        </div>
-      </div>
-
-      <!-- Config Panel Drawer (frmPrint 대응) -->
-      <div id="reportConfigDrawer" style="display: none; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 12px 16px; font-size: 12px; max-height: 240px; overflow-y: auto;">
-        <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px;">
-          <!-- Left: Metadata & Approval Block Form -->
-          <div>
-            <strong style="font-size: 12px; color: var(--text-primary); margin-bottom: 6px; display: block;">🏛️ 프로젝트 및 결재란 정보 (Cover & Approvals)</strong>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-              <input type="text" class="input-field" id="rptProjectName" placeholder="프로젝트명" value="CFDesigner Project" style="padding: 3px 6px; font-size: 11px;">
-              <input type="text" class="input-field" id="rptSectionName" placeholder="부재명" value="Cold-Formed Section" style="padding: 3px 6px; font-size: 11px;">
-              <input type="text" class="input-field" id="rptDocNumber" placeholder="문서번호" value="CALC-CFS-001" style="padding: 3px 6px; font-size: 11px;">
-              <input type="text" class="input-field" id="rptCompany" placeholder="설계회사명" value="Structural Engineering Corp." style="padding: 3px 6px; font-size: 11px;">
-              <input type="text" class="input-field" id="rptDesignedBy" placeholder="작성자" value="설계자" style="padding: 3px 6px; font-size: 11px;">
-              <input type="text" class="input-field" id="rptCheckedBy" placeholder="검토자" value="검토자" style="padding: 3px 6px; font-size: 11px;">
-              <input type="text" class="input-field" id="rptApprovedBy" placeholder="승인자" value="책임기술사" style="padding: 3px 6px; font-size: 11px;">
-              <input type="text" class="input-field" id="rptRemarks" placeholder="비고" value="KDS 14 31 10 직접강도법" style="padding: 3px 6px; font-size: 11px;">
-            </div>
-          </div>
-
-          <!-- Right: Report Sections Checkbox List (frmPrint.cs lstPrint) -->
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <strong style="font-size: 12px; color: var(--text-primary);">📋 상세 계산서 수록 항목 선택 (Report Sections)</strong>
-              <div style="display: flex; gap: 4px;">
-                <button class="btn btn-xs btn-outline" id="btnRptSelectAll" style="padding: 2px 6px; font-size: 10px;">전체 선택</button>
-                <button class="btn btn-xs btn-outline" id="btnRptUnselectAll" style="padding: 2px 6px; font-size: 10px;">전체 해제</button>
-              </div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 11px; color: var(--text-secondary);">
-              <label><input type="checkbox" id="chkRptInputs" checked> 1. 단면 입력 제원 (Inputs)</label>
-              <label><input type="checkbox" id="chkRptGross" checked> 2. 총/주축 단면성질 (Gross/Principal)</label>
-              <label><input type="checkbox" id="chkRptTorsion" checked> 3. 비틀림/뒴 성질 (Torsion Wn, Sw)</label>
-              <label><input type="checkbox" id="chkRptEffective" checked> 4. 유효단면 성질 (Winter Iteration)</label>
-              <label><input type="checkbox" id="chkRptStrength" checked> 5. 완전지지 강도 (Fully Braced)</label>
-              <label><input type="checkbox" id="chkRptFSM" checked> 6. FSM 탄성 버클링 (Signature Curve)</label>
-              <label><input type="checkbox" id="chkRptMember" checked> 7. KDS 부재내력 (Member Design)</label>
-              <label><input type="checkbox" id="chkRptCrippling" checked> 8. 웨브 크리플링 (Web Crippling)</label>
-            </div>
-            <div style="text-align: right; margin-top: 6px;">
-              <button class="btn btn-primary btn-xs" id="btnApplyReportConfig" style="padding: 3px 10px;">⚡ 계산서 새로고침 적용</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-body" style="flex: 1; padding: 0; position: relative; background: #525659;">
-        <iframe id="reportIframe" style="width: 100%; height: 100%; border: none;"></iframe>
-      </div>
-    </div>
-  </div>
 
   <!-- ================= Phase 1: Element Table Editor Modal ================= -->
   <div class="modal-backdrop" id="elementEditorModal">
@@ -1252,6 +1185,82 @@
     </div>
   </div>
 
+  <!-- ================= Phase 7 & 11: Formal Calculation Report Viewer Modal ================= -->
+  <div class="modal-backdrop" id="reportModal">
+    <div class="modal-dialog report-modal-dialog" style="position: relative;">
+
+      
+      <!-- Report Modal Toolbar -->
+      <div class="report-modal-toolbar">
+        <div class="report-toolbar-group">
+          <strong style="font-size: 14px; color: var(--text-primary);">📄 구조계산서 뷰어 (Engineering Calculation Sheet)</strong>
+          <div class="btn-group" style="display: flex; gap: 4px; margin-left: 12px;">
+            <button class="btn btn-outline" id="btnReportModeSummary" style="padding: 4px 10px; font-size: 11.5px;">📋 간략 요약</button>
+            <button class="btn btn-primary" id="btnReportModeDetailed" style="padding: 4px 10px; font-size: 11.5px;">📑 정식 상세</button>
+          </div>
+        </div>
+
+        <div class="report-toolbar-group">
+          <button class="btn btn-outline" id="btnToggleAllTrace" style="padding: 4px 10px; font-size: 11.5px;" title="모든 수식 상세 펼치기/접기">
+            📂 수식 전체 펼치기
+          </button>
+          <button class="btn btn-outline" id="btnToggleReportConfig" style="padding: 4px 10px; font-size: 11.5px;" title="인쇄 및 포함 항목 설정">
+            ⚙️ 출력 설정
+          </button>
+          <button class="btn btn-primary" id="btnPrintReportFrame" style="padding: 4px 12px; font-size: 11.5px;">
+            🖨️ 인쇄 / PDF 저장
+          </button>
+          <button class="btn btn-outline" id="btnCloseReportModal" style="padding: 4px 10px; font-size: 11.5px;">✕ 닫기</button>
+        </div>
+      </div>
+
+      <!-- Report Options Drawer -->
+      <div class="report-config-drawer" id="reportConfigDrawer">
+        <div class="config-section-title">출력 챕터 선택 (frmPrint.cs 이식)</div>
+        <div class="config-checkbox-group">
+          <label class="config-checkbox-label">
+            <input type="checkbox" id="chkReportSectionInputs" checked> 제1장. 설계 개요 및 단면 제원
+          </label>
+          <label class="config-checkbox-label">
+            <input type="checkbox" id="chkReportGrossProps" checked> 제2장. 단면 기하학적 성질
+          </label>
+          <label class="config-checkbox-label">
+            <input type="checkbox" id="chkReportTorsionProps" checked> 제3장. 비틀림 및 뒴(Warping)
+          </label>
+          <label class="config-checkbox-label">
+            <input type="checkbox" id="chkReportEffectiveProps" checked> 제4장. 유효단면 & Winter 유효폭
+          </label>
+          <label class="config-checkbox-label">
+            <input type="checkbox" id="chkReportFullyBraced" checked> 제5장. 완전지지 단면 강도 & Trace
+          </label>
+          <label class="config-checkbox-label">
+            <input type="checkbox" id="chkReportFsmBuckling" checked> 제6장. FSM 탄성 좌굴 & 다중 모드
+          </label>
+          <label class="config-checkbox-label">
+            <input type="checkbox" id="chkReportMemberDesign" checked> 제7장. KDS 14 31 10 부재 내력 검토
+          </label>
+          <label class="config-checkbox-label">
+            <input type="checkbox" id="chkReportWebCrippling" checked> 제8장. 웨브 크리플링 국부 좌굴
+          </label>
+          <label class="config-checkbox-label">
+            <input type="checkbox" id="chkReport1dAnalysis"> 제9장. 1D 보/기둥 구조해석 다이어그램
+          </label>
+          <label class="config-checkbox-label" style="margin-top: 6px; font-weight: 700; color: var(--accent-primary);">
+            <input type="checkbox" id="chkReportTraceDetails" checked> 📝 상세 계산 과정(Trace) 수식 포함
+          </label>
+        </div>
+
+        <button class="btn btn-primary" id="btnApplyReportConfig" style="margin-top: 10px; width: 100%; padding: 7px; font-size: 12px;">
+          🔄 계산서 다시 생성
+        </button>
+      </div>
+
+      <!-- Iframe Report Viewer -->
+      <iframe class="report-viewer-frame" id="reportViewerFrame" title="Calculation Sheet Viewer"></iframe>
+
+    </div>
+  </div>
+
   <!-- Application Logic -->
   <script src="/static/js/canvas_2d.js"></script>
   <script src="/static/js/chart_fsm.js"></script>
@@ -1260,3 +1269,4 @@
   <script src="/static/js/app.js"></script>
 </body>
 </html>
+

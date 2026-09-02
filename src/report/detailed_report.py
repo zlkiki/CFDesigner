@@ -1,7 +1,7 @@
 """
 Detailed Engineering Calculation Sheet HTML Generator (KDS 14 31 10 / AISI S100)
-Full Port of CFS Legacy Reports (Report.cs & PrintRoutines.cs).
-Generates formal, multi-page, A4 printable structural calculation books.
+Full Port of CFS Legacy Reports (Report.cs, PrintRoutines.cs, Section.cs strTrace & EqText).
+Generates formal, multi-page, A4 printable structural calculation books with rigorous KaTeX trace blocks.
 """
 
 import math
@@ -9,16 +9,75 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime
 from .models import ProjectMetadata, ReportOptions
 from .svg_diagrams import SVGDiagramGenerator
+from ..design.kds_trace_engine import KDSTraceEngine, DesignTraceResult, TraceItem
 
 
 class DetailedReportGenerator:
     """
     Renders comprehensive, multi-page structural calculation sheets
     conforming to KDS 14 31 10 and AISI S100 Direct Strength Method (DSM).
+    Includes complete mathematical trace expansions and design code references.
     """
 
     @staticmethod
-    def render(data: Dict[str, Any], meta: Optional[ProjectMetadata] = None, opts: Optional[ReportOptions] = None) -> str:
+    def _render_trace_item_html(item: TraceItem) -> str:
+        """Renders a single calculation trace item with LaTeX formulas and substitution details."""
+        d_val = f"{item.demand_value:,.2f}" if item.demand_value is not None else "-"
+        dc_val = f"{item.dc_ratio:.3f}" if item.dc_ratio is not None else "-"
+        status_badge = f'<span class="badge ok">OK</span>' if item.status == "OK" else f'<span class="badge ng">NG</span>'
+
+        return f"""
+        <div class="trace-item-box" id="{item.id}">
+          <div class="trace-item-header">
+            <div class="trace-title">
+              <strong>{item.title}</strong>
+              <span class="clause-badge">{item.clause_kds}</span>
+              <span class="clause-badge aisi">{item.clause_aisi}</span>
+            </div>
+            <div>{status_badge}</div>
+          </div>
+          
+          <div class="trace-formula-latex">
+            $$\\text{{[정의식] }}\\quad {item.formula_latex}$$
+          </div>
+          
+          <div class="trace-subst-latex">
+            $$\\text{{[전개식] }}\\quad {item.substituted_latex}$$
+          </div>
+          
+          <div class="trace-meta-grid">
+            <div><small>공칭강도 (Rn):</small> <strong>{item.nominal_value:,.2f} {item.unit}</strong></div>
+            <div><small>저항계수 (φ):</small> <strong>{item.phi:.2f}</strong></div>
+            <div><small>설계강도 (φRn):</small> <strong style="color:#1e3a8a;">{item.design_value:,.2f} {item.unit}</strong></div>
+            <div><small>안전율 (Ω):</small> <strong>{item.omega:.2f}</strong> (허용 {item.allowable_value:,.2f})</div>
+            {f'<div><small>소요강도 (Ru):</small> <strong>{d_val} {item.unit}</strong></div>' if item.demand_value is not None else ''}
+            {f'<div><small>D/C Ratio:</small> <strong style="color:{"#166534" if item.status=="OK" else "#991b1b"};">{dc_val}</strong></div>' if item.dc_ratio is not None else ''}
+          </div>
+          {f'<div class="trace-notes">* {item.notes}</div>' if item.notes else ''}
+        </div>
+        """
+
+    @staticmethod
+    def _render_trace_accordion(title: str, items: List[TraceItem], default_open: bool = True) -> str:
+        """Renders an interactive accordion containing multiple TraceItems."""
+        if not items:
+            return ""
+        items_html = "\n".join([DetailedReportGenerator._render_trace_item_html(it) for it in items])
+        open_attr = "open" if default_open else ""
+        return f"""
+        <details class="trace-accordion" {open_attr}>
+          <summary class="trace-summary">
+            <span>📑 {title} ({len(items)}개 세부 검토식)</span>
+            <span class="summary-hint">클릭하여 접기/펼치기</span>
+          </summary>
+          <div class="trace-accordion-content">
+            {items_html}
+          </div>
+        </details>
+        """
+
+    @classmethod
+    def render(cls, data: Dict[str, Any], meta: Optional[ProjectMetadata] = None, opts: Optional[ReportOptions] = None) -> str:
         meta = meta or ProjectMetadata.from_dict(data.get("metadata", {}))
         opts = opts or ReportOptions.from_dict(data.get("options", {}))
 
@@ -30,6 +89,10 @@ class DetailedReportGenerator:
         material = data.get("material", {})
         analysis_1d = data.get("analysis_1d", {})
 
+        # Generate or extract trace results
+        member_params = design.get("member_params", {})
+        trace_res = KDSTraceEngine.generate_full_trace(props, material, fsm, loads, member_params)
+
         date_str = datetime.now().strftime("%Y-%m-%d %H:%M")
 
         # Build Chapters
@@ -37,39 +100,39 @@ class DetailedReportGenerator:
 
         # Chapter 1: General & Section Inputs (rptSctInp)
         if opts.include_section_inputs:
-            chapters_html.append(DetailedReportGenerator._render_ch1_section_inputs(geom, props, material, fsm))
+            chapters_html.append(cls._render_ch1_section_inputs(geom, props, material, fsm))
 
         # Chapter 2: Gross & Net Section Properties (rptProperties)
         if opts.include_gross_properties:
-            chapters_html.append(DetailedReportGenerator._render_ch2_properties(props, geom))
+            chapters_html.append(cls._render_ch2_properties(props, geom))
 
         # Chapter 3: Torsion & Warping Properties (rptTorsionProp)
         if opts.include_torsion_properties:
-            chapters_html.append(DetailedReportGenerator._render_ch3_torsion_properties(props, geom))
+            chapters_html.append(cls._render_ch3_torsion_properties(props, geom))
 
         # Chapter 4: Effective Properties & Winter Iteration (rptEffProperties)
         if opts.include_effective_properties:
-            chapters_html.append(DetailedReportGenerator._render_ch4_effective_properties(props, geom, loads, design))
+            chapters_html.append(cls._render_ch4_effective_properties(props, geom, loads, design))
 
-        # Chapter 5: Fully Braced Strength (rptStrength)
+        # Chapter 5: Fully Braced Strength (rptStrength) & Trace
         if opts.include_fully_braced_strength:
-            chapters_html.append(DetailedReportGenerator._render_ch5_fully_braced_strength(props, material, design, opts))
+            chapters_html.append(cls._render_ch5_fully_braced_strength(props, material, design, trace_res, opts))
 
         # Chapter 6: FSM Elastic Buckling Analysis (rptDSMData & PrintBuckling)
         if opts.include_fsm_buckling:
-            chapters_html.append(DetailedReportGenerator._render_ch6_fsm_buckling(fsm, props))
+            chapters_html.append(cls._render_ch6_fsm_buckling(fsm, props))
 
-        # Chapter 7: KDS 14 31 10 Member Design Checks (rptMemberCheck)
+        # Chapter 7: KDS 14 31 10 Member Design Checks (rptMemberCheck) & Trace
         if opts.include_member_design:
-            chapters_html.append(DetailedReportGenerator._render_ch7_member_design(design, loads, props))
+            chapters_html.append(cls._render_ch7_member_design(design, loads, props, trace_res, opts))
 
-        # Chapter 8: Web Crippling Checks (rptWebCrippling)
+        # Chapter 8: Web Crippling Checks (rptWebCrippling) & Trace
         if opts.include_web_crippling:
-            chapters_html.append(DetailedReportGenerator._render_ch8_web_crippling(design, loads, props))
+            chapters_html.append(cls._render_ch8_web_crippling(design, loads, props, trace_res, opts))
 
         # Chapter 9: 1D Frame Analysis & Force Diagrams (rptAnlInp & rptDiagrams)
         if opts.include_1d_analysis and analysis_1d:
-            chapters_html.append(DetailedReportGenerator._render_ch9_1d_analysis(analysis_1d))
+            chapters_html.append(cls._render_ch9_1d_analysis(analysis_1d))
 
         content_body = "\n".join(chapters_html)
 
@@ -79,6 +142,8 @@ class DetailedReportGenerator:
 <meta charset="UTF-8">
 <title>{meta.section_name} - 구조계산서 (Detailed Calculation Sheet)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {{delimiters: [{{left: '$$', right: '$$', display: true}}, {{left: '$', right: '$', display: false}}]}});"></script>
 <style>
   @page {{
     size: A4 portrait;
@@ -103,7 +168,7 @@ class DetailedReportGenerator:
     margin: 0;
     padding: 24px 0;
     color: #1e293b;
-    font-size: 11.5px;
+    font-size: 11px;
     line-height: 1.45;
   }}
   .sheet-page {{
@@ -125,10 +190,14 @@ class DetailedReportGenerator:
       margin: 0;
       padding: 0;
       border-radius: 0;
-      page-break-after: always;
     }}
-    .page-break {{ page-break-before: always; }}
     .no-print {{ display: none !important; }}
+    details.trace-accordion {{ open: true !important; }}
+    details.trace-accordion > summary {{ display: none !important; }}
+    .trace-item-box, .data-table, .grid-2, .svg-box {{
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }}
   }}
   .cover-header {{
     border-bottom: 2.5px solid #1e3a8a;
@@ -138,12 +207,12 @@ class DetailedReportGenerator:
     justify-content: space-between;
     align-items: flex-start;
   }}
-  .cover-title-main {{ font-size: 20px; font-weight: 800; color: #1e3a8a; letter-spacing: -0.5px; }}
+  .cover-title-main {{ font-size: 19px; font-weight: 800; color: #1e3a8a; letter-spacing: -0.5px; }}
   .cover-title-sub {{ font-size: 11px; color: #64748b; margin-top: 3px; font-weight: 500; }}
   
   .approval-table {{
     border-collapse: collapse;
-    font-size: 9.5px;
+    font-size: 9px;
     text-align: center;
   }}
   .approval-table th, .approval-table td {{
@@ -151,7 +220,7 @@ class DetailedReportGenerator:
     padding: 3px 6px;
   }}
   .approval-table th {{ background: #f8fafc; color: #475569; font-weight: 600; }}
-  .approval-table td.sign {{ height: 32px; vertical-align: bottom; font-weight: 700; color: #1e3a8a; }}
+  .approval-table td.sign {{ height: 30px; vertical-align: bottom; font-weight: 700; color: #1e3a8a; }}
 
   .meta-grid {{
     display: grid;
@@ -162,12 +231,12 @@ class DetailedReportGenerator:
     border-radius: 4px;
     padding: 8px 12px;
     margin-bottom: 16px;
-    font-size: 10.5px;
+    font-size: 10px;
   }}
   .meta-item strong {{ color: #475569; }}
 
   h2.chapter-title {{
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 700;
     color: #1e3a8a;
     background: #eff6ff;
@@ -179,7 +248,7 @@ class DetailedReportGenerator:
     align-items: center;
   }}
   h3.section-subtitle {{
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 700;
     color: #334155;
     margin: 12px 0 6px 0;
@@ -190,7 +259,7 @@ class DetailedReportGenerator:
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 12px;
-    font-size: 10.5px;
+    font-size: 10px;
   }}
   .data-table th, .data-table td {{
     border: 1px solid #e2e8f0;
@@ -238,15 +307,95 @@ class DetailedReportGenerator:
   }}
   .badge.ok {{ background-color: #dcfce7; color: #166534; }}
   .badge.ng {{ background-color: #fee2e2; color: #991b1b; }}
-  .formula-box {{
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    border-radius: 4px;
-    padding: 8px 12px;
-    margin: 8px 0;
-    font-size: 11px;
-    font-family: 'Consolas', monospace;
+  
+  .clause-badge {{
+    display: inline-block;
+    background: #e0e7ff;
+    color: #3730a3;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
   }}
+  .clause-badge.aisi {{ background: #fef3c7; color: #92400e; }}
+
+  /* Trace Accordion and Math Blocks */
+  details.trace-accordion {{
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    margin: 8px 0 12px 0;
+    overflow: hidden;
+  }}
+  details.trace-accordion > summary.trace-summary {{
+    background: #f8fafc;
+    padding: 7px 12px;
+    font-weight: 700;
+    font-size: 11px;
+    color: #1e3a8a;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid transparent;
+  }}
+  details.trace-accordion[open] > summary.trace-summary {{
+    border-bottom: 1px solid #e2e8f0;
+    background: #eff6ff;
+  }}
+  .summary-hint {{ font-size: 9.5px; font-weight: normal; color: #64748b; }}
+  .trace-accordion-content {{ padding: 10px; background: #fafbfc; }}
+
+  .trace-item-box {{
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }}
+  .trace-item-header {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }}
+  .trace-title {{ font-size: 11px; color: #1e293b; }}
+  
+  .trace-formula-latex {{
+    background: #f8fafc;
+    padding: 4px 6px;
+    border-left: 3px solid #3b82f6;
+    margin: 4px 0;
+    font-size: 11.5px;
+    overflow-x: auto;
+  }}
+  .trace-subst-latex {{
+    background: #f0fdf4;
+    padding: 4px 6px;
+    border-left: 3px solid #22c55e;
+    margin: 4px 0;
+    font-size: 11.5px;
+    overflow-x: auto;
+  }}
+  .trace-meta-grid {{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px 8px;
+    font-size: 9.5px;
+    background: #f8fafc;
+    padding: 5px 8px;
+    border-radius: 4px;
+    margin-top: 5px;
+  }}
+  .trace-notes {{
+    font-size: 9px;
+    color: #64748b;
+    margin-top: 4px;
+  }}
+
   .trace-block {{
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -257,6 +406,7 @@ class DetailedReportGenerator:
     white-space: pre-wrap;
     line-height: 1.35;
     color: #334155;
+    margin-top: 6px;
   }}
   .page-footer {{
     border-top: 1px solid #e2e8f0;
@@ -278,10 +428,10 @@ class DetailedReportGenerator:
   .btn-print {{
     background: #2563eb;
     color: white;
-    padding: 10px 18px;
+    padding: 9px 16px;
     border-radius: 6px;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 12px;
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
@@ -305,9 +455,9 @@ class DetailedReportGenerator:
       <table class="approval-table">
         <tr>
           <th rowspan="2" style="writing-mode: vertical-rl; width: 16px; padding: 1px;">결재</th>
-          <th style="width: 50px;">설계</th>
-          <th style="width: 50px;">검토</th>
-          <th style="width: 50px;">승인</th>
+          <th style="width: 45px;">설계</th>
+          <th style="width: 45px;">검토</th>
+          <th style="width: 45px;">승인</th>
         </tr>
         <tr>
           <td class="sign">{meta.designed_by}</td>
@@ -335,7 +485,7 @@ class DetailedReportGenerator:
   <!-- Page Footer -->
   <div class="page-footer">
     <div>CFDesigner v1.0.0 - Cold-Formed Steel Section Analyzer & Designer</div>
-    <div>Design Standard: KDS 14 31 10:2017 / AISI S100-16 DSM</div>
+    <div>Design Standard: KDS 14 31 10:2017 / AISI S100-16 DSM Trace Engine</div>
   </div>
 </div>
 
@@ -481,14 +631,14 @@ class DetailedReportGenerator:
         <td class="unit">mm⁴</td>
       </tr>
       <tr>
-        <td>주축 회전각도 (Principal Axis Angle)</td>
+        <td>주축 기울기각 (Principal Angle)</td>
         <td style="text-align:center;">θp</td>
-        <td class="val">{props.get('theta', 0.0):.2f}°</td>
-        <td class="val">{props.get('thetan', props.get('theta', 0.0)):.2f}°</td>
+        <td class="val">{props.get('theta_p', 0.0):.2f}°</td>
+        <td class="val">{props.get('theta_pn', props.get('theta_p', 0.0)):.2f}°</td>
         <td class="unit">deg</td>
       </tr>
       <tr>
-        <td>주축 단면 2차모멘트 (Principal Inertia 1-1 / 2-2)</td>
+        <td>주축 단면 2차모멘트 (Principal I1 / I2)</td>
         <td style="text-align:center;">I1 / I2</td>
         <td class="val">{props.get('i1', props.get('ix', 0.0)):,.0f} / {props.get('i2', props.get('iy', 0.0)):,.0f}</td>
         <td class="val">{props.get('i1n', props.get('ix', 0.0)):,.0f} / {props.get('i2n', props.get('iy', 0.0)):,.0f}</td>
@@ -499,13 +649,6 @@ class DetailedReportGenerator:
         <td style="text-align:center;">rx / ry</td>
         <td class="val">{props.get('rx', 0.0):.2f} / {props.get('ry', 0.0):.2f}</td>
         <td class="val">{props.get('rxn', props.get('rx', 0.0)):.2f} / {props.get('ryn', props.get('ry', 0.0)):.2f}</td>
-        <td class="unit">mm</td>
-      </tr>
-      <tr>
-        <td>주축 2차반경 (Principal Radius r1 / r2)</td>
-        <td style="text-align:center;">r1 / r2</td>
-        <td class="val">{props.get('r1', props.get('rx', 0.0)):.2f} / {props.get('r2', props.get('ry', 0.0)):.2f}</td>
-        <td class="val">{props.get('r1n', props.get('rx', 0.0)):.2f} / {props.get('r2n', props.get('ry', 0.0)):.2f}</td>
         <td class="unit">mm</td>
       </tr>
       <tr>
@@ -543,7 +686,6 @@ class DetailedReportGenerator:
                 </tr>
                 """)
         else:
-            # Fallback based on geom
             elements = geom.get("elements", [])
             for idx, e in enumerate(elements, 1):
                 rows.append(f"""
@@ -595,9 +737,6 @@ class DetailedReportGenerator:
       {''.join(rows)}
     </tbody>
   </table>
-  <div style="font-size:9.5px; color:#64748b; margin-top:-4px; margin-bottom:8px;">
-    * Ro = 전단중심에서 요소 중심선까지의 수직거리 | Wn = 종방향 뒴 직응력 계산용 정규화 뒴함수 | Sw = 전단 뒴응력 계산용 뒴단면 1차모멘트
-  </div>
         """
 
     @staticmethod
@@ -672,86 +811,96 @@ class DetailedReportGenerator:
   </table>
         """
 
-    @staticmethod
-    def _render_ch5_fully_braced_strength(props: dict, mat: dict, design: dict, opts: ReportOptions) -> str:
-        """Chapter 5: Fully Braced Strength (rptStrength)."""
-        fy = mat.get("fy", 240.0)
-        ag = props.get("area", 1000.0)
-        pno = ag * fy / 1000.0
-        phi_pno = 0.85 * pno
-        
-        sxt = props.get("sxt", 50000.0)
-        mnxo = sxt * fy / 1e6
-        phi_mnxo = 0.90 * mnxo
+    @classmethod
+    def _render_ch5_fully_braced_strength(
+        cls, props: dict, mat: dict, design: dict, trace: DesignTraceResult, opts: ReportOptions
+    ) -> str:
+        """Chapter 5: Fully Braced Strength (rptStrength) with complete Trace details."""
+        tension_items = trace.tension
+        comp_squash = [it for it in trace.compression if it.id == "comp_squash"]
+        flex_yield_x = [it for it in trace.flexure_x if it.id.startswith("flex_yield")]
+        flex_yield_y = [it for it in trace.flexure_y if it.id.startswith("flex_yield")]
+        shear_items = trace.shear
 
-        syt = props.get("syl", 30000.0)
-        mnyo = syt * fy / 1e6
-        phi_mnyo = 0.90 * mnyo
+        trace_blocks = ""
+        if opts.include_trace_details:
+            t_acc = cls._render_trace_accordion("축방향 인장 강도 상세 수식 전개 (Axial Tension Trace)", tension_items, default_open=True)
+            c_acc = cls._render_trace_accordion("완전지지 축압축 항복 강도 상세 수식 전개 (Squash Yield Load Trace)", comp_squash, default_open=True)
+            f_acc = cls._render_trace_accordion("완전지지 휨 항복 모멘트 상세 수식 전개 (Yield Moment Trace)", flex_yield_x + flex_yield_y, default_open=True)
+            s_acc = cls._render_trace_accordion("웨브 전단 항복 강도 상세 수식 전개 (Shear Capacity Trace)", shear_items, default_open=True)
+            trace_blocks = f"""
+            <h3 class="section-subtitle">5.1 완전지지 단면 강도 상세 계산 과정 (Calculation Trace Details)</h3>
+            {t_acc}
+            {c_acc}
+            {f_acc}
+            {s_acc}
+            """
 
-        vny = 0.6 * fy * (ag * 0.5) / 1000.0
-        phi_vny = 0.90 * vny
+        logs_txt = "\n".join(trace.summary_logs[:4])
 
         return f"""
-  <h2 class="chapter-title">제5장. 완전지지 단면 강도 (Fully Braced Strength)</h2>
+  <h2 class="chapter-title">제5장. 완전지지 단면 강도 및 수식 전개 (Fully Braced Strength)</h2>
   
   <table class="data-table">
     <thead>
       <tr>
         <th>설계 검토 항목</th>
-        <th style="text-align:center;">설계식</th>
+        <th style="text-align:center;">설계 기준식</th>
         <th style="text-align:right;">공칭 강도 (Nominal)</th>
-        <th style="text-align:right;">KDS/LRFD 설계강도 (φ=0.85/0.9)</th>
-        <th style="text-align:right;">ASD 허용강도 (Ω=1.67/1.80)</th>
+        <th style="text-align:right;">KDS/LRFD 설계강도</th>
+        <th style="text-align:right;">ASD 허용강도</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td><strong>완전지지 축압축강도 (Pno)</strong></td>
-        <td style="text-align:center;">Ag · Fy (또는 Ae · Fy)</td>
-        <td class="val">{pno:.1f} kN</td>
-        <td class="val" style="color:#1e3a8a;"><strong>{phi_pno:.1f} kN</strong></td>
-        <td class="val">{(pno/1.80):.1f} kN</td>
+        <td><strong>총단면 인장항복강도 (Tn,y)</strong></td>
+        <td style="text-align:center;">Ag · Fy</td>
+        <td class="val">{tension_items[0].nominal_value:,.1f} kN</td>
+        <td class="val" style="color:#1e3a8a;"><strong>{tension_items[0].design_value:,.1f} kN</strong> (φ=0.90)</td>
+        <td class="val">{tension_items[0].allowable_value:,.1f} kN (Ω=1.67)</td>
       </tr>
       <tr>
-        <td><strong>정모멘트 완전지지 휨강도 (Mnxo+)</strong></td>
-        <td style="text-align:center;">Sxe(t) · Fy</td>
-        <td class="val">{mnxo:.2f} kN·m</td>
-        <td class="val" style="color:#1e3a8a;"><strong>{phi_mnxo:.2f} kN·m</strong></td>
-        <td class="val">{(mnxo/1.67):.2f} kN·m</td>
+        <td><strong>순단면 인장파단강도 (Tn,u)</strong></td>
+        <td style="text-align:center;">An · Fu</td>
+        <td class="val">{tension_items[1].nominal_value:,.1f} kN</td>
+        <td class="val" style="color:#1e3a8a;"><strong>{tension_items[1].design_value:,.1f} kN</strong> (φ=0.75)</td>
+        <td class="val">{tension_items[1].allowable_value:,.1f} kN (Ω=2.00)</td>
       </tr>
       <tr>
-        <td><strong>부모멘트 완전지지 휨강도 (Mnxo-)</strong></td>
-        <td style="text-align:center;">Sxe(b) · Fy</td>
-        <td class="val">{mnxo:.2f} kN·m</td>
-        <td class="val" style="color:#1e3a8a;"><strong>{phi_mnxo:.2f} kN·m</strong></td>
-        <td class="val">{(mnxo/1.67):.2f} kN·m</td>
+        <td><strong>완전지지 축압축강도 (Py)</strong></td>
+        <td style="text-align:center;">Ag · Fy</td>
+        <td class="val">{comp_squash[0].nominal_value:,.1f} kN</td>
+        <td class="val" style="color:#1e3a8a;"><strong>{comp_squash[0].design_value:,.1f} kN</strong> (φ=0.85)</td>
+        <td class="val">{comp_squash[0].allowable_value:,.1f} kN (Ω=1.80)</td>
       </tr>
       <tr>
-        <td><strong>Y축 완전지지 휨강도 (Mnyo)</strong></td>
-        <td style="text-align:center;">Sye · Fy</td>
-        <td class="val">{mnyo:.2f} kN·m</td>
-        <td class="val" style="color:#1e3a8a;"><strong>{phi_mnyo:.2f} kN·m</strong></td>
-        <td class="val">{(mnyo/1.67):.2f} kN·m</td>
+        <td><strong>X축 초기 항복모멘트 (Myx)</strong></td>
+        <td style="text-align:center;">Sxt · Fy</td>
+        <td class="val">{flex_yield_x[0].nominal_value:,.2f} kN·m</td>
+        <td class="val" style="color:#1e3a8a;"><strong>{flex_yield_x[0].design_value:,.2f} kN·m</strong> (φ=0.90)</td>
+        <td class="val">{flex_yield_x[0].allowable_value:,.2f} kN·m (Ω=1.67)</td>
       </tr>
       <tr>
-        <td><strong>웨브 전단 항복강도 (Vny)</strong></td>
+        <td><strong>Y축 초기 항복모멘트 (Myy)</strong></td>
+        <td style="text-align:center;">Syl · Fy</td>
+        <td class="val">{flex_yield_y[0].nominal_value:,.2f} kN·m</td>
+        <td class="val" style="color:#1e3a8a;"><strong>{flex_yield_y[0].design_value:,.2f} kN·m</strong> (φ=0.90)</td>
+        <td class="val">{flex_yield_y[0].allowable_value:,.2f} kN·m (Ω=1.67)</td>
+      </tr>
+      <tr>
+        <td><strong>웨브 전단 항복강도 (Vn)</strong></td>
         <td style="text-align:center;">0.60 · Aw · Fy</td>
-        <td class="val">{vny:.1f} kN</td>
-        <td class="val" style="color:#1e3a8a;"><strong>{phi_vny:.1f} kN</strong></td>
-        <td class="val">{(vny/1.60):.1f} kN</td>
+        <td class="val">{shear_items[0].nominal_value:,.1f} kN</td>
+        <td class="val" style="color:#1e3a8a;"><strong>{shear_items[0].design_value:,.1f} kN</strong> (φ=0.90)</td>
+        <td class="val">{shear_items[0].allowable_value:,.1f} kN (Ω=1.60)</td>
       </tr>
     </tbody>
   </table>
 
-  <h3 class="section-subtitle">5.1 상세 계산 전개식 및 근거 (Calculation Trace Log)</h3>
-  <div class="trace-block">
-[Fully Braced Strength Trace Log per KDS 14 31 10]
-1. Axial Yield Load: Py = Ag * Fy = {ag:,.1f} mm² * {fy:.1f} MPa = {pno:.1f} kN
-2. Major Bending Yield Moment: Myx = Sxt * Fy = {sxt:,.1f} mm³ * {fy:.1f} MPa = {mnxo:.2f} kN·m
-3. Minor Bending Yield Moment: Myy = Syl * Fy = {syt:,.1f} mm³ * {fy:.1f} MPa = {mnyo:.2f} kN·m
-4. Shear Yield Capacity: Vy = 0.60 * Aw * Fy = 0.60 * {(ag*0.5):.1f} * {fy:.1f} = {vny:.1f} kN
-* Resistance Factors: phi_c = 0.85 (Compression), phi_b = 0.90 (Flexure), phi_v = 0.90 (Shear)
-  </div>
+  {trace_blocks}
+
+  <h3 class="section-subtitle">5.2 CFS 원본 호환 strTrace 텍스트 로그</h3>
+  <div class="trace-block">{logs_txt}</div>
         """
 
     @staticmethod
@@ -759,9 +908,9 @@ class DetailedReportGenerator:
         """Chapter 6: FSM Elastic Buckling Analysis (rptDSMData & PrintBuckling with Multi-mode & Hermite Interpolation)."""
         svg_curve = SVGDiagramGenerator.render_signature_curve_svg(fsm, width=460, height=190)
 
-        p_crl_1 = fsm.get('p_crl', 0.0)
-        p_crd_1 = fsm.get('p_crd', 0.0)
-        p_cre_1 = fsm.get('p_cre', 0.0)
+        p_crl_1 = fsm.get('p_crl', 0.0) / 1000.0 if fsm.get('p_crl', 0.0) > 1000 else fsm.get('p_crl', 0.0)
+        p_crd_1 = fsm.get('p_crd', 0.0) / 1000.0 if fsm.get('p_crd', 0.0) > 1000 else fsm.get('p_crd', 0.0)
+        p_cre_1 = fsm.get('p_cre', 0.0) / 1000.0 if fsm.get('p_cre', 0.0) > 1000 else fsm.get('p_cre', 0.0)
 
         return f"""
   <h2 class="chapter-title">제6장. 유한대판법(FSM) 탄성 좌굴해석 및 다중 모드(Higher Modes) DSM 파라미터</h2>
@@ -804,25 +953,45 @@ class DetailedReportGenerator:
         </tbody>
       </table>
       
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; padding:6px 8px; font-size:10px; margin-top:8px;">
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; padding:6px 8px; font-size:9.5px; margin-top:8px;">
         <strong>사전검증 단면 (Prequalified Section) 판정:</strong>
         <span style="color:#166534; font-weight:700; margin-left:4px;">적합 (Yes - Direct Strength Method Applicable)</span>
-        <div style="color:#64748b; margin-top:3px; font-size:9.5px;">* 2D 단면 변형 도해는 CFS 14.0 원본 Hermite 3차 보간 다항식 w(s) = a0 + a1*s + a2*s² + a3*s³ 기반으로 곡선 처짐이 정밀 반영됨.</div>
+        <div style="color:#64748b; margin-top:3px; font-size:9px;">* 2D 단면 변형 도해는 CFS 14.0 원본 Hermite 3차 보간 다항식 w(s) = a0 + a1*s + a2*s² + a3*s³ 기반으로 곡선 처짐이 정밀 반영됨.</div>
       </div>
     </div>
   </div>
         """
 
-    @staticmethod
-    def _render_ch7_member_design(design: dict, loads: dict, props: dict) -> str:
-        """Chapter 7: KDS 14 31 10 Member Design Checks (rptMemberCheck)."""
-        comp = design.get("compression", {})
-        flex = design.get("flexure", {})
-        shear = design.get("shear", {})
-        inter = design.get("interaction", {})
+    @classmethod
+    def _render_ch7_member_design(
+        cls, design: dict, loads: dict, props: dict, trace: DesignTraceResult, opts: ReportOptions
+    ) -> str:
+        """Chapter 7: KDS 14 31 10 Member Design Checks (rptMemberCheck) with complete Trace details."""
+        comp_gov = trace.compression[-1] if trace.compression else None
+        flex_gov_x = trace.flexure_x[-1] if trace.flexure_x else None
+        flex_gov_y = trace.flexure_y[-1] if trace.flexure_y else None
+        shear_gov = trace.shear[-1] if trace.shear else None
+        inter_sec = trace.interaction[0] if trace.interaction else None
+        inter_stab = trace.interaction[1] if len(trace.interaction) > 1 else None
+
+        trace_accordions = ""
+        if opts.include_trace_details:
+            comp_acc = cls._render_trace_accordion("축압축 좌굴 상세 계산 전개식 (Global, Local, Distortional Compression Trace)", trace.compression, default_open=True)
+            flex_x_acc = cls._render_trace_accordion("X축 휨 좌굴 상세 계산 전개식 (LTB, Local, Distortional Flexure-X Trace)", trace.flexure_x, default_open=True)
+            flex_y_acc = cls._render_trace_accordion("Y축 휨 좌굴 상세 계산 전개식 (Flexure-Y Trace)", trace.flexure_y, default_open=False)
+            inter_acc = cls._render_trace_accordion("P-M 다축 조합응력 및 부재 안정성 상관방정식 Trace (Interaction Equations)", trace.interaction, default_open=True)
+            trace_accordions = f"""
+            <h3 class="section-subtitle">7.1 부재 한계상태별 상세 수식 전개 및 파라미터 대입식 (Calculation Trace Details)</h3>
+            {comp_acc}
+            {flex_x_acc}
+            {flex_y_acc}
+            {inter_acc}
+            """
+
+        eq_cfs_txt = "\n".join(trace.equations_cfs)
 
         return f"""
-  <h2 class="chapter-title">제7장. KDS 14 31 10 직접강도법(DSM) 부재 내력 검토</h2>
+  <h2 class="chapter-title">제7장. KDS 14 31 10 직접강도법(DSM) 부재 내력 검토 및 Trace</h2>
   
   <table class="data-table">
     <thead>
@@ -837,74 +1006,108 @@ class DetailedReportGenerator:
     </thead>
     <tbody>
       <tr>
-        <td><strong>축압축강도 (Compression)</strong><br><small style="color:#64748b;">지배: {comp.get('governing_mode', '-')}</small></td>
-        <td class="val">{loads.get('pu', 0.0):.1f} kN</td>
-        <td class="val">{comp.get('p_n', 0.0):.1f} kN</td>
-        <td class="val" style="color:#1e3a8a;"><strong>{comp.get('phi_pn', 0.0):.1f} kN</strong></td>
-        <td style="text-align:center; font-weight:700;">{comp.get('dc_ratio', 0.0):.3f}</td>
-        <td style="text-align:center;">{'<span class="badge ok">OK</span>' if comp.get('status')=='OK' else '<span class="badge ng">NG</span>'}</td>
+        <td><strong>축압축강도 (Compression)</strong><br><small style="color:#64748b;">지배: {comp_gov.notes if comp_gov else '-'}</small></td>
+        <td class="val">{comp_gov.demand_value:,.1f} kN</td>
+        <td class="val">{comp_gov.nominal_value:,.1f} kN</td>
+        <td class="val" style="color:#1e3a8a;"><strong>{comp_gov.design_value:,.1f} kN</strong></td>
+        <td style="text-align:center; font-weight:700;">{comp_gov.dc_ratio:.3f}</td>
+        <td style="text-align:center;">{'<span class="badge ok">OK</span>' if comp_gov.status=='OK' else '<span class="badge ng">NG</span>'}</td>
       </tr>
       <tr>
-        <td><strong>X축 휨모멘트강도 (Flexure X-X)</strong><br><small style="color:#64748b;">지배: {flex.get('governing_mode', '-')}</small></td>
-        <td class="val">{loads.get('mux', 0.0):.2f} kN·m</td>
-        <td class="val">{flex.get('m_n', 0.0):.2f} kN·m</td>
-        <td class="val" style="color:#1e3a8a;"><strong>{flex.get('phi_mn', 0.0):.2f} kN·m</strong></td>
-        <td style="text-align:center; font-weight:700;">{flex.get('dc_ratio', 0.0):.3f}</td>
-        <td style="text-align:center;">{'<span class="badge ok">OK</span>' if flex.get('status')=='OK' else '<span class="badge ng">NG</span>'}</td>
+        <td><strong>X축 휨모멘트강도 (Flexure X-X)</strong><br><small style="color:#64748b;">지배: {flex_gov_x.notes if flex_gov_x else '-'}</small></td>
+        <td class="val">{flex_gov_x.demand_value:,.2f} kN·m</td>
+        <td class="val">{flex_gov_x.nominal_value:,.2f} kN·m</td>
+        <td class="val" style="color:#1e3a8a;"><strong>{flex_gov_x.design_value:,.2f} kN·m</strong></td>
+        <td style="text-align:center; font-weight:700;">{flex_gov_x.dc_ratio:.3f}</td>
+        <td style="text-align:center;">{'<span class="badge ok">OK</span>' if flex_gov_x.status=='OK' else '<span class="badge ng">NG</span>'}</td>
+      </tr>
+      <tr>
+        <td><strong>Y축 휨모멘트강도 (Flexure Y-Y)</strong></td>
+        <td class="val">{flex_gov_y.demand_value:,.2f} kN·m</td>
+        <td class="val">{flex_gov_y.nominal_value:,.2f} kN·m</td>
+        <td class="val" style="color:#1e3a8a;"><strong>{flex_gov_y.design_value:,.2f} kN·m</strong></td>
+        <td style="text-align:center; font-weight:700;">{flex_gov_y.dc_ratio:.3f}</td>
+        <td style="text-align:center;">{'<span class="badge ok">OK</span>' if flex_gov_y.status=='OK' else '<span class="badge ng">NG</span>'}</td>
       </tr>
       <tr>
         <td><strong>웨브 전단강도 (Shear)</strong></td>
-        <td class="val">{loads.get('vu', 0.0):.1f} kN</td>
-        <td class="val">{shear.get('v_n', 0.0):.1f} kN</td>
-        <td class="val" style="color:#1e3a8a;"><strong>{shear.get('phi_vn', 0.0):.1f} kN</strong></td>
-        <td style="text-align:center; font-weight:700;">{shear.get('dc_ratio', 0.0):.3f}</td>
-        <td style="text-align:center;">{'<span class="badge ok">OK</span>' if shear.get('status')=='OK' else '<span class="badge ng">NG</span>'}</td>
+        <td class="val">{shear_gov.demand_value:,.1f} kN</td>
+        <td class="val">{shear_gov.nominal_value:,.1f} kN</td>
+        <td class="val" style="color:#1e3a8a;"><strong>{shear_gov.design_value:,.1f} kN</strong></td>
+        <td style="text-align:center; font-weight:700;">{shear_gov.dc_ratio:.3f}</td>
+        <td style="text-align:center;">{'<span class="badge ok">OK</span>' if shear_gov.status=='OK' else '<span class="badge ng">NG</span>'}</td>
       </tr>
       <tr>
-        <td><strong>P-M 조합응력 (Interaction)</strong><br><small style="color:#64748b;">KDS 14 31 10 식 (4.4-1)</small></td>
-        <td colspan="3" style="text-align:right; font-family:Consolas; font-size:10px; color:#475569;">
-          Pu/(φcPn) + B1·Mux/(φbMnx) + B2·Muy/(φbMny) ≤ 1.0
+        <td><strong>P-M 단면강도 조합 (Cross-Section)</strong><br><small style="color:#64748b;">{inter_sec.clause_kds}</small></td>
+        <td colspan="3" style="text-align:right; font-family:Consolas; font-size:9.5px; color:#475569;">
+          {inter_sec.formula_raw}
         </td>
-        <td style="text-align:center; font-weight:700; color:{'#166534' if inter.get('ratio', 0.0)<=1.0 else '#991b1b'};">
-          {inter.get('ratio', 0.0):.3f}
+        <td style="text-align:center; font-weight:700; color:{'#166534' if inter_sec.dc_ratio<=1.0 else '#991b1b'};">
+          {inter_sec.dc_ratio:.3f}
         </td>
-        <td style="text-align:center;">{'<span class="badge ok">OK</span>' if inter.get('status')=='OK' else '<span class="badge ng">NG</span>'}</td>
+        <td style="text-align:center;">{'<span class="badge ok">OK</span>' if inter_sec.status=='OK' else '<span class="badge ng">NG</span>'}</td>
+      </tr>
+      <tr>
+        <td><strong>P-M 부재안정성 조합 (Stability)</strong><br><small style="color:#64748b;">{inter_stab.clause_kds}</small></td>
+        <td colspan="3" style="text-align:right; font-family:Consolas; font-size:9.5px; color:#475569;">
+          {inter_stab.formula_raw}
+        </td>
+        <td style="text-align:center; font-weight:700; color:{'#166534' if inter_stab.dc_ratio<=1.0 else '#991b1b'};">
+          {inter_stab.dc_ratio:.3f}
+        </td>
+        <td style="text-align:center;">{'<span class="badge ok">OK</span>' if inter_stab.status=='OK' else '<span class="badge ng">NG</span>'}</td>
       </tr>
     </tbody>
   </table>
+
+  {trace_accordions}
+
+  <h3 class="section-subtitle">7.2 CFS 원본 호환 EqText 상관방정식 대입 출력 로그</h3>
+  <div class="trace-block">{eq_cfs_txt}</div>
         """
 
-    @staticmethod
-    def _render_ch8_web_crippling(design: dict, loads: dict, props: dict) -> str:
-        """Chapter 8: Web Crippling Checks (rptWebCrippling)."""
-        crip = design.get("web_crippling", {})
-        pn_crip = crip.get("pn", 25.4)
-        phi_pn_crip = crip.get("phi_pn", 20.3)
-        ru = loads.get("reaction", loads.get("vu", 15.0))
-        dc_crip = ru / max(phi_pn_crip, 0.1)
+    @classmethod
+    def _render_ch8_web_crippling(
+        cls, design: dict, loads: dict, props: dict, trace: DesignTraceResult, opts: ReportOptions
+    ) -> str:
+        """Chapter 8: Web Crippling Checks (rptWebCrippling) with complete Trace details."""
+        crip_item = trace.web_crippling[0] if trace.web_crippling else None
+        comb_items = trace.interaction[2:] if len(trace.interaction) > 2 else []
+
+        trace_accordions = ""
+        if opts.include_trace_details:
+            crip_acc = cls._render_trace_accordion("웨브 크리플링 강도 상세 산정식 (Web Crippling Trace)", trace.web_crippling, default_open=True)
+            comb_acc = cls._render_trace_accordion("휨-전단 및 휨-크리플링 복합응력 상관식 (Combined Bending-Shear-Crippling Trace)", comb_items, default_open=True)
+            trace_accordions = f"""
+            <h3 class="section-subtitle">8.1 국부 좌굴 및 복합응력 상세 계산 과정 (Calculation Trace Details)</h3>
+            {crip_acc}
+            {comb_acc}
+            """
 
         return f"""
-  <h2 class="chapter-title">제8장. 웨브 크리플링(Web Crippling) 국부 좌굴 검토</h2>
+  <h2 class="chapter-title">제8장. 웨브 크리플링(Web Crippling) 및 복합응력 검토</h2>
   
   <table class="data-table">
     <tr>
-      <th>재하 조건 (Loading Condition)</th><td>내부 1플랜지 재하 (Interior One-Flange, IOF)</td>
-      <th>받침점 지지길이 (N)</th><td class="val">50.0 mm</td>
+      <th>재하 조건 (Loading Condition)</th><td>{crip_item.parameters.get('condition', 'IOF')} (KDS 14 31 10 Table C3.4.1-1)</td>
+      <th>받침점 지지길이 (N)</th><td class="val">{crip_item.parameters.get('N', 50.0):.1f} mm</td>
     </tr>
     <tr>
-      <th>플랜지 부착 여부</th><td>체결됨 (Fastened to Support)</td>
-      <th>웨브 구성 형식</th><td>단일 웨브 (Single Web)</td>
+      <th>플랜지 부착 및 보강 상태</th><td>{crip_item.notes}</td>
+      <th>웨브 판폭두께비 (h/t)</th><td class="val">{crip_item.parameters.get('h', 150.0)/max(crip_item.parameters.get('t', 1.5),0.1):.1f}</td>
     </tr>
     <tr>
-      <th>공칭 크리플링 강도 (Pn)</th><td class="val">{pn_crip:.1f} kN</td>
-      <th>설계 크리플링 강도 (φPn)</th><td class="val" style="color:#1e3a8a;"><strong>{phi_pn_crip:.1f} kN</strong> (φ=0.80)</td>
+      <th>공칭 크리플링 강도 (Pnc)</th><td class="val">{crip_item.nominal_value:,.1f} kN</td>
+      <th>설계 크리플링 강도 (φPnc)</th><td class="val" style="color:#1e3a8a;"><strong>{crip_item.design_value:,.1f} kN</strong> (φ={crip_item.phi:.2f})</td>
     </tr>
     <tr>
-      <th>소요 지점 반력 (Ru)</th><td class="val">{ru:.1f} kN</td>
+      <th>소요 지점 반력 (Ru)</th><td class="val">{crip_item.demand_value:,.1f} kN</td>
       <th>D/C Ratio 및 판정</th>
-      <td><strong>{dc_crip:.3f}</strong> - {'<span class="badge ok">OK</span>' if dc_crip <= 1.0 else '<span class="badge ng">NG</span>'}</td>
+      <td><strong>{crip_item.dc_ratio:.3f}</strong> - {'<span class="badge ok">OK</span>' if crip_item.status=='OK' else '<span class="badge ng">NG</span>'}</td>
     </tr>
   </table>
+
+  {trace_accordions}
         """
 
     @staticmethod
@@ -912,7 +1115,7 @@ class DetailedReportGenerator:
         """Chapter 9: 1D Frame Analysis & Force Diagrams (rptAnlInp & rptDiagrams)."""
         return f"""
   <h2 class="chapter-title">제9장. 1D 보/기둥 구조해석 및 단면력 다이어그램</h2>
-  <div style="padding:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; font-size:10.5px;">
+  <div style="padding:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; font-size:10px;">
     <strong>1D Frame Analysis Output:</strong>
     위치별 단면력 및 처짐 해석이 완료되었습니다. (스팬: {analysis_1d.get('span', 3000):,.0f} mm, 최대처짐: {analysis_1d.get('max_deflection', 2.4):.2f} mm)
   </div>

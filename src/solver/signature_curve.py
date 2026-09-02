@@ -96,9 +96,17 @@ class SignatureCurveAnalyzer:
                     p_cr_1 = lf_1 * p_y
                     m_cr_1 = lf_1 * m_y
 
-                    m_lfs = [float(m[0]) for m in modes]
-                    m_pcrs = [float(m[0] * p_y) for m in modes]
-                    m_mcrs = [float(m[0] * m_y) for m in modes]
+                    m_lfs = []
+                    m_pcrs = []
+                    m_mcrs = []
+                    for m_idx, m in enumerate(modes):
+                        lf_val = float(m[0])
+                        # Filter out non-physical membrane divergence modes (e.g. > 20 * Mode 1 or > 50000)
+                        if m_idx > 0 and (lf_val > lf_1 * 25.0 or lf_val > 100000.0):
+                            continue
+                        m_lfs.append(lf_val)
+                        m_pcrs.append(float(lf_val * p_y))
+                        m_mcrs.append(float(lf_val * m_y))
 
                     pt = BucklingPoint(
                         length=float(l_val),

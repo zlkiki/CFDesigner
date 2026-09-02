@@ -167,24 +167,32 @@ class FSMSignatureChart {
     const m1_data = (points || []).map(p => {
       let val = 0;
       if (p.mode_pcrs && p.mode_pcrs.length > 0) {
-        val = isBending ? (p.mode_mcrs[0] || p.m_cr) : p.mode_pcrs[0];
+        val = isBending ? ((p.mode_mcrs && p.mode_mcrs.length > 0 ? p.mode_mcrs[0] : p.m_cr) || 0) : p.mode_pcrs[0];
       } else {
         val = isBending ? (p.m_cr !== undefined ? p.m_cr : p.critical_moment) : (p.p_cr !== undefined ? p.p_cr : (p.critical_load / 1000.0));
       }
       return { x: p.length, y: Number(val) };
-    });
+    }).filter(d => !isNaN(d.y) && d.y > 0);
+
+    const validM1Vals = m1_data.map(d => d.y);
+    const maxM1 = validM1Vals.length > 0 ? Math.max(...validM1Vals) : 1000.0;
+    const upperLimit = maxM1 * 4.0; // Reasonable visual scale upper bound
 
     // Mode 2 dataset
-    const m2_data = (points || []).filter(p => p.mode_pcrs && p.mode_pcrs.length > 1).map(p => {
-      const val = isBending ? (p.mode_mcrs[1] || p.mode_pcrs[1]) : p.mode_pcrs[1];
+    const m2_data = (points || []).map(p => {
+      if (!p.mode_pcrs || p.mode_pcrs.length < 2) return null;
+      const val = isBending ? (p.mode_mcrs && p.mode_mcrs.length > 1 ? p.mode_mcrs[1] : null) : p.mode_pcrs[1];
+      if (val === null || val === undefined || isNaN(val) || val <= 0 || val > upperLimit) return null;
       return { x: p.length, y: Number(val) };
-    });
+    }).filter(d => d !== null);
 
     // Mode 3 dataset
-    const m3_data = (points || []).filter(p => p.mode_pcrs && p.mode_pcrs.length > 2).map(p => {
-      const val = isBending ? (p.mode_mcrs[2] || p.mode_pcrs[2]) : p.mode_pcrs[2];
+    const m3_data = (points || []).map(p => {
+      if (!p.mode_pcrs || p.mode_pcrs.length < 3) return null;
+      const val = isBending ? (p.mode_mcrs && p.mode_mcrs.length > 2 ? p.mode_mcrs[2] : null) : p.mode_pcrs[2];
+      if (val === null || val === undefined || isNaN(val) || val <= 0 || val > upperLimit) return null;
       return { x: p.length, y: Number(val) };
-    });
+    }).filter(d => d !== null);
 
     this.chart.data.datasets[0].data = m1_data;
     this.chart.data.datasets[0].label = isBending ? 'Mode 1 (1차 Mcr)' : 'Mode 1 (1차 Pcr)';

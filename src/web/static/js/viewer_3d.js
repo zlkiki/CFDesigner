@@ -246,6 +246,60 @@ class BucklingViewer3D {
     this.buildStressProfile();
   }
 
+  buildStressProfile() {
+    if (!this.stressProfileGroup) return;
+
+    // Clear previous stress profile elements
+    while (this.stressProfileGroup.children.length > 0) {
+      const child = this.stressProfileGroup.children[0];
+      this.stressProfileGroup.remove(child);
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach(m => m.dispose());
+        } else {
+          child.material.dispose();
+        }
+      }
+    }
+
+    this.stressProfileGroup.visible = !!this.showStressProfile;
+    if (!this.nodes || this.nodes.length === 0) return;
+
+    // Build stress vectors at section inlet (Z = -110)
+    const zBase = -110;
+    const arrowLenMax = 30.0;
+
+    // Compute Y-span to estimate stress gradient for bending
+    let minY = Infinity, maxY = -Infinity;
+    this.nodes.forEach(n => {
+      minY = Math.min(minY, n.y);
+      maxY = Math.max(maxY, n.y);
+    });
+    const midY = (minY + maxY) / 2.0;
+    const spanY = Math.max(maxY - minY, 1.0);
+
+    this.nodes.forEach((n, idx) => {
+      // Normal stress representation based on mode / position
+      let stressRatio = 1.0;
+      if (this.currentModeKey && this.currentModeKey.startsWith('dist')) {
+        stressRatio = 0.85 + 0.15 * Math.sin(idx);
+      } else {
+        stressRatio = (n.y - midY) / (spanY / 2.0); // Bending gradient
+        if (Math.abs(stressRatio) < 0.1) stressRatio = 0.5;
+      }
+
+      const isComp = stressRatio >= 0;
+      const mag = Math.max(Math.abs(stressRatio) * arrowLenMax, 8.0);
+      const color = isComp ? 0xef4444 : 0x3b82f6; // Red for compression, Blue for tension
+      const dir = isComp ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(0, 0, -1);
+      const origin = new THREE.Vector3(n.x, n.y, isComp ? zBase - mag : zBase);
+
+      const arrow = new THREE.ArrowHelper(dir, origin, mag, color, 4.0, 2.5);
+      this.stressProfileGroup.add(arrow);
+    });
+  }
+
   buildGeometry() {
     if (this.mesh) {
       this.scene.remove(this.mesh);

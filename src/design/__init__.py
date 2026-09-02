@@ -6,6 +6,7 @@ from .dsm_compression import DSMCompression, CompressionDesignResult
 from .dsm_flexure import DSMFlexure, FlexureDesignResult
 from .shear_and_crippling import WebShearAndCrippling, ShearCripplingResult
 from .beam_column import BeamColumnInteraction, InteractionResult
+from .kds_trace_engine import KDSTraceEngine, TraceItem, DesignTraceResult
 
 __all__ = [
     "DSMCompression",
@@ -16,4 +17,8 @@ __all__ = [
     "ShearCripplingResult",
     "BeamColumnInteraction",
     "InteractionResult",
+    "KDSTraceEngine",
+    "TraceItem",
+    "DesignTraceResult",
 ]
+

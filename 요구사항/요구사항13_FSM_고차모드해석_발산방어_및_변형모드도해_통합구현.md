@@ -1,0 +1,88 @@
+# 요구사항 13: FSM 고차 모드 해석, 수치 발산 방어 및 다차수 변형모드 도해 통합 구현
+
+## 1. 목적 및 배경
+
+본 요구사항은 [`docs/14_fsm_buckling_modes_and_higher_order_theory_analysis.md`](file:///f:/PyProject/CFDesigner/docs/14_fsm_buckling_modes_and_higher_order_theory_analysis.md)에 정립된 **FSM 버클링 모드 해석, 고차 모드 거동 및 수치 발산 방어 이론**을 바탕으로, CFS.exe 레거시 프로그램의 원본 1차 모드 해석 체계를 완벽히 계승함과 동시에 모던 웹 환경에 최적화된 **다중 모드(Mode 1, Mode 2, Mode 3) 탄성 좌굴해석, 휨 상태 비물리적 막 발산 방어, 2D Hermite 3차 보간 및 3D 실시간 파형 시각화**를 시스템 전 영역에 걸쳐 무결하게 완성하는 것을 목적으로 합니다.
+
+---
+
+## 2. 세부 요구사항 (Detailed Requirements)
+
+### 2.1 [엔진/솔버] FSM 고차 모드 해석 및 비물리적 막 발산 수치 방어 (`src/solver/signature_curve.py`, `src/solver/eigen_solver.py`)
+1. **다차수 고유치 및 임계하중/모멘트 산정**:
+   - 각 반파장 길이 $L$(Start Length $L_{\min} \sim$ End Length $L_{\max}$)에 대해 양의 고유치를 오름차순으로 정렬하여 Mode 1($\lambda_1$), Mode 2($\lambda_2$), Mode 3($\lambda_3$)을 산출.
+   - 압축 상태: $P_{cr,k} = \lambda_k \cdot P_y$ 산정.
+   - 휨 상태(강축/약축): $M_{cr,k} = \lambda_k \cdot M_y$ 산정.
+2. **휨(Bending) 상태에서의 비좌굴 막 모드(Membrane Mode) 발산 방어**:
+   - 긴 반파장($L > 500\text{ mm}$)에서 부정부호 기하 강성행렬 $[K_g]$와 $1/L$ 탄성 강성 저하로 인해 발생하는 $O(L^2)$ 비물리적 초거대 고유치($\lambda \sim 10^5 \sim 10^6$) 필터링:
+     $$\text{Filter Condition: } \lambda_k > 25 \times \lambda_1 \quad \text{or} \quad \lambda_k > 100,000$$
+   - 필터링된 고차 포인트는 노이즈로 처리하여 차트 플롯 배열에서 안전하게 배제하고, 유효한 물리적 좌굴 모드만 데이터셋으로 구성.
+3. **CFS 원본 100% 대칭 `WorkRatio` 3대 좌굴 모드 판별**:
+   - 변형 에너지 비 $\text{WorkRatio} = \sqrt{W_{\text{flex}} / W_{\text{trans}}}$ 기반 자동 분류:
+     - $\text{WorkRatio} > 3.0 \rightarrow$ 국부 좌굴 (Local Buckling, $P_{crl} / M_{crl}$)
+     - $0.2 < \text{WorkRatio} \le 3.0 \rightarrow$ 디스토셔널 좌굴 (Distortional Buckling, $P_{crd} / M_{crd}$)
+     - $\text{WorkRatio} \le 0.2 \rightarrow$ 전체 좌굴 (Global Buckling, $P_{cre} / M_{cre}$)
+
+---
+
+### 2.2 [차트 UI] 시그니처 커브 Chart.js 다중 모드 렌더링 및 Y축 스케일 보호 (`src/web/static/js/chart_fsm.js`)
+1. **Mode 1, Mode 2, Mode 3 다중 곡선 오버레이**:
+   - Mode 1: 주 곡선 (강조 색상, 로컬/디스토셔널/글로벌 극솟점 마커 표시).
+   - Mode 2 / Mode 3: 보조 곡선 (초록/보라 점선 또는 실선 오버레이, 범례 토글 지원).
+2. **Y축 스케일 자동 방어 (Scale Explosion Protection)**:
+   - Mode 1 최대값 기준 가시 범위 상한 $\text{Upper Limit} = \max(\text{Mode 1}) \times 4.0$ 적용.
+   - 고차 모드의 과도한 수치가 입력되더라도 1차 곡선이 바닥에 납작하게 찌그러지지 않도록 렌더링 시 자동 클리핑/스킵 처리.
+3. **응력 분포별 Y축 단위 및 타이틀 동적 연동**:
+   - 압축(`compression`): `탄성 버클링하중 P_cr (kN)`
+   - 휨(`bending_x`, `bending_y`): `탄성 버클링모멘트 M_cr (kN·m)`
+
+---
+
+### 2.3 [2D/3D 뷰어] Hermite 3차 보간 기반 다차수 변형모드 도해 (`src/web/static/js/canvas_2d.js`, `src/web/static/js/viewer_3d.js`)
+1. **2D 캔버스 Hermite 3차 보간 다항식 정밀 렌더링**:
+   - CFS.exe 원본 `PlotModeShape` 알고리즘과 100% 동일하게 각 요소(Strip)를 16분할하여 Hermite 3차 다항식 곡선으로 면외 변형 형상 도해.
+   - 툴바의 `Mode 1`, `Mode 2`, `Mode 3` 버튼 클릭 시 해당 차수의 고유벡터를 반영한 2D 변형 곡선 즉각 전환 렌더링.
+2. **3D Three.js 실시간 파형 셰이딩 및 응력 프로파일 연동**:
+   - 종방향 $z$축에 따른 파동 변위($\sin(\pi z / L)$) 메쉬 구성.
+   - 단면 선단부에 절점별 정규화 수직응력 화살표(`THREE.ArrowHelper`) 벡터 메쉬를 생성하여 '응력분포' 버튼과 연동.
+   - 3D 뷰어 상단 플로팅 정보창에 선택된 반파장($L$), 버클링계수($\beta$), Work Ratio, 임계하중($P_{cr}$/$M_{cr}$) 실시간 표시.
+
+---
+
+### 2.4 [상태 관리 & API] 세부 설정 모달 응력 분포 상태 지속 유지 (`src/web/static/js/app.js`, `src/api/routes.py`)
+1. **응력 상태(`load_type`) 지속성 보장**:
+   - FSM 세부 설정 모달에서 사용자가 선택한 응력 분포(`compression`, `bending_x`, `bending_y`)를 `this.currentFsmStressType`에 영구 보존.
+   - 도심정렬, 회전, 대칭 변환 등 기하학적 조작 시에도 `runFSM()`에 해당 `load_type`을 전달하여 선택된 응력 상태가 순수 압축으로 리셋되지 않고 유지되도록 동기화.
+2. **백엔드 `/api/fsm/solve` 및 `/api/fsm/parameters` 스키마 완전 일치**:
+   - 두 엔드포인트 모두 `signature_curve`, `critical_modes`, `mode_lfs`, `mode_pcrs`, `mode_mcrs`, `nodes`, `strips`를 완전 직렬화하여 반환.
+
+---
+
+### 2.5 [도움말 & 매뉴얼] 온라인 도움말 시스템 동기화 (`docs/08_online_help_manual_specification.md`, `src/manual/`)
+1. **FSM 이론 및 시그니처 커브 토픽 최신화**:
+   - `fsm_theory`, `buckling_modes`, `signature_curve`, `fsm_params` 토픽에 반파장($L$)의 공학적 정의, CFS 원본 단일 모드 vs CFDesigner 다중 모드 비교, 휨 상태 면내 막 발산 방어 메커니즘을 한·영 대조로 완벽 수록.
+
+---
+
+## 3. 검증 기준 (Acceptance Criteria)
+
+- [ ] **AC 13-1 [고차 모드 산정 & 발산 방어]**: FSM 해석 시 Mode 1, Mode 2, Mode 3 고유치가 정상 산출되며, 휨 상태($L > 500\text{ mm}$)에서 $O(L^2)$ 비물리적 막 발산 수치가 $\lambda_k > 25\lambda_1$ 필터링에 의해 안전하게 정제될 것.
+- [ ] **AC 13-2 [Chart.js 다중 모드 & 스케일 보호]**: 시그니처 커브 차트에서 Mode 1, 2, 3 곡선이 오버레이되고, Y축 스케일 상한 보호(`upperLimit`)로 인해 Mode 1 곡선이 바닥(0선)에 찌그러지지 않고 선명하게 플롯될 것.
+- [ ] **AC 13-3 [2D/3D 다차수 변형 형상]**: 툴바에서 `Mode 1`, `Mode 2`, `Mode 3` 및 `Local`, `Distortional`, `Global` 선택 시 2D Hermite 3차 변형 곡선 및 3D Three.js 파형이 실시간 동기화되어 전환될 것.
+- [ ] **AC 13-4 [응력분포 상태 유지]**: FSM 세부 설정에서 휨 모멘트(`bending_x`) 선택 후 도심정렬 또는 단면 변환 버튼을 눌러도 압축으로 리셋되지 않고 휨 해석 상태가 온전히 유지될 것.
+- [ ] **AC 13-5 [단위 테스트 무결성]**: `pytest` 전체 79개 테스트가 100% 통과할 것.
+
+---
+
+## 4. 영향받는 대상 파일 목록
+
+| 도메인 | 파일 경로 | 주요 역할 및 수정 범위 |
+|---|---|---|
+| **FSM 엔진** | [`src/solver/signature_curve.py`](file:///f:/PyProject/CFDesigner/src/solver/signature_curve.py) | 다중 모드 산정 및 비물리적 막 발산 고유치 필터링 |
+| **FSM 엔진** | [`src/solver/eigen_solver.py`](file:///f:/PyProject/CFDesigner/src/solver/eigen_solver.py) | 부정부호 $[K_g]$ 고유치 정렬 및 일반화 고유치 해석 |
+| **백엔드 API** | [`src/api/routes.py`](file:///f:/PyProject/CFDesigner/src/api/routes.py) | `/api/fsm/solve`, `/api/fsm/parameters` 다중 모드/3D 절점 직렬화 |
+| **차트 UI** | [`src/web/static/js/chart_fsm.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/chart_fsm.js) | Mode 1, 2, 3 다중 곡선 오버레이 및 Y축 상한 보호 |
+| **2D/3D 뷰어** | [`src/web/static/js/viewer_3d.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/viewer_3d.js) | Three.js 3D 파동 메쉬 및 `buildStressProfile()` 응력 화살표 벡터 |
+| **2D/3D 뷰어** | [`src/web/static/js/canvas_2d.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/canvas_2d.js) | Hermite 3차 보간 다항식 기반 2D 변형 형상 도해 |
+| **프론트엔드 메인** | [`src/web/static/js/app.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/app.js) | `currentFsmStressType` 상태 보존 및 컴포넌트별 렌더링 예외 격리 |
+| **기술 문서 (SSOT)** | [`docs/14_fsm_buckling_modes_and_higher_order_theory_analysis.md`](file:///f:/PyProject/CFDesigner/docs/14_fsm_buckling_modes_and_higher_order_theory_analysis.md) | 이론 분석 명세서 (Ground Truth 대조) |

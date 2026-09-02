@@ -542,25 +542,37 @@ class CFDesignerApp {
       });
     }
 
-    document.getElementById('btnOpenReport').addEventListener('click', () => this.openReportModal());
-    document.getElementById('btnCloseReport').addEventListener('click', () => this.closeReportModal());
+    const btnOpenRpt = document.getElementById('btnOpenReport');
+    if (btnOpenRpt) btnOpenRpt.addEventListener('click', () => this.openReportModal());
+    const btnCloseRpt = document.getElementById('btnCloseReportModal') || document.getElementById('btnCloseReport');
+    if (btnCloseRpt) btnCloseRpt.addEventListener('click', () => this.closeReportModal());
 
     // Report Dual Mode Buttons
     const btnModeSummary = document.getElementById('btnReportModeSummary');
     const btnModeDetailed = document.getElementById('btnReportModeDetailed');
     if (btnModeSummary && btnModeDetailed) {
       btnModeSummary.addEventListener('click', () => {
-        btnModeSummary.classList.add('active');
-        btnModeDetailed.classList.remove('active');
+        btnModeSummary.classList.add('btn-primary');
+        btnModeSummary.classList.remove('btn-outline');
+        btnModeDetailed.classList.remove('btn-primary');
+        btnModeDetailed.classList.add('btn-outline');
         this.reportMode = 'summary';
         this.refreshReport();
       });
       btnModeDetailed.addEventListener('click', () => {
-        btnModeDetailed.classList.add('active');
-        btnModeSummary.classList.remove('active');
+        btnModeDetailed.classList.add('btn-primary');
+        btnModeDetailed.classList.remove('btn-outline');
+        btnModeSummary.classList.remove('btn-primary');
+        btnModeSummary.classList.add('btn-outline');
         this.reportMode = 'detailed';
         this.refreshReport();
       });
+    }
+
+    // Toggle All Trace Details
+    const btnToggleAllTrace = document.getElementById('btnToggleAllTrace');
+    if (btnToggleAllTrace) {
+      btnToggleAllTrace.addEventListener('click', () => this.toggleAllTraceDetails());
     }
 
     // Toggle Config Drawer
@@ -569,39 +581,26 @@ class CFDesignerApp {
       btnToggleConfig.addEventListener('click', () => {
         const drawer = document.getElementById('reportConfigDrawer');
         if (drawer) {
-          drawer.style.display = drawer.style.display === 'none' ? 'block' : 'none';
+          drawer.classList.toggle('open');
         }
       });
     }
 
-    // Select All / Unselect All
-    const btnRptSelectAll = document.getElementById('btnRptSelectAll');
-    const btnRptUnselectAll = document.getElementById('btnRptUnselectAll');
-    if (btnRptSelectAll && btnRptUnselectAll) {
-      btnRptSelectAll.addEventListener('click', () => {
-        ['chkRptInputs', 'chkRptGross', 'chkRptTorsion', 'chkRptEffective', 'chkRptStrength', 'chkRptFSM', 'chkRptMember', 'chkRptCrippling'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.checked = true;
-        });
-      });
-      btnRptUnselectAll.addEventListener('click', () => {
-        ['chkRptInputs', 'chkRptGross', 'chkRptTorsion', 'chkRptEffective', 'chkRptStrength', 'chkRptFSM', 'chkRptMember', 'chkRptCrippling'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.checked = false;
-        });
-      });
-    }
-
-    // Apply Config & Print from Modal
+    // Apply Config
     const btnApplyRpt = document.getElementById('btnApplyReportConfig');
     if (btnApplyRpt) {
-      btnApplyRpt.addEventListener('click', () => this.refreshReport());
+      btnApplyRpt.addEventListener('click', () => {
+        const drawer = document.getElementById('reportConfigDrawer');
+        if (drawer) drawer.classList.remove('open');
+        this.refreshReport();
+      });
     }
 
-    const btnPrintModal = document.getElementById('btnPrintReportFromModal');
+    // Print from Modal
+    const btnPrintModal = document.getElementById('btnPrintReportFrame') || document.getElementById('btnPrintReportFromModal');
     if (btnPrintModal) {
       btnPrintModal.addEventListener('click', () => {
-        const iframe = document.getElementById('reportIframe');
+        const iframe = document.getElementById('reportViewerFrame') || document.getElementById('reportIframe');
         if (iframe && iframe.contentWindow) {
           iframe.contentWindow.print();
         }
@@ -747,6 +746,8 @@ class CFDesignerApp {
       this.showStatus('🔬 FSM 탄성 버클링 해석 연산 중 (35개 스윕)...', 'busy');
       const signal = this.getAbortSignal('fsm', '이전 FSM 연산 취소 후 최신 단면 재해석 중...');
 
+      const stressType = this.currentFsmStressType || document.getElementById('fsmStressType')?.value || 'compression';
+
       try {
         const res = await fetch('/api/fsm/solve', {
           method: 'POST',
@@ -754,37 +755,78 @@ class CFDesignerApp {
           body: JSON.stringify({
             elements: this.currentGeometry.elements,
             thickness: this.currentGeometry.thickness,
+            load_type: stressType,
             yield_stress: fy,
             member_length: lMem,
             num_points: 35
           }),
           signal: signal
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ detail: '서버 오류' }));
+          this.showStatus(`⚠️ FSM 해석 오류: ${errData.detail || '응답 오류'}`, 'warning', 3500);
+          return;
+        }
         const data = await res.json();
         this.currentFsmResult = data;
 
-        // Update FSM Signature Chart
-        this.fsmChart.updateData(data.signature_curve, data.critical_modes.load_type);
+        // 1. Update FSM Signature Chart
+        try {
+          if (this.fsmChart) {
+            this.fsmChart.updateData(data.signature_curve, data.critical_modes.load_type);
+          }
+        } catch (chartErr) {
+          console.error('FSM Chart update error:', chartErr);
+        }
 
-        // Update 3D Viewer Mesh & Modes
+        // 2. Update 3D Viewer Mesh & Modes
         this.lastFsmNodes = data.nodes;
         this.lastFsmStrips = data.strips;
-        if (this.viewer3d) this.viewer3d.setData(data.nodes, data.strips, 'local_mode');
-        if (this.canvas2d) this.canvas2d.setFsmModeData(data.nodes, data.strips, 'local_mode', this.viewer3d ? this.viewer3d.amplitude : 15.0);
-        this.update3dOverlayInfo('local_mode');
+        try {
+          if (this.viewer3d) {
+            this.viewer3d.setData(data.nodes, data.strips, 'local_mode');
+          }
+        } catch (v3dErr) {
+          console.error('3D Viewer update error:', v3dErr);
+        }
 
-        // Update FSM Key Indicator Labels
-        const modes = data.critical_modes;
-        const isBending = modes.load_type && modes.load_type.startsWith('bending');
-        if (isBending) {
-          document.getElementById('valPcrl').innerText = `${modes.m_crl} kN·m (${modes.l_local} mm)`;
-          document.getElementById('valPcrd').innerText = `${modes.m_crd} kN·m (${modes.l_distortional} mm)`;
-          document.getElementById('valPcre').innerText = `${modes.m_cre} kN·m (${modes.l_global} mm)`;
-        } else {
-          document.getElementById('valPcrl').innerText = `${modes.p_crl} kN (${modes.l_local} mm)`;
-          document.getElementById('valPcrd').innerText = `${modes.p_crd} kN (${modes.l_distortional} mm)`;
-          document.getElementById('valPcre').innerText = `${modes.p_cre} kN (${modes.l_global} mm)`;
+        // 3. Update 2D Mode Shape
+        try {
+          if (this.canvas2d) {
+            this.canvas2d.setFsmModeData(data.nodes, data.strips, 'local_mode', this.viewer3d ? this.viewer3d.amplitude : 15.0);
+          }
+        } catch (c2dErr) {
+          console.error('2D Canvas Mode Shape update error:', c2dErr);
+        }
+
+        // 4. Update 3D Overlay Info
+        try {
+          this.update3dOverlayInfo('local_mode');
+        } catch (ovErr) {
+          console.error('Overlay Info update error:', ovErr);
+        }
+
+        // 5. Update FSM Key Indicator Labels
+        try {
+          const modes = data.critical_modes;
+          if (modes) {
+            const isBending = modes.load_type && modes.load_type.startsWith('bending');
+            const elPcrl = document.getElementById('valPcrl');
+            const elPcrd = document.getElementById('valPcrd');
+            const elPcre = document.getElementById('valPcre');
+
+            if (isBending) {
+              if (elPcrl) elPcrl.innerText = `${modes.m_crl} kN·m (${modes.l_local} mm)`;
+              if (elPcrd) elPcrd.innerText = `${modes.m_crd} kN·m (${modes.l_distortional} mm)`;
+              if (elPcre) elPcre.innerText = `${modes.m_cre} kN·m (${modes.l_global} mm)`;
+            } else {
+              if (elPcrl) elPcrl.innerText = `${modes.p_crl} kN (${modes.l_local} mm)`;
+              if (elPcrd) elPcrd.innerText = `${modes.p_crd} kN (${modes.l_distortional} mm)`;
+              if (elPcre) elPcre.innerText = `${modes.p_cre} kN (${modes.l_global} mm)`;
+            }
+          }
+        } catch (lblErr) {
+          console.error('Label update error:', lblErr);
         }
 
         const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
@@ -792,7 +834,7 @@ class CFDesignerApp {
       } catch (err) {
         if (err.name === 'AbortError') return;
         console.error('FSM solve error:', err);
-        this.showStatus('FSM 탄성 버클링 해석 실패', 'warning', 3000);
+        this.showStatus('FSM 탄성 버클링 해석 통신 실패', 'warning', 3000);
       }
     }, 50);
   }
@@ -917,108 +959,6 @@ class CFDesignerApp {
     // 4. P-M Interaction
     const inter = data.interaction;
     updateGauge('inter', inter.ratio, inter.status, `P-M 조합비 (${inter.formula_type})`);
-  }
-
-  async openReportModal() {
-    this.reportMode = this.reportMode || 'detailed';
-    const btnModeSummary = document.getElementById('btnReportModeSummary');
-    const btnModeDetailed = document.getElementById('btnReportModeDetailed');
-    if (btnModeSummary && btnModeDetailed) {
-      btnModeSummary.classList.toggle('active', this.reportMode === 'summary');
-      btnModeDetailed.classList.toggle('active', this.reportMode === 'detailed');
-    }
-    document.getElementById('reportModal').classList.add('active');
-    await this.refreshReport();
-  }
-
-  async refreshReport() {
-    if (!this.currentGeometry || !this.currentProperties) return;
-
-    const shape = document.getElementById('wizardShape') ? document.getElementById('wizardShape').value : 'C';
-    const pu = parseFloat(document.getElementById('loadPu') ? document.getElementById('loadPu').value : 50) || 50;
-    const mux = parseFloat(document.getElementById('loadMux') ? document.getElementById('loadMux').value : 5.0) || 5.0;
-    const vu = parseFloat(document.getElementById('loadVu') ? document.getElementById('loadVu').value : 15.0) || 15.0;
-
-    const defaultSecName = `CFS-${shape.toUpperCase()}-${document.getElementById('wizH') ? document.getElementById('wizH').value : 150}x${document.getElementById('wizB') ? document.getElementById('wizB').value : 50}x${document.getElementById('wizT') ? document.getElementById('wizT').value : 2.0}`;
-    
-    const meta = {
-      project_name: document.getElementById('rptProjectName') ? document.getElementById('rptProjectName').value : "CFDesigner Project",
-      section_name: document.getElementById('rptSectionName') ? (document.getElementById('rptSectionName').value || defaultSecName) : defaultSecName,
-      doc_number: document.getElementById('rptDocNumber') ? document.getElementById('rptDocNumber').value : "CALC-CFS-001",
-      company: document.getElementById('rptCompany') ? document.getElementById('rptCompany').value : "Structural Engineering Corp.",
-      designed_by: document.getElementById('rptDesignedBy') ? document.getElementById('rptDesignedBy').value : "설계자",
-      checked_by: document.getElementById('rptCheckedBy') ? document.getElementById('rptCheckedBy').value : "검토자",
-      approved_by: document.getElementById('rptApprovedBy') ? document.getElementById('rptApprovedBy').value : "책임기술사",
-      remarks: document.getElementById('rptRemarks') ? document.getElementById('rptRemarks').value : "KDS 14 31 10 직접강도법",
-      file_name: `${shape.toUpperCase()}_Section.cfs`
-    };
-
-    const options = {
-      report_mode: this.reportMode || 'detailed',
-      include_section_inputs: document.getElementById('chkRptInputs') ? document.getElementById('chkRptInputs').checked : true,
-      include_gross_properties: document.getElementById('chkRptGross') ? document.getElementById('chkRptGross').checked : true,
-      include_torsion_properties: document.getElementById('chkRptTorsion') ? document.getElementById('chkRptTorsion').checked : true,
-      include_effective_properties: document.getElementById('chkRptEffective') ? document.getElementById('chkRptEffective').checked : true,
-      include_fully_braced_strength: document.getElementById('chkRptStrength') ? document.getElementById('chkRptStrength').checked : true,
-      include_fsm_buckling: document.getElementById('chkRptFSM') ? document.getElementById('chkRptFSM').checked : true,
-      include_member_design: document.getElementById('chkRptMember') ? document.getElementById('chkRptMember').checked : true,
-      include_web_crippling: document.getElementById('chkRptCrippling') ? document.getElementById('chkRptCrippling').checked : true,
-    };
-
-    // Material info
-    const mat = {
-      name: document.getElementById('matName') ? document.getElementById('matName').value : "SS275 / ASTM A1008",
-      fy: parseFloat(document.getElementById('matFy') ? document.getElementById('matFy').value : 275.0) || 275.0,
-      fu: parseFloat(document.getElementById('matFu') ? document.getElementById('matFu').value : 410.0) || 410.0,
-      e: parseFloat(document.getElementById('matE') ? document.getElementById('matE').value : 205000.0) || 205000.0,
-      cold_work: document.getElementById('chkColdWork') ? document.getElementById('chkColdWork').checked : false,
-      inelastic_reserve: document.getElementById('chkInelasticReserve') ? document.getElementById('chkInelasticReserve').checked : false
-    };
-
-    const payload = {
-      section_name: meta.section_name,
-      project_name: meta.project_name,
-      metadata: meta,
-      options: options,
-      geometry: this.currentGeometry,
-      properties: this.currentProperties,
-      material: mat,
-      fsm: this.currentFsmResult ? {
-        ...(this.currentFsmResult.critical_modes || {}),
-        signature_curve: this.currentFsmResult.signature_curve || [],
-        l_local: this.currentFsmResult.critical_modes?.l_local || 60.0,
-        p_crl: this.currentFsmResult.critical_modes?.p_crl || 45.0,
-        p_crl_ratio: this.currentFsmResult.critical_modes?.p_crl_ratio || 0.85,
-        l_distortional: this.currentFsmResult.critical_modes?.l_distortional || 350.0,
-        p_crd: this.currentFsmResult.critical_modes?.p_crd || 38.0,
-        p_crd_ratio: this.currentFsmResult.critical_modes?.p_crd_ratio || 0.72,
-        l_global: this.currentFsmResult.critical_modes?.l_global || 1500.0,
-        p_cre: this.currentFsmResult.critical_modes?.p_cre || 25.0,
-        p_cre_ratio: this.currentFsmResult.critical_modes?.p_cre_ratio || 0.47,
-      } : {},
-      design: this.currentDesignResult || {},
-      loads: { pu, mux, vu }
-    };
-
-    try {
-      const res = await fetch('/api/report/html', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-
-      const iframe = document.getElementById('reportIframe');
-      if (iframe) {
-        iframe.srcdoc = data.html;
-      }
-    } catch (err) {
-      console.error('Report generation error:', err);
-    }
-  }
-
-  closeReportModal() {
-    document.getElementById('reportModal').classList.remove('active');
   }
 
   // ================= Phase 1: Element Spreadsheet Editor =================
@@ -1855,6 +1795,7 @@ class CFDesignerApp {
     const lMax = parseFloat(document.getElementById('fsmLmax').value) || 10000.0;
     const steps = parseInt(document.getElementById('fsmSteps').value) || 60;
     const stressType = document.getElementById('fsmStressType').value || 'compression';
+    this.currentFsmStressType = stressType;
     const fy = parseFloat(document.getElementById('yieldStress').value) || 345.0;
     const lGlobal = parseFloat(document.getElementById('memberLength').value) || 3000.0;
 
@@ -1882,26 +1823,73 @@ class CFDesignerApp {
 
       const data = await res.json();
       this.lastFsmResult = data;
-      this.currentFsmResult = {
-        signature_curve: data.curve.points,
-        critical_modes: data.modes,
-        nodes: this.currentFsmResult ? this.currentFsmResult.nodes : [],
-        strips: this.currentFsmResult ? this.currentFsmResult.strips : []
-      };
-      this.fsmChart.updateData(data.curve.points, data.modes.load_type);
+      const pts = data.signature_curve || (data.curve && data.curve.points) || [];
+      const modes = data.critical_modes || data.modes || {};
 
-      const modes = data.modes;
-      const isBending = modes.load_type && modes.load_type.startsWith('bending');
-      if (isBending) {
-        document.getElementById('valPcrl').innerText = `${modes.m_crl} kN·m (${modes.l_local} mm)`;
-        document.getElementById('valPcrd').innerText = `${modes.m_crd} kN·m (${modes.l_distortional} mm)`;
-        document.getElementById('valPcre').innerText = `${modes.m_cre} kN·m (${modes.l_global} mm)`;
-      } else {
-        document.getElementById('valPcrl').innerText = `${modes.p_crl} kN (${modes.l_local} mm)`;
-        document.getElementById('valPcrd').innerText = `${modes.p_crd} kN (${modes.l_distortional} mm)`;
-        document.getElementById('valPcre').innerText = `${modes.p_cre} kN (${modes.l_global} mm)`;
+      this.lastFsmNodes = data.nodes || [];
+      this.lastFsmStrips = data.strips || [];
+
+      this.currentFsmResult = {
+        signature_curve: pts,
+        critical_modes: modes,
+        nodes: this.lastFsmNodes,
+        strips: this.lastFsmStrips
+      };
+
+      // 1. Update FSM Signature Chart with multi-mode curves
+      try {
+        if (this.fsmChart) {
+          this.fsmChart.updateData(pts, modes.load_type);
+        }
+      } catch (cErr) {
+        console.error('Chart update error:', cErr);
       }
 
+      // 2. Update 3D Viewer with new mode shapes & stress profile
+      const activeModeKey = this.currentFsmModeKey || 'local_mode';
+      const activeModeIdx = this.currentFsmModeIndex || 1;
+      try {
+        if (this.viewer3d) {
+          this.viewer3d.setData(this.lastFsmNodes, this.lastFsmStrips, activeModeKey);
+        }
+      } catch (vErr) {
+        console.error('3D Viewer update error:', vErr);
+      }
+
+      // 3. Update 2D Canvas Mode Shape
+      try {
+        if (this.canvas2d) {
+          this.canvas2d.fsmModeIndex = activeModeIdx;
+          this.canvas2d.setFsmModeData(this.lastFsmNodes, this.lastFsmStrips, activeModeKey, this.viewer3d ? this.viewer3d.amplitude : 15.0);
+        }
+      } catch (c2dErr) {
+        console.error('2D Canvas update error:', c2dErr);
+      }
+
+      // 4. Update 3D Overlay Info
+      try {
+        this.update3dOverlayInfo(activeModeKey, activeModeIdx);
+      } catch (ovErr) {
+        console.error('Overlay Info update error:', ovErr);
+      }
+
+      // 5. Update FSM Key Indicator Labels
+      const isBending = modes.load_type && modes.load_type.startsWith('bending');
+      const elPcrl = document.getElementById('valPcrl');
+      const elPcrd = document.getElementById('valPcrd');
+      const elPcre = document.getElementById('valPcre');
+
+      if (isBending) {
+        if (elPcrl) elPcrl.innerText = `${modes.m_crl} kN·m (${modes.l_local} mm)`;
+        if (elPcrd) elPcrd.innerText = `${modes.m_crd} kN·m (${modes.l_distortional} mm)`;
+        if (elPcre) elPcre.innerText = `${modes.m_cre} kN·m (${modes.l_global} mm)`;
+      } else {
+        if (elPcrl) elPcrl.innerText = `${modes.p_crl} kN (${modes.l_local} mm)`;
+        if (elPcrd) elPcrd.innerText = `${modes.p_crd} kN (${modes.l_distortional} mm)`;
+        if (elPcre) elPcre.innerText = `${modes.p_cre} kN (${modes.l_global} mm)`;
+      }
+
+      this.showStatus('✅ 커스텀 FSM 해석 완료', 'success', 3000);
       this.closeFsmParamsModal();
     } catch (err) {
       console.error('FSM custom sweep error:', err);
@@ -2393,10 +2381,124 @@ class CFDesignerApp {
 
     alert(`✅ 구조해석 최대 부재력이 부재설계(Member Check) 및 웨브크리플링으로 연동되었습니다!\n• Mux = ${mux} kN·m\n• Vu = ${vu} kN (소요반력 Ru = ${vu} kN)\n• Pu = ${pu} kN`);
   }
+
+  // =========================================================
+  // Phase 7 & 11: Calculation Report & Trace Viewer Methods
+  // =========================================================
+  openReportModal() {
+    const modal = document.getElementById('reportModal');
+    if (modal) {
+      modal.classList.add('active');
+      this.refreshReport();
+    }
+  }
+
+  closeReportModal() {
+    const modal = document.getElementById('reportModal');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+  }
+
+  toggleAllTraceDetails() {
+    const iframe = document.getElementById('reportViewerFrame');
+    if (!iframe || !iframe.contentDocument) return;
+
+    const doc = iframe.contentDocument;
+    const accordions = doc.querySelectorAll('details.trace-accordion');
+    if (!accordions || accordions.length === 0) return;
+
+    // If at least one is closed, open all. Otherwise, close all.
+    const anyClosed = Array.from(accordions).some(acc => !acc.open);
+    accordions.forEach(acc => {
+      acc.open = anyClosed;
+    });
+
+    const btn = document.getElementById('btnToggleAllTrace');
+    if (btn) {
+      btn.textContent = anyClosed ? '📁 수식 전체 접기' : '📂 수식 전체 펼치기';
+    }
+  }
+
+  async refreshReport() {
+    const iframe = document.getElementById('reportViewerFrame');
+    if (!iframe) return;
+
+    this.showStatus('📑 구조계산서 및 수식 전개(Trace) 생성 중...', 'busy');
+
+    const mode = this.reportMode || 'detailed';
+    const opts = {
+      report_mode: mode,
+      include_section_inputs: document.getElementById('chkReportSectionInputs')?.checked ?? true,
+      include_gross_properties: document.getElementById('chkReportGrossProps')?.checked ?? true,
+      include_torsion_properties: document.getElementById('chkReportTorsionProps')?.checked ?? true,
+      include_effective_properties: document.getElementById('chkReportEffectiveProps')?.checked ?? true,
+      include_fully_braced_strength: document.getElementById('chkReportFullyBraced')?.checked ?? true,
+      include_fsm_buckling: document.getElementById('chkReportFsmBuckling')?.checked ?? true,
+      include_member_design: document.getElementById('chkReportMemberDesign')?.checked ?? true,
+      include_web_crippling: document.getElementById('chkReportWebCrippling')?.checked ?? true,
+      include_1d_analysis: document.getElementById('chkReport1dAnalysis')?.checked ?? false,
+      include_trace_details: document.getElementById('chkReportTraceDetails')?.checked ?? true,
+      unit_system: 'SI'
+    };
+
+    const payload = {
+      section_name: this.currentSectionName || 'CFS Custom Section',
+      project_name: 'Cold-Formed Steel Structure Design Project',
+      metadata: {
+        project_name: 'CFDesigner Engineering Project',
+        section_name: this.currentSectionName || 'CFS-C150',
+        doc_number: 'CALC-CFS-001',
+        company: 'Structural Engineering & Design Corp.',
+        designed_by: 'Structural Engineer',
+        checked_by: 'Senior PE',
+        approved_by: 'Lead SE',
+        remarks: 'Cold-Formed Steel Design per KDS 14 31 10:2017 & AISI S100-16 DSM'
+      },
+      options: opts,
+      geometry: this.currentGeometry || { elements: [] },
+      properties: this.currentProperties || {},
+      material: this.currentMaterial || { fy: 275.0, fu: 410.0, e: 205000.0, name: 'SS275' },
+      fsm: this.currentFsmResult || this.lastFsmResult || {},
+      design: this.currentDesignResult || this.lastDesignResult || {},
+      loads: {
+        pu: parseFloat(document.getElementById('loadPu')?.value) || 0,
+        mux: parseFloat(document.getElementById('loadMux')?.value) || 0,
+        muy: parseFloat(document.getElementById('loadMuy')?.value) || 0,
+        vu: parseFloat(document.getElementById('loadVu')?.value) || 0,
+        ru: parseFloat(document.getElementById('cripRuInput')?.value) || 0
+      },
+      analysis_1d: this.lastFrameResult || {}
+    };
+
+    try {
+      const res = await fetch('/api/report/html', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        throw new Error(`Report API Error: ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      const html = data.html || '';
+
+      // Load into iframe
+      iframe.srcdoc = html;
+      this.showStatus('✅ 구조계산서 렌더링 완료', 'ready', 2000);
+
+    } catch (err) {
+      console.error('Report Generation Error:', err);
+      this.showStatus('❌ 구조계산서 생성 오류', 'warning', 3000);
+    }
+  }
 }
 
 // Instantiate on DOM Load
 window.addEventListener('DOMContentLoaded', () => {
   window.app = new CFDesignerApp();
 });
+
 

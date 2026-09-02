@@ -219,3 +219,29 @@ def test_api_report_endpoints(client, sample_report_payload):
     res_det = client.post("/api/report/detailed", json=sample_report_payload)
     assert res_det.status_code == 200
     assert "제1장. 설계 개요" in res_det.json()["html"]
+
+
+def test_trace_rendering_in_detailed_report(sample_report_payload):
+    """Verify KaTeX math blocks and Trace accordions in detailed report."""
+    sample_report_payload["options"]["include_trace_details"] = True
+    html = DetailedReportGenerator.render(sample_report_payload)
+    
+    # Check KaTeX headers and script
+    assert "katex.min.css" in html
+    assert "katex.min.js" in html
+    assert "renderMathInElement" in html
+
+    # Check Trace Accordions
+    assert "trace-accordion" in html
+    assert "trace-item-box" in html
+    assert "KDS 14 31 10" in html
+    assert "AISI S100-16" in html
+
+    # Check Formula & Substitution LaTeX
+    assert "T_n = A_g" in html or "P_n =" in html
+    assert "trace-subst-latex" in html
+    assert "trace-formula-latex" in html
+
+    # Check D/C & OK badges
+    assert "clause-badge" in html
+

@@ -917,6 +917,7 @@ async def fsm_custom_sweep_api(req: FSMCustomSweepRequest):
     """
     Executes FSM elastic buckling analysis with customized half-wavelength sweep range,
     number of steps, and stress distribution.
+    Also extracts multi-mode curves (Mode 1, Mode 2, Mode 3) and 3D mode shape displacements.
     """
     geom = elements_from_dto(req.elements, req.thickness)
     gross_props = SectionPropertiesCalculator.calculate(geom)
@@ -938,35 +939,137 @@ async def fsm_custom_sweep_api(req: FSMCustomSweepRequest):
         member_length=req.member_length
     )
 
+    # Compute 3D Mode Displacement vectors for visualization under custom load_type
+    # 1. Local Mode Shape (Mode 1, Mode 2, Mode 3 at local wavelength)
+    l_loc = fsm_res.l_local if fsm_res.l_local > 0 else 50.0
+    ke_loc, kg_loc = assembler.assemble_matrices(half_wavelength=l_loc)
+    modes_loc = FSMEigenSolver.solve_eigenvalues(ke_loc, kg_loc, num_modes=3)
+    mode_loc_1 = modes_loc[0][1] if len(modes_loc) > 0 else None
+    mode_loc_2 = modes_loc[1][1] if len(modes_loc) > 1 else mode_loc_1
+    mode_loc_3 = modes_loc[2][1] if len(modes_loc) > 2 else mode_loc_2
+
+    # 2. Distortional Mode Shape
+    l_dist = fsm_res.l_distortional if fsm_res.l_distortional > 0 else 250.0
+    ke_dist, kg_dist = assembler.assemble_matrices(half_wavelength=l_dist)
+    modes_dist = FSMEigenSolver.solve_eigenvalues(ke_dist, kg_dist, num_modes=3)
+    mode_dist_1 = modes_dist[0][1] if len(modes_dist) > 0 else None
+    mode_dist_2 = modes_dist[1][1] if len(modes_dist) > 1 else mode_dist_1
+    mode_dist_3 = modes_dist[2][1] if len(modes_dist) > 2 else mode_dist_2
+
+    # 3. Global Mode Shape
+    l_glob = req.member_length if req.member_length > 0 else 3000.0
+    ke_glob, kg_glob = assembler.assemble_matrices(half_wavelength=l_glob)
+    modes_glob = FSMEigenSolver.solve_eigenvalues(ke_glob, kg_glob, num_modes=3)
+    mode_glob_1 = modes_glob[0][1] if len(modes_glob) > 0 else None
+    mode_glob_2 = modes_glob[1][1] if len(modes_glob) > 1 else mode_glob_1
+    mode_glob_3 = modes_glob[2][1] if len(modes_glob) > 2 else mode_glob_2
+
+    # Convert mode shapes to serializable node displacement arrays
+    nodes_data = []
+    for node_idx, n in enumerate(assembler.nodes):
+        dof_start = node_idx * 4
+        loc_disp_1 = mode_loc_1[dof_start:dof_start+4].tolist() if mode_loc_1 is not None else [0,0,0,0]
+        loc_disp_2 = mode_loc_2[dof_start:dof_start+4].tolist() if mode_loc_2 is not None else loc_disp_1
+        loc_disp_3 = mode_loc_3[dof_start:dof_start+4].tolist() if mode_loc_3 is not None else loc_disp_2
+
+        dist_disp_1 = mode_dist_1[dof_start:dof_start+4].tolist() if mode_dist_1 is not None else [0,0,0,0]
+        dist_disp_2 = mode_dist_2[dof_start:dof_start+4].tolist() if mode_dist_2 is not None else dist_disp_1
+        dist_disp_3 = mode_dist_3[dof_start:dof_start+4].tolist() if mode_dist_3 is not None else dist_disp_2
+
+        glob_disp_1 = mode_glob_1[dof_start:dof_start+4].tolist() if mode_glob_1 is not None else [0,0,0,0]
+        glob_disp_2 = mode_glob_2[dof_start:dof_start+4].tolist() if mode_glob_2 is not None else glob_disp_1
+        glob_disp_3 = mode_glob_3[dof_start:dof_start+4].tolist() if mode_glob_3 is not None else glob_disp_2
+
+        nodes_data.append({
+            "node_idx": node_idx,
+            "x": round(n.x, 4),
+            "y": round(n.y, 4),
+            "local_mode": [round(val, 5) for val in loc_disp_1],
+            "local_mode_2": [round(val, 5) for val in loc_disp_2],
+            "local_mode_3": [round(val, 5) for val in loc_disp_3],
+            "dist_mode": [round(val, 5) for val in dist_disp_1],
+            "dist_mode_2": [round(val, 5) for val in dist_disp_2],
+            "dist_mode_3": [round(val, 5) for val in dist_disp_3],
+            "glob_mode": [round(val, 5) for val in glob_disp_1],
+            "glob_mode_2": [round(val, 5) for val in glob_disp_2],
+            "glob_mode_3": [round(val, 5) for val in glob_disp_3],
+        })
+
+    # Prepare signature curve chart data (with multi-mode series)
+    chart_points = []
+    mode_1_curve = []
+    mode_2_curve = []
+    mode_3_curve = []
+
+    for pt in fsm_res.points:
+        p_cr_kn = round(pt.critical_load / 1000.0, 2)
+        m_cr_knm = round(pt.critical_moment / 1e6, 3)
+        m_pcrs = [round(p / 1000.0, 2) for p in pt.mode_critical_loads]
+        m_mcrs = [round(m / 1e6, 3) for m in pt.mode_critical_moments]
+        m_lfs = [round(lf, 4) for lf in pt.mode_load_factors]
+
+        chart_points.append({
+            "length": round(pt.length, 2),
+            "load_factor": round(pt.load_factor, 4),
+            "p_cr": p_cr_kn,
+            "m_cr": m_cr_knm,
+            "critical_load": round(pt.critical_load, 1),
+            "critical_moment": round(pt.critical_moment, 1),
+            "mode_lfs": m_lfs,
+            "mode_pcrs": m_pcrs,
+            "mode_mcrs": m_mcrs,
+        })
+
+        if pt.mode_load_factors:
+            mode_1_curve.append({"x": round(pt.length, 2), "y": round(pt.mode_load_factors[0], 4)})
+            if len(pt.mode_load_factors) > 1:
+                mode_2_curve.append({"x": round(pt.length, 2), "y": round(pt.mode_load_factors[1], 4)})
+            if len(pt.mode_load_factors) > 2:
+                mode_3_curve.append({"x": round(pt.length, 2), "y": round(pt.mode_load_factors[2], 4)})
+
+    strips_data = [
+        {
+            "elem_id": s.elem_id,
+            "node_i": s.node_i,
+            "node_j": s.node_j,
+            "thickness": s.thickness,
+            "width": round(s.width, 3),
+            "alpha": round(s.alpha, 4)
+        } for s in assembler.strips
+    ]
+
+    critical_modes_data = {
+        "load_type": req.load_type,
+        "p_crl": round(fsm_res.p_crl / 1000.0, 2),
+        "l_local": round(fsm_res.l_local, 1),
+        "p_crd": round(fsm_res.p_crd / 1000.0, 2),
+        "l_distortional": round(fsm_res.l_distortional, 1),
+        "p_cre": round(fsm_res.p_cre / 1000.0, 2),
+        "l_global": round(fsm_res.l_global, 1),
+        "m_crl": round(fsm_res.m_crl / 1e6, 3),
+        "m_crd": round(fsm_res.m_crd / 1e6, 3),
+        "m_cre": round(fsm_res.m_cre / 1e6, 3),
+        "lf_local": round(fsm_res.lf_local, 4),
+        "lf_distortional": round(fsm_res.lf_distortional, 4),
+        "lf_global": round(fsm_res.lf_global, 4),
+    }
+
     return {
+        "signature_curve": chart_points,
         "curve": {
             "lengths": fsm_res.lengths,
             "load_factors": fsm_res.load_factors,
-            "points": [
-                {
-                    "length": round(pt.length, 2),
-                    "load_factor": round(pt.load_factor, 4),
-                    "critical_load": round(pt.critical_load, 1),
-                    "critical_moment": round(pt.critical_moment, 1)
-                }
-                for pt in fsm_res.points
-            ]
+            "points": chart_points
         },
-        "modes": {
-            "load_type": req.load_type,
-            "p_crl": round(fsm_res.p_crl / 1000.0, 2),
-            "l_local": round(fsm_res.l_local, 1),
-            "p_crd": round(fsm_res.p_crd / 1000.0, 2),
-            "l_distortional": round(fsm_res.l_distortional, 1),
-            "p_cre": round(fsm_res.p_cre / 1000.0, 2),
-            "l_global": round(fsm_res.l_global, 1),
-            "m_crl": round(fsm_res.m_crl / 1e6, 3),
-            "m_crd": round(fsm_res.m_crd / 1e6, 3),
-            "m_cre": round(fsm_res.m_cre / 1e6, 3),
-            "lf_local": round(fsm_res.lf_local, 4),
-            "lf_distortional": round(fsm_res.lf_distortional, 4),
-            "lf_global": round(fsm_res.lf_global, 4),
-        }
+        "curves": {
+            "mode_1": mode_1_curve,
+            "mode_2": mode_2_curve,
+            "mode_3": mode_3_curve,
+        },
+        "modes": critical_modes_data,
+        "critical_modes": critical_modes_data,
+        "nodes": nodes_data,
+        "strips": strips_data,
     }
 
 

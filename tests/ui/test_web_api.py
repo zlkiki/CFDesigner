@@ -57,6 +57,44 @@ def test_fsm_solve_api():
     assert data["critical_modes"]["p_crl"] > 0
 
 
+def test_fsm_parameters_custom_sweep_api():
+    wiz_res = client.post("/api/section/wizard", json={"shape_type": "C", "h": 150, "b": 65, "c": 20, "t": 2.0, "r": 2.0})
+    geom = wiz_res.json()["geometry"]
+
+    fsm_custom_payload = {
+        "elements": geom["elements"],
+        "thickness": geom["thickness"],
+        "l_min": 10.0,
+        "l_max": 5000.0,
+        "steps": 20,
+        "load_type": "bending_x",
+        "yield_stress": 345.0,
+        "elastic_modulus": 205000.0,
+        "poisson_ratio": 0.3,
+        "member_length": 3000.0
+    }
+    res = client.post("/api/fsm/parameters", json=fsm_custom_payload)
+    assert res.status_code == 200
+    data = res.json()
+
+    assert "signature_curve" in data
+    assert "curves" in data
+    assert "mode_1" in data["curves"]
+    assert "mode_2" in data["curves"]
+    assert "mode_3" in data["curves"]
+    assert "nodes" in data
+    assert "strips" in data
+    assert len(data["nodes"]) > 0
+    assert len(data["strips"]) > 0
+
+    # Verify each point has multi-mode values for Chart.js
+    first_pt = data["signature_curve"][0]
+    assert "mode_pcrs" in first_pt
+    assert "mode_mcrs" in first_pt
+    assert "mode_lfs" in first_pt
+    assert len(first_pt["mode_pcrs"]) >= 1
+
+
 def test_design_check_api():
     wiz_res = client.post("/api/section/wizard", json={"shape_type": "C", "h": 150, "b": 65, "c": 20, "t": 2.0, "r": 2.0})
     geom = wiz_res.json()["geometry"]
