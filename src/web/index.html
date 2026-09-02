@@ -42,6 +42,9 @@
     </div>
 
     <div class="header-actions">
+      <button class="btn btn-primary" id="btnOpenQuickStart" title="목적별 빠른 시작 허브 열기" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); font-weight: 700;">
+        🚀 퀵 스타트
+      </button>
       <button class="btn btn-outline" id="btnThemeToggle" title="테마 전환">🌓 테마</button>
       <button class="btn btn-outline" id="btnOpenFrameAnalysis" title="1D 보/연속보 FEM 구조해석 및 SFD/BMD/처짐 다이어그램">
         🏗️ 1D 구조해석
@@ -64,8 +67,71 @@
     </div>
   </header>
 
+  <!-- ================= Guided Engineering Workflow Stepper ================= -->
+  <nav class="workflow-stepper-bar" id="workflowStepperBar" aria-label="엔지니어링 워크플로우 5단계">
+    <div class="stepper-track" id="workflowStepper">
+      <div class="stepper-item active" data-step="1" id="stepItem1" title="단면 형상 생성, 요소 편집, DXF 불러오기 (Alt+1)">
+        <div class="step-num">1</div>
+        <div class="step-label-group">
+          <span class="step-title">단면 모델링</span>
+          <span class="step-sub">Modeling</span>
+        </div>
+        <span class="step-badge badge-ready" id="stepBadge1">준비완료</span>
+      </div>
+
+      <div class="stepper-divider"></div>
+
+      <div class="stepper-item" data-step="2" id="stepItem2" title="Gross/Net 성질 및 Winter 유효단면 해석 (Alt+2)">
+        <div class="step-num">2</div>
+        <div class="step-label-group">
+          <span class="step-title">단면 성질</span>
+          <span class="step-sub">Properties</span>
+        </div>
+        <span class="step-badge badge-ready" id="stepBadge2">해석완료</span>
+      </div>
+
+      <div class="stepper-divider"></div>
+
+      <div class="stepper-item" data-step="3" id="stepItem3" title="FSM 시그니처 커브 및 3D 좌굴 파형 분석 (Alt+3)">
+        <div class="step-num">3</div>
+        <div class="step-label-group">
+          <span class="step-title">FSM 좌굴해석</span>
+          <span class="step-sub">Buckling</span>
+        </div>
+        <span class="step-badge badge-ready" id="stepBadge3">준비완료</span>
+      </div>
+
+      <div class="stepper-divider"></div>
+
+      <div class="stepper-item" data-step="4" id="stepItem4" title="KDS 14 31 10 직접강도법 부재설계 및 P-M 검토 (Alt+4)">
+        <div class="step-num">4</div>
+        <div class="step-label-group">
+          <span class="step-title">KDS 부재설계</span>
+          <span class="step-sub">Member Design</span>
+        </div>
+        <span class="step-badge badge-ready" id="stepBadge4">검토합격</span>
+      </div>
+
+      <div class="stepper-divider"></div>
+
+      <div class="stepper-item" data-step="5" id="stepItem5" title="정식 A4 구조계산서 출력 및 성과물 패키지 (Alt+5)">
+        <div class="step-num">5</div>
+        <div class="step-label-group">
+          <span class="step-title">구조계산서 출력</span>
+          <span class="step-sub">Report & Export</span>
+        </div>
+        <span class="step-badge badge-ready" id="stepBadge5">준비완료</span>
+      </div>
+    </div>
+
+    <div class="stepper-controls">
+      <button class="btn btn-sm btn-outline" id="btnPrevStep" title="이전 단계 (Alt+←)">← 이전</button>
+      <button class="btn btn-sm btn-primary" id="btnNextStep" title="다음 단계 (Alt+→)">다음 단계 (Next Step) →</button>
+    </div>
+  </nav>
+
   <!-- ================= Main 3-Column Layout Container ================= -->
-  <div class="app-container">
+  <div class="app-container" id="mainAppContainer" data-step="1">
     
     <!-- ================= Left Control Sidebar ================= -->
     <aside class="left-sidebar">
@@ -471,6 +537,92 @@
     </aside>
   </div>
 
+  <!-- ================= Contextual Smart Action Assistant Bar ================= -->
+  <aside class="smart-action-bar" id="smartActionBar" aria-label="컨텍스트 스마트 어시스턴트">
+    <div class="sab-left">
+      <span class="sab-icon" id="sabIcon">💡</span>
+      <div class="sab-msg-group">
+        <span class="sab-tag" id="sabTag">WORKFLOW GUIDE</span>
+        <span class="sab-text" id="sabText">단면 모델링이 준비되었습니다. 단면성질을 검토하세요.</span>
+      </div>
+    </div>
+    <div class="sab-actions" id="sabActions">
+      <button class="btn btn-sm btn-primary" id="btnSabPrimaryAction">⚡ 원클릭 일괄 해석 실행</button>
+      <button class="btn btn-sm btn-outline" id="btnSabSecondaryAction" style="display: none;">다음 단계 →</button>
+    </div>
+  </aside>
+
+  <!-- ================= Quick Start Launcher Modal ================= -->
+  <div class="modal-backdrop" id="quickStartModal">
+    <div class="modal-dialog modal-dialog-lg" style="max-width: 880px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);">
+        <div>
+          <strong style="font-size: 16px; color: var(--text-primary);">🚀 무엇을 설계하시겠습니까? (Quick Start Launcher)</strong>
+          <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px;">
+            엔지니어링 목표에 부합하는 작업 모드를 선택하시면 최적화된 파이프라인으로 즉시 안내합니다.
+          </div>
+        </div>
+        <button class="btn btn-outline" id="btnCloseQuickStart" style="padding: 4px 10px;">✕ 닫기</button>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <div class="quick-start-grid">
+          <!-- Card 1: Standard Section -->
+          <div class="quick-start-card" id="qsCardStandard">
+            <div class="qs-card-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">🎯</div>
+            <div class="qs-card-content">
+              <h4 class="qs-card-title">1. 표준 단면 설계 (Standard Section)</h4>
+              <p class="qs-card-desc">C형강, Z형강, Hat, ㄷ형강, 각형강관 등 6대 표준 단면을 파라메트릭하게 생성하고 단면성질과 강도를 검토합니다.</p>
+              <div class="qs-card-action">
+                <button class="btn btn-primary btn-sm" id="btnQsStartStandard">표준 단면 시작 (Step 1) →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: DXF Import -->
+          <div class="quick-start-card" id="qsCardDxf">
+            <div class="qs-card-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">📐</div>
+            <div class="qs-card-content">
+              <h4 class="qs-card-title">2. 비정형 CAD 단면 해석 (DXF Import)</h4>
+              <p class="qs-card-desc">AutoCAD 2D Polyline DXF 도면을 불러와 비정형 형상을 자동 메싱하고 FSM 탄성 좌굴해석을 수행합니다.</p>
+              <div class="qs-card-action">
+                <button class="btn btn-outline btn-sm" id="btnQsStartDxf">📁 DXF 파일 열기 →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Quick Design -->
+          <div class="quick-start-card" id="qsCardQuickDesign">
+            <div class="qs-card-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">⚡</div>
+            <div class="qs-card-content">
+              <h4 class="qs-card-title">3. 목표 하중 역설계 (Quick Design)</h4>
+              <p class="qs-card-desc">설계 축력, 휨모멘트, 경간 및 처짐 한계를 입력하여 이를 만족하는 최경량 단면을 3열 대화창에서 자동 탐색합니다.</p>
+              <div class="qs-card-action">
+                <button class="btn btn-primary btn-sm" id="btnQsStartQuickDesign" style="background: #f59e0b; border-color: #f59e0b; color: #000; font-weight: 700;">⚡ 3열 퀵디자인 열기 →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: 1D Frame Analysis -->
+          <div class="quick-start-card" id="qsCardFrame">
+            <div class="qs-card-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">🌉</div>
+            <div class="qs-card-content">
+              <h4 class="qs-card-title">4. 1D 보/연속보 구조해석 (1D Frame)</h4>
+              <p class="qs-card-desc">단순보, 2~3경간 연속보, 캔틸레버의 지점 및 등분포/집중하중을 정의하고 SFD/BMD/처짐을 일괄 산출합니다.</p>
+              <div class="qs-card-action">
+                <button class="btn btn-outline btn-sm" id="btnQsStartFrame">🏗️ 1D 구조해석 열기 →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; background: var(--bg-tertiary); border-top: 1px solid var(--border-color);">
+        <label style="font-size: 11.5px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="checkbox" id="chkDontShowQuickStartAgain"> 앱 시작 시 이 창을 자동으로 표시하지 않음
+        </label>
+        <button class="btn btn-outline" id="btnCloseQuickStartBottom">닫기</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ================= Phase 1: Element Table Editor Modal ================= -->
   <div class="modal-backdrop" id="elementEditorModal">
@@ -1203,6 +1355,15 @@
         <div class="report-toolbar-group">
           <button class="btn btn-outline" id="btnToggleAllTrace" style="padding: 4px 10px; font-size: 11.5px;" title="모든 수식 상세 펼치기/접기">
             📂 수식 전체 펼치기
+          </button>
+          <button class="btn btn-outline" id="btnExportDxfFromReport" style="padding: 4px 10px; font-size: 11.5px;" title="현재 해석 단면 2D DXF 도면 파일 다운로드">
+            📐 CAD DXF
+          </button>
+          <button class="btn btn-outline" id="btnExportCsvFromReport" style="padding: 4px 10px; font-size: 11.5px;" title="단면성질 및 FSM 곡선 수치 데이터 CSV 다운로드">
+            📊 CSV 내보내기
+          </button>
+          <button class="btn btn-outline" id="btnCopySummaryTableFromReport" style="padding: 4px 10px; font-size: 11.5px;" title="엑셀 붙여넣기용 단면성질 및 부재설계 결과표 클립보드 복사">
+            📋 요약표 복사
           </button>
           <button class="btn btn-outline" id="btnToggleReportConfig" style="padding: 4px 10px; font-size: 11.5px;" title="인쇄 및 포함 항목 설정">
             ⚙️ 출력 설정

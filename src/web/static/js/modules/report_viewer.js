@@ -110,4 +110,87 @@ export function applyReportViewerMixin(AppClass) {
       this.showStatus('❌ 구조계산서 생성 오류', 'warning', 3000);
     }
   };
+
+  AppClass.prototype.exportSectionDxf = function() {
+    if (!this.currentGeometry || !this.currentGeometry.elements) {
+      alert('내보낼 단면 기하 데이터가 없습니다.');
+      return;
+    }
+
+    let dxf = "0\nSECTION\n2\nENTITIES\n";
+    this.currentGeometry.elements.forEach(el => {
+      const x0 = el.x0 !== undefined ? el.x0 : el[1];
+      const y0 = el.y0 !== undefined ? el.y0 : el[2];
+      const x1 = el.x1 !== undefined ? el.x1 : el[3];
+      const y1 = el.y1 !== undefined ? el.y1 : el[4];
+      dxf += `0\nLINE\n8\nCFS_SECTION\n10\n${x0}\n20\n${y0}\n30\n0.0\n11\n${x1}\n21\n${y1}\n31\n0.0\n`;
+    });
+    dxf += "0\nENDSEC\n0\nEOF\n";
+
+    const blob = new Blob([dxf], { type: 'application/dxf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `CFS_Section_${Date.now()}.dxf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    this.showStatus('✅ CAD DXF 파일 다운로드 완료', 'ready', 2500);
+  };
+
+  AppClass.prototype.exportSectionCsv = function() {
+    let csv = "Category,Property,Value,Unit\n";
+    if (this.currentProperties) {
+      const p = this.currentProperties;
+      csv += `Gross Properties,Area (Ag),${p.area || 0},mm2\n`;
+      csv += `Gross Properties,Weight,${p.weight || 0},kg/m\n`;
+      csv += `Gross Properties,Ix,${p.ix || 0},mm4\n`;
+      csv += `Gross Properties,Iy,${p.iy || 0},mm4\n`;
+      csv += `Gross Properties,rx,${p.rx || 0},mm\n`;
+      csv += `Gross Properties,ry,${p.ry || 0},mm\n`;
+      csv += `Gross Properties,J,${p.j || 0},mm4\n`;
+      csv += `Gross Properties,Cw,${p.cw || 0},mm6\n`;
+    }
+
+    if (this.currentFsmResult && this.currentFsmResult.signature_curve) {
+      csv += "\nFSM Curve,Half-Wavelength L (mm),Buckling Load Ratio (Beta),Critical Load Pcr (kN),Mcr (kNm)\n";
+      this.currentFsmResult.signature_curve.forEach(pt => {
+        csv += `FSM,${pt.length || pt.l},${pt.beta},${pt.p_cr || pt.pcr || ''},${pt.m_cr || pt.mcr || ''}\n`;
+      });
+    }
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `CFS_Analysis_Results_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    this.showStatus('✅ 수치 데이터 CSV 다운로드 완료', 'ready', 2500);
+  };
+
+  AppClass.prototype.copySummaryTable = function() {
+    let text = "=== CFDesigner 단면 및 부재설계 요약표 ===\n";
+    if (this.currentProperties) {
+      const p = this.currentProperties;
+      text += `[단면 기하성질]\n`;
+      text += `Ag: ${p.area} mm² | Ix: ${p.ix} mm⁴ | Iy: ${p.iy} mm⁴ | J: ${p.j} mm⁴ | Cw: ${p.cw} mm⁶\n\n`;
+    }
+    if (this.currentDesignResult) {
+      const d = this.currentDesignResult;
+      text += `[KDS 14 31 10 부재설계 D/C]\n`;
+      text += `압축: φPn=${d.compression?.phi_pn} kN (D/C = ${d.compression?.dc_ratio})\n`;
+      text += `휨: φMn=${d.flexure?.phi_mn} kN·m (D/C = ${d.flexure?.dc_ratio})\n`;
+      text += `전단: φVn=${d.shear?.phi_vn} kN (D/C = ${d.shear?.dc_ratio})\n`;
+      text += `P-M 조합비: ${d.interaction?.ratio} (${d.interaction?.status})\n`;
+    }
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('요약표가 클립보드에 복사되었습니다. (엑셀 및 보고서에 붙여넣기 가능)');
+        this.showStatus('📋 요약표 클립보드 복사 완료', 'ready', 2500);
+      });
+    } else {
+      prompt('아래 텍스트를 복사하세요:', text);
+    }
+  };
 }

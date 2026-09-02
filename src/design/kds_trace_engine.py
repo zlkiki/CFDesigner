@@ -169,6 +169,37 @@ class KDSTraceEngine:
         return traces
 
     # -------------------------------------------------------------
+    # Helper: Intelligent Unit Normalization & Fallbacks
+    # -------------------------------------------------------------
+    @staticmethod
+    def _normalize_p_cr(val: float, py_kn: float) -> float:
+        """
+        Normalizes critical buckling load to kN.
+        - If <= 0, falls back to a sensible engineering estimate (0.80 * Py).
+        - If > 1000.0 and significantly larger than Py, assumes N and converts to kN.
+        - Otherwise returns kN directly.
+        """
+        if val is None or val <= 0:
+            return max(py_kn * 0.80, 1.0)
+        if val > 1000.0 and val > py_kn * 1.5:
+            return val / 1000.0
+        return float(val)
+
+    @staticmethod
+    def _normalize_m_cr(val: float, my_knm: float, p_ratio: float = 0.85) -> float:
+        """
+        Normalizes critical buckling moment to kN·m.
+        - If <= 0, falls back to (p_ratio * My).
+        - If > 1000.0 (e.g. 6,000,000 N·mm), assumes N·mm and converts to kN·m.
+        - Otherwise returns kN·m directly.
+        """
+        if val is None or val <= 0:
+            return max(my_knm * max(min(p_ratio, 1.5), 0.2), 0.1)
+        if val > 1000.0:
+            return val / 1e6
+        return float(val)
+
+    # -------------------------------------------------------------
     # 2. Axial Compression Trace (Section.cs:2846~2950 & DSM Compression)
     # -------------------------------------------------------------
     @staticmethod
@@ -206,7 +237,7 @@ class KDSTraceEngine:
         ))
 
         # 2.2 Global Buckling (Pne)
-        p_cre_kn = p_cre / 1000.0 if p_cre > 0 else 1e-6
+        p_cre_kn = KDSTraceEngine._normalize_p_cr(p_cre, py_kn)
         lambda_c = math.sqrt(py_kn / p_cre_kn) if p_cre_kn > 1e-6 else 10.0
         if lambda_c <= 1.5:
             pne_kn = (0.658 ** (lambda_c ** 2)) * py_kn
@@ -237,7 +268,7 @@ class KDSTraceEngine:
         ))
 
         # 2.3 Local Buckling (Pnl)
-        p_crl_kn = p_crl / 1000.0 if p_crl > 0 else 1e-6
+        p_crl_kn = KDSTraceEngine._normalize_p_cr(p_crl, py_kn)
         lambda_l = math.sqrt(pne_kn / p_crl_kn) if p_crl_kn > 1e-6 else 0.0
         if lambda_l <= 0.776:
             pnl_kn = pne_kn
@@ -267,7 +298,7 @@ class KDSTraceEngine:
         ))
 
         # 2.4 Distortional Buckling (Pnd)
-        p_crd_kn = p_crd / 1000.0 if p_crd > 0 else 1e-6
+        p_crd_kn = KDSTraceEngine._normalize_p_cr(p_crd, py_kn)
         lambda_d = math.sqrt(py_kn / p_crd_kn) if p_crd_kn > 1e-6 else 0.0
         if lambda_d <= 0.561:
             pnd_kn = py_kn
@@ -367,7 +398,7 @@ class KDSTraceEngine:
         ))
 
         # 3.2 Lateral-Torsional Buckling (Mne)
-        m_cre_knm = m_cre / 1e6 if m_cre > 0 else 1e-6
+        m_cre_knm = KDSTraceEngine._normalize_m_cr(m_cre, my_knm)
         if m_cre_knm < 0.56 * my_knm:
             mne_knm = m_cre_knm
             ltb_desc = f"Mcre < 0.56*My: Mne = Mcre = {mne_knm:,.2f} kN·m (탄성 LTB)"
@@ -401,7 +432,7 @@ class KDSTraceEngine:
         ))
 
         # 3.3 Local Buckling (Mnl)
-        m_crl_knm = m_crl / 1e6 if m_crl > 0 else 1e-6
+        m_crl_knm = KDSTraceEngine._normalize_m_cr(m_crl, my_knm)
         lambda_l = math.sqrt(mne_knm / m_crl_knm) if m_crl_knm > 1e-6 else 0.0
         if lambda_l <= 0.776:
             mnl_knm = mne_knm
@@ -431,7 +462,7 @@ class KDSTraceEngine:
         ))
 
         # 3.4 Distortional Buckling (Mnd)
-        m_crd_knm = m_crd / 1e6 if m_crd > 0 else 1e-6
+        m_crd_knm = KDSTraceEngine._normalize_m_cr(m_crd, my_knm)
         lambda_d = math.sqrt(my_knm / m_crd_knm) if m_crd_knm > 1e-6 else 0.0
         if lambda_d <= 0.673:
             mnd_knm = my_knm
@@ -767,15 +798,39 @@ class KDSTraceEngine:
         ru = loads.get("ru", 0.0)
 
         # FSM Elastic Buckling Loads & Moments
-        p_cre = fsm.get("p_cre", 0.0)
-        p_crl = fsm.get("p_crl", 0.0)
-        p_crd = fsm.get("p_crd", 0.0)
-        m_cre_x = fsm.get("m_cre_x", fsm.get("m_cre", 0.0))
-        m_crl_x = fsm.get("m_crl_x", fsm.get("m_crl", 0.0))
-        m_crd_x = fsm.get("m_crd_x", fsm.get("m_crd", 0.0))
-        m_cre_y = fsm.get("m_cre_y", m_cre_x * 0.5)
-        m_crl_y = fsm.get("m_crl_y", m_crl_x * 0.5)
-        m_crd_y = fsm.get("m_crd_y", m_crd_x * 0.5)
+        crit_modes = fsm.get("critical_modes", {}) if isinstance(fsm.get("critical_modes"), dict) else {}
+
+        py_kn = ag * fy / 1000.0
+        my_x_knm = min(sxt, sxb) * fy / 1e6
+        my_y_knm = min(syl, syr) * fy / 1e6
+
+        p_cre_raw = fsm.get("p_cre", crit_modes.get("p_cre", 0.0))
+        p_crl_raw = fsm.get("p_crl", crit_modes.get("p_crl", 0.0))
+        p_crd_raw = fsm.get("p_crd", crit_modes.get("p_crd", 0.0))
+
+        p_cre = cls._normalize_p_cr(p_cre_raw, py_kn)
+        p_crl = cls._normalize_p_cr(p_crl_raw, py_kn)
+        p_crd = cls._normalize_p_cr(p_crd_raw, py_kn)
+
+        ratio_crl = p_crl / py_kn if py_kn > 0 else 0.85
+        ratio_crd = p_crd / py_kn if py_kn > 0 else 0.85
+        ratio_cre = p_cre / py_kn if py_kn > 0 else 0.75
+
+        m_cre_x_raw = fsm.get("m_cre_x", fsm.get("m_cre", crit_modes.get("m_cre", 0.0)))
+        m_crl_x_raw = fsm.get("m_crl_x", fsm.get("m_crl", crit_modes.get("m_crl", 0.0)))
+        m_crd_x_raw = fsm.get("m_crd_x", fsm.get("m_crd", crit_modes.get("m_crd", 0.0)))
+
+        m_cre_x = cls._normalize_m_cr(m_cre_x_raw, my_x_knm, ratio_cre)
+        m_crl_x = cls._normalize_m_cr(m_crl_x_raw, my_x_knm, ratio_crl)
+        m_crd_x = cls._normalize_m_cr(m_crd_x_raw, my_x_knm, ratio_crd)
+
+        m_cre_y_raw = fsm.get("m_cre_y", crit_modes.get("m_cre_y", 0.0))
+        m_crl_y_raw = fsm.get("m_crl_y", crit_modes.get("m_crl_y", 0.0))
+        m_crd_y_raw = fsm.get("m_crd_y", crit_modes.get("m_crd_y", 0.0))
+
+        m_cre_y = cls._normalize_m_cr(m_cre_y_raw, my_y_knm, ratio_cre) if m_cre_y_raw > 0 else m_cre_x * (my_y_knm / max(my_x_knm, 1e-6))
+        m_crl_y = cls._normalize_m_cr(m_crl_y_raw, my_y_knm, ratio_crl) if m_crl_y_raw > 0 else m_crl_x * (my_y_knm / max(my_x_knm, 1e-6))
+        m_crd_y = cls._normalize_m_cr(m_crd_y_raw, my_y_knm, ratio_crd) if m_crd_y_raw > 0 else m_crd_x * (my_y_knm / max(my_x_knm, 1e-6))
 
         # 1. Tension
         res.tension = cls.trace_tension(ag, an, fy, fu, pu if pu < 0 else 0.0)

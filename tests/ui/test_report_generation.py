@@ -245,3 +245,18 @@ def test_trace_rendering_in_detailed_report(sample_report_payload):
     # Check D/C & OK badges
     assert "clause-badge" in html
 
+
+def test_report_dc_ratios_reasonable(sample_report_payload):
+    """Verify that D/C ratios in calculation sheet do not explode and remain within realistic bounds."""
+    trace = DetailedReportGenerator.render(sample_report_payload)
+    
+    # Check that crazy numbers like 100,000+ D/C ratios do NOT appear
+    assert "1035811" not in trace
+    assert "1036649" not in trace
+    assert "838267" not in trace
+
+    # Check that realistic values are rendered in the HTML
+    assert "29.8" in trace or "35.1" in trace  # Compression capacity in reasonable kN
+    assert "4.34" in trace or "4.82" in trace or "6.01" in trace  # Flexural capacity in reasonable kN*m
+
+

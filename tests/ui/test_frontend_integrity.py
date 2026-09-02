@@ -8,12 +8,102 @@ Performs automated static analysis on HTML and JavaScript source files:
 
 import os
 import re
+import subprocess
+import shutil
 import pytest
 
 WEB_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "src", "web"))
 STATIC_ROOT = os.path.join(WEB_ROOT, "static")
 JS_ROOT = os.path.join(STATIC_ROOT, "js")
 MANUAL_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "src", "manual"))
+
+
+@pytest.mark.frontend
+@pytest.mark.ui
+def test_javascript_syntax_and_brace_integrity():
+    """
+    Automated JS Syntax & ES Module Parsing Integrity Check:
+    Scans all JavaScript files under src/web/static/js/ (including modules/)
+    and executes Node.js syntax parsing (or AST/brace validation) to ensure
+    there are 0 syntax errors, missing closing braces, or unexpected tokens.
+    Prevents whole-UI button freezing and silent frontend initialization failures.
+    """
+    js_files = []
+    for root, _, files in os.walk(JS_ROOT):
+        for file in files:
+            if file.endswith(".js"):
+                js_files.append(os.path.join(root, file))
+
+    assert len(js_files) >= 5, f"Expected at least 5 JS files, found {len(js_files)}"
+
+    node_bin = shutil.which("node")
+
+    for js_path in js_files:
+        rel_path = os.path.relpath(js_path, WEB_ROOT).replace("\\", "/")
+        
+        # 1. Node.js ES Module Syntax Check (if Node is available)
+        if node_bin:
+            norm_path = js_path.replace("\\", "/")
+            cmd = [node_bin, "--input-type=module", "-e", f'import "./{norm_path}"']
+            res = subprocess.run(cmd, capture_output=True, text=True)
+            if res.returncode != 0:
+                # Filter out expected browser runtime globals (window, document, HTMLElement, etc.)
+                err_text = res.stderr
+                if "SyntaxError" in err_text:
+                    pytest.fail(f"JavaScript Syntax Error in '{rel_path}':\n{err_text.strip()}")
+                elif "ReferenceError" in err_text:
+                    # ReferenceError: window is not defined (Normal in Node environment without DOM)
+                    pass
+
+        # 2. Pure-Python Balanced Braces & Quotes Static Analysis
+        with open(js_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        # Check basic brace symmetry across non-comment lines
+        brace_count = 0
+        paren_count = 0
+        bracket_count = 0
+        in_multiline_comment = False
+
+        for line_no, line in enumerate(lines, 1):
+            s = line.strip()
+            if in_multiline_comment:
+                if "*/" in s:
+                    in_multiline_comment = False
+                    s = s[s.index("*/") + 2:]
+                else:
+                    continue
+
+            if "/*" in s:
+                if "*/" in s:
+                    s = re.sub(r'/\*.*?\*/', '', s)
+                else:
+                    in_multiline_comment = True
+                    s = s[:s.index("/*")]
+
+            # Strip single-line comments
+            if "//" in s:
+                # Basic protection for url('http://...')
+                parts = s.split("//")
+                s = parts[0]
+
+            # Strip string literals to avoid counting braces inside strings
+            cleaned = re.sub(r'(\'\'\'|\"\"\"|\'.*?\'|\".*?\"|`.*?`)', '', s)
+
+            brace_count += cleaned.count('{') - cleaned.count('}')
+            paren_count += cleaned.count('(') - cleaned.count(')')
+            bracket_count += cleaned.count('[') - cleaned.count(']')
+
+            assert brace_count >= 0, (
+                f"Closing brace '}}' unmatched at line {line_no} in '{rel_path}'!"
+            )
+
+        assert brace_count == 0, (
+            f"Unclosed opening brace '{{' (count delta: {brace_count}) in '{rel_path}'!"
+        )
+        assert paren_count == 0, (
+            f"Unclosed opening parenthesis '(' (count delta: {paren_count}) in '{rel_path}'!"
+        )
 
 
 @pytest.mark.frontend

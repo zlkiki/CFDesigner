@@ -51,6 +51,7 @@ class CFDesignerApp {
     this.frameSpans = [{ length: 4000.0, left_sup: 'pin', right_sup: 'roller' }];
     this.frameLoads = [{ load_type: 'udl', magnitude: 10.0, x_start: 0.0, x_end: 4000.0 }];
     this.activeViewerTab = '2d'; // '2d' or '3d'
+    this.currentWorkflowStep = 1;
 
     this.init();
   }
@@ -228,11 +229,259 @@ class CFDesignerApp {
         this.canvas2d.render();
       }
     }
+  }
 
-    this.update3dOverlayInfo(modeKey, modeIdx);
+  setWorkflowStep(stepNum) {
+    stepNum = Math.max(1, Math.min(5, parseInt(stepNum, 10)));
+    this.currentWorkflowStep = stepNum;
+
+    // 1. Update Stepper DOM UI
+    document.querySelectorAll('.stepper-item').forEach(item => {
+      const s = parseInt(item.getAttribute('data-step'), 10);
+      item.classList.toggle('active', s === stepNum);
+    });
+
+    // 2. Update Layout Container Preset
+    const container = document.getElementById('mainAppContainer');
+    if (container) {
+      container.setAttribute('data-step', String(stepNum));
+    }
+
+    // 3. Step-specific optimal transitions
+    if (stepNum === 1) {
+      // Step 1: Modeling Focus -> Activate tabSection, switch 2D
+      this.activateSidebarTab('tabSection');
+      this.switchViewerMode('2d');
+    } else if (stepNum === 2) {
+      // Step 2: Properties Focus -> Activate tabSection, 2D view
+      this.activateSidebarTab('tabSection');
+      this.switchViewerMode('2d');
+    } else if (stepNum === 3) {
+      // Step 3: FSM Buckling Focus -> 3D viewer & FSM chart
+      this.switchViewerMode('3d');
+    } else if (stepNum === 4) {
+      // Step 4: Member Design Focus -> Activate tabMember, 2D view
+      this.activateSidebarTab('tabMember');
+      this.switchViewerMode('2d');
+    } else if (stepNum === 5) {
+      // Step 5: Report & Export Focus -> Open Report Modal
+      if (document.getElementById('btnOpenReport')) {
+        document.getElementById('btnOpenReport').click();
+      }
+    }
+
+    // 4. Update Prev/Next Buttons
+    const btnPrev = document.getElementById('btnPrevStep');
+    const btnNext = document.getElementById('btnNextStep');
+    if (btnPrev) {
+      btnPrev.disabled = (stepNum === 1);
+    }
+    if (btnNext) {
+      if (stepNum === 5) {
+        btnNext.innerText = '✅ 설계 및 검토 완료';
+      } else {
+        const nextTitles = ['', '단면 성질 (Step 2) →', '좌굴 해석 (Step 3) →', '부재 설계 (Step 4) →', '계산서 출력 (Step 5) →'];
+        btnNext.innerText = `다음: ${nextTitles[stepNum]}`;
+      }
+    }
+
+    // 5. Trigger resize for all active canvases
+    setTimeout(() => {
+      if (this.canvas2d) this.canvas2d.render();
+      if (this.viewer3d) this.viewer3d.onWindowResize();
+      if (this.fsmChart && this.fsmChart.chart) this.fsmChart.chart.resize();
+    }, 150);
+  }
+
+  updateSmartAssistant(stateKey, customData = {}) {
+    const bar = document.getElementById('smartActionBar');
+    const icon = document.getElementById('sabIcon');
+    const tag = document.getElementById('sabTag');
+    const text = document.getElementById('sabText');
+    const btnPrimary = document.getElementById('btnSabPrimaryAction');
+    const btnSecondary = document.getElementById('btnSabSecondaryAction');
+    if (!bar || !text || !btnPrimary) return;
+
+    bar.className = 'smart-action-bar';
+
+    if (stateKey === 'section_ready' || stateKey === 'section_modified') {
+      icon.innerText = '💡';
+      tag.innerText = 'STEP 1 → STEP 2/3';
+      text.innerText = '단면 치수가 갱신되었습니다. 단면성질 산정 및 FSM 좌굴해석을 실행하세요.';
+      btnPrimary.innerText = '⚡ 원클릭 일괄 해석 실행';
+      btnPrimary.onclick = async () => {
+        this.showStatus('단면 성질 및 FSM 좌굴해석 일괄 수행 중...', 'busy');
+        await this.runWizard();
+        await this.solveFsm();
+        this.setWorkflowStep(3);
+      };
+      if (btnSecondary) btnSecondary.style.display = 'none';
+    } else if (stateKey === 'fsm_completed') {
+      bar.classList.add('state-success');
+      icon.innerText = '📈';
+      tag.innerText = 'STEP 3 COMPLETED';
+      const pcrl = customData.pcrl ? `${customData.pcrl.toFixed(1)} kN` : '산출됨';
+      text.innerText = `국부/왜곡 좌굴 임계하중(Pcrl=${pcrl})이 산출되었습니다. 부재설계 검토로 이동하세요.`;
+      btnPrimary.innerText = 'Step 4 KDS 부재설계 이동 →';
+      btnPrimary.onclick = () => {
+        this.setWorkflowStep(4);
+        this.runDesignCheck();
+      };
+      if (btnSecondary) btnSecondary.style.display = 'none';
+    } else if (stateKey === 'design_passed') {
+      bar.classList.add('state-success');
+      icon.innerText = '✅';
+      tag.innerText = 'DESIGN PASSED (OK)';
+      const maxRatio = customData.maxRatio !== undefined ? customData.maxRatio.toFixed(2) : '0.85';
+      text.innerText = `모든 KDS 14 31 10 부재설계 검토를 통과했습니다. (최대 D/C = ${maxRatio})`;
+      btnPrimary.innerText = '📄 Step 5 구조계산서 출력 및 PDF 저장 →';
+      btnPrimary.onclick = () => {
+        this.setWorkflowStep(5);
+      };
+      if (btnSecondary) btnSecondary.style.display = 'none';
+    } else if (stateKey === 'design_failed') {
+      bar.classList.add('state-danger');
+      icon.innerText = '⚠️';
+      tag.innerText = 'CAPACITY EXCEEDED (NG)';
+      const maxRatio = customData.maxRatio !== undefined ? customData.maxRatio.toFixed(2) : '1.15';
+      text.innerText = `부재 내력이 초과되었습니다 (최대 D/C = ${maxRatio}, NG). 단면 보강 또는 최적화가 필요합니다.`;
+      btnPrimary.innerText = '⚡ 3열 퀵디자인 최적 탐색 →';
+      btnPrimary.onclick = () => {
+        const btnQd = document.getElementById('btnOpenQuickDesign');
+        if (btnQd) btnQd.click();
+      };
+      if (btnSecondary) {
+        btnSecondary.style.display = 'inline-block';
+        btnSecondary.innerText = '두께 0.5mm 증가';
+        btnSecondary.onclick = () => {
+          const tInput = document.getElementById('wizT');
+          if (tInput) {
+            tInput.value = (parseFloat(tInput.value || 2.0) + 0.5).toFixed(1);
+            this.runWizard();
+          }
+        };
+      }
+    }
+  }
+
+  activateSidebarTab(tabPaneId) {
+    document.querySelectorAll('.tab-nav-btn').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-target') === tabPaneId);
+    });
+    document.querySelectorAll('.tab-pane').forEach(p => {
+      p.style.display = (p.id === tabPaneId) ? 'block' : 'none';
+    });
   }
 
   bindEvents() {
+    // Workflow Stepper Item Clicks
+    document.querySelectorAll('.stepper-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const step = item.getAttribute('data-step');
+        if (step) this.setWorkflowStep(step);
+      });
+    });
+
+    const btnPrev = document.getElementById('btnPrevStep');
+    if (btnPrev) {
+      btnPrev.addEventListener('click', () => {
+        this.setWorkflowStep(this.currentWorkflowStep - 1);
+      });
+    }
+
+    const btnNext = document.getElementById('btnNextStep');
+    if (btnNext) {
+      btnNext.addEventListener('click', () => {
+        if (this.currentWorkflowStep < 5) {
+          this.setWorkflowStep(this.currentWorkflowStep + 1);
+        } else {
+          this.setWorkflowStep(5);
+        }
+      });
+    }
+
+    // Workflow Keyboard Shortcuts (Alt+1 ~ Alt+5, Alt+ArrowLeft/Right)
+    window.addEventListener('keydown', (e) => {
+      if (e.altKey) {
+        if (e.key >= '1' && e.key <= '5') {
+          e.preventDefault();
+          this.setWorkflowStep(parseInt(e.key, 10));
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          this.setWorkflowStep(this.currentWorkflowStep + 1);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          this.setWorkflowStep(this.currentWorkflowStep - 1);
+        }
+      }
+    });
+
+    // Quick Start Launcher Modal Events
+    const modalQs = document.getElementById('quickStartModal');
+    const btnOpenQs = document.getElementById('btnOpenQuickStart');
+    const btnCloseQs = document.getElementById('btnCloseQuickStart');
+    const btnCloseQsBottom = document.getElementById('btnCloseQuickStartBottom');
+    const chkDontShowQs = document.getElementById('chkDontShowQuickStartAgain');
+
+    if (btnOpenQs && modalQs) {
+      btnOpenQs.addEventListener('click', () => {
+        modalQs.style.display = 'flex';
+      });
+    }
+
+    const closeQsModal = () => {
+      if (modalQs) modalQs.style.display = 'none';
+    };
+
+    if (btnCloseQs) btnCloseQs.addEventListener('click', closeQsModal);
+    if (btnCloseQsBottom) btnCloseQsBottom.addEventListener('click', closeQsModal);
+
+    if (chkDontShowQs) {
+      chkDontShowQs.checked = (localStorage.getItem('cfdesigner_hide_quickstart') === 'true');
+      chkDontShowQs.addEventListener('change', (e) => {
+        localStorage.setItem('cfdesigner_hide_quickstart', e.target.checked ? 'true' : 'false');
+      });
+    }
+
+    // 4 Quick Start Action Buttons
+    const btnQsStandard = document.getElementById('btnQsStartStandard');
+    if (btnQsStandard) {
+      btnQsStandard.addEventListener('click', () => {
+        closeQsModal();
+        this.setWorkflowStep(1);
+        this.runWizard();
+        this.showStatus('🎯 표준 단면 설계 모드가 시작되었습니다.', 'ready', 3000);
+      });
+    }
+
+    const btnQsDxf = document.getElementById('btnQsStartDxf');
+    if (btnQsDxf) {
+      btnQsDxf.addEventListener('click', () => {
+        closeQsModal();
+        this.setWorkflowStep(1);
+        const fileInput = document.getElementById('dxfFileInput');
+        if (fileInput) fileInput.click();
+      });
+    }
+
+    const btnQsQuickDesign = document.getElementById('btnQsStartQuickDesign');
+    if (btnQsQuickDesign) {
+      btnQsQuickDesign.addEventListener('click', () => {
+        closeQsModal();
+        const btnQd = document.getElementById('btnOpenQuickDesign');
+        if (btnQd) btnQd.click();
+      });
+    }
+
+    const btnQsFrame = document.getElementById('btnQsStartFrame');
+    if (btnQsFrame) {
+      btnQsFrame.addEventListener('click', () => {
+        closeQsModal();
+        const btnFa = document.getElementById('btnOpenFrameAnalysis');
+        if (btnFa) btnFa.click();
+      });
+    }
+
     // Theme Toggle
     document.getElementById('btnThemeToggle').addEventListener('click', () => {
       const isLight = document.body.getAttribute('data-theme') === 'light';
@@ -613,6 +862,22 @@ class CFDesignerApp {
       });
     }
 
+    // Export Actions from Report
+    const btnExpDxf = document.getElementById('btnExportDxfFromReport');
+    if (btnExpDxf) {
+      btnExpDxf.addEventListener('click', () => this.exportSectionDxf());
+    }
+
+    const btnExpCsv = document.getElementById('btnExportCsvFromReport');
+    if (btnExpCsv) {
+      btnExpCsv.addEventListener('click', () => this.exportSectionCsv());
+    }
+
+    const btnCopySummary = document.getElementById('btnCopySummaryTableFromReport');
+    if (btnCopySummary) {
+      btnCopySummary.addEventListener('click', () => this.copySummaryTable());
+    }
+
     // Print from Modal
     const btnPrintModal = document.getElementById('btnPrintReportFrame') || document.getElementById('btnPrintReportFromModal');
     if (btnPrintModal) {
@@ -720,9 +985,21 @@ class CFDesignerApp {
     // 2. Update Properties Table immediately
     this.renderPropertiesTable(this.currentProperties);
 
+    // Update Step 1 & 2 badges and assistant
+    this.updateWorkflowBadge(1, 'ready', '생성완료');
+    this.updateWorkflowBadge(2, 'ready', '해석완료');
+    this.updateSmartAssistant('section_ready');
+
     // 3. Trigger FSM Buckling Analysis & Design Check asynchronously with debouncing
     this.runFSM();
     this.runDesignCheck();
+  }
+
+  updateWorkflowBadge(stepNum, type, text) {
+    const badge = document.getElementById(`stepBadge${stepNum}`);
+    if (!badge) return;
+    badge.className = `step-badge badge-${type}`;
+    badge.innerText = text;
   }
 
   renderPropertiesTable(props) {
@@ -845,6 +1122,12 @@ class CFDesignerApp {
         } catch (lblErr) {
           console.error('Label update error:', lblErr);
         }
+
+        // Update Step 3 Badge & Assistant
+        this.updateWorkflowBadge(3, 'ready', '해석완료');
+        this.updateSmartAssistant('fsm_completed', {
+          pcrl: data.critical_modes?.p_crl || data.critical_modes?.m_crl
+        });
 
         const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
         this.showStatus(`✅ 해석 및 부재설계 완료 (${elapsed}s)`, 'success', 3500);
@@ -976,6 +1259,16 @@ class CFDesignerApp {
     // 4. P-M Interaction
     const inter = data.interaction;
     updateGauge('inter', inter.ratio, inter.status, `P-M 조합비 (${inter.formula_type})`);
+
+    // Update Step 4 Badge & Assistant
+    const maxRatio = Math.max(comp.dc_ratio || 0, flex.dc_ratio || 0, shear.dc_ratio || 0, inter.ratio || 0);
+    if (maxRatio <= 1.0) {
+      this.updateWorkflowBadge(4, 'ready', '검토합격');
+      this.updateSmartAssistant('design_passed', { maxRatio });
+    } else {
+      this.updateWorkflowBadge(4, 'danger', '강도초과');
+      this.updateSmartAssistant('design_failed', { maxRatio });
+    }
   }
 
   // ================= Phase 1: Element Spreadsheet Editor =================

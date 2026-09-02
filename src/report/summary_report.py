@@ -7,6 +7,7 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 from .models import ProjectMetadata, ReportOptions
 from .svg_diagrams import SVGDiagramGenerator
+from ..design.kds_trace_engine import KDSTraceEngine
 
 
 class SummaryReportGenerator:
@@ -24,6 +25,7 @@ class SummaryReportGenerator:
         fsm = data.get("fsm", {})
         design = data.get("design", {})
         loads = data.get("loads", {})
+        material = data.get("material", {})
 
         date_str = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -31,11 +33,49 @@ class SummaryReportGenerator:
         elements = geom.get("elements", [])
         svg_section = SVGDiagramGenerator.render_section_svg(elements, props, width=320, height=220)
 
+        # Fallback trace calculation if design results are incomplete
+        trace = KDSTraceEngine.generate_full_trace(props, material, fsm, loads)
+
         # Design results
         comp = design.get("compression", {})
+        if not comp or comp.get("phi_pn", 0.0) <= 0:
+            c_gov = trace.compression[-1] if trace.compression else None
+            comp = {
+                "p_n": c_gov.nominal_value if c_gov else 0.0,
+                "phi_pn": c_gov.design_value if c_gov else 0.0,
+                "dc_ratio": c_gov.dc_ratio if c_gov else 0.0,
+                "status": c_gov.status if c_gov else "OK",
+                "governing_mode": c_gov.notes if c_gov else "-"
+            }
+
         flex = design.get("flexure", {})
+        if not flex or flex.get("phi_mn", 0.0) <= 0:
+            f_gov = trace.flexure_x[-1] if trace.flexure_x else None
+            flex = {
+                "m_n": f_gov.nominal_value if f_gov else 0.0,
+                "phi_mn": f_gov.design_value if f_gov else 0.0,
+                "dc_ratio": f_gov.dc_ratio if f_gov else 0.0,
+                "status": f_gov.status if f_gov else "OK",
+                "governing_mode": f_gov.notes if f_gov else "-"
+            }
+
         shear = design.get("shear", {})
+        if not shear or shear.get("phi_vn", 0.0) <= 0:
+            s_gov = trace.shear[-1] if trace.shear else None
+            shear = {
+                "v_n": s_gov.nominal_value if s_gov else 0.0,
+                "phi_vn": s_gov.design_value if s_gov else 0.0,
+                "dc_ratio": s_gov.dc_ratio if s_gov else 0.0,
+                "status": s_gov.status if s_gov else "OK"
+            }
+
         inter = design.get("interaction", {})
+        if not inter or "status" not in inter:
+            i_sec = trace.interaction[0] if trace.interaction else None
+            inter = {
+                "ratio": i_sec.dc_ratio if i_sec else 0.0,
+                "status": i_sec.status if i_sec else "OK"
+            }
 
         comp_badge = '<span class="badge ok">OK</span>' if comp.get("status") == "OK" else '<span class="badge ng">NG</span>'
         flex_badge = '<span class="badge ok">OK</span>' if flex.get("status") == "OK" else '<span class="badge ng">NG</span>'

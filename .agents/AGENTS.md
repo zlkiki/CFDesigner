@@ -117,6 +117,8 @@
 * 📑 **[구조계산서 및 출력 시스템 명세서](file:///f:/PyProject/CFDesigner/docs/12_structural_calculation_report_specification.md)**: 듀얼 리포트 모드, CFS 원본 14종 리포트 전수 이식, 10대 장별 수식/테이블 및 SVG 다이어그램 사양
 * 📊 **[요구사항 09 전수검증 및 대조비교표 보고서](file:///f:/PyProject/CFDesigner/요구사항/@@OLD/요구사항09_전수검증_및_대조비교표_보고서-260902_1024.md)**: 5대 도메인 22개 세부 요구사항 1:1 대조 비교표, 결함 보완 내역 및 77개 테스트 100% 무결성 검증서
 * 🔬 **[FSM 버클링 모드 해석, 고차 모드 거동 및 수치 발산 방어 이론 분석서](file:///f:/PyProject/CFDesigner/docs/14_fsm_buckling_modes_and_higher_order_theory_analysis.md)**: CFS 원본 Sturm 수열 단일 모드 vs 웹 다중 모드 비교, 휨 상태 면내 막 발산 방어 메커니즘 및 3대 좌굴 모드 판별 SSOT
+* 🖥️ **[CFS 원본 UI/메뉴/창 구성 및 입출력 상세 명세서](file:///f:/PyProject/CFDesigner/docs/15_cfs_legacy_ui_menu_and_dialog_specification.md)**: 상용 CFS 원본 7대 메뉴, 3대 MDI 창, 2대 플로팅 입력창, 15대 전문 다이얼로그 및 14종 리포트 입출력 전수 명세
+* 🛡️ **[프론트엔드 무결성 유지 및 대규모 업데이트 재발 방지 가이드](file:///f:/PyProject/CFDesigner/docs/16_frontend_integrity_and_update_prevention_guide.md)**: 버튼 불통/구문오류 원천 방어, 4대 취약 패턴 및 자동화 괄호/구문 검사 수칙
 
 * 🔗 **[KDS 국가건설기준 연동 가이드 (kcsc2md)](file:///f:/PyProject/kcsc2md/docs/외부프로젝트_연동_및_조회_가이드.md)**: KDS 기준 Ground Truth 조회 표준
 
