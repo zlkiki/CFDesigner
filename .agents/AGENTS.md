@@ -115,8 +115,9 @@
 * 🔍 **[CFS Legacy UI vs Web Gap 분석서](file:///f:/PyProject/CFDesigner/docs/10_cfs_legacy_ui_vs_web_gap_analysis.md)**: CFS 원본 UI 기능 전수 대조 및 웹 구현 현황
 * 🧪 **[Pytest 도메인별 3대 테스트 가이드](file:///f:/PyProject/CFDesigner/docs/11_pytest_testing_guide.md)**: 엔진 / UI / 도움말 3대 영역 분리 구조, 초고속 실행 치트시트 및 검증 규칙
 * 📑 **[구조계산서 및 출력 시스템 명세서](file:///f:/PyProject/CFDesigner/docs/12_structural_calculation_report_specification.md)**: 듀얼 리포트 모드, CFS 원본 14종 리포트 전수 이식, 10대 장별 수식/테이블 및 SVG 다이어그램 사양
-* 📊 **[요구사항 09 전수검증 및 대조비교표 보고서](file:///f:/PyProject/CFDesigner/docs/13_요구사항09_전수검증_및_대조비교표_보고서.md)**: 5대 도메인 22개 세부 요구사항 1:1 대조 비교표, 결함 보완 내역 및 77개 테스트 100% 무결성 검증서
+* 📊 **[요구사항 09 전수검증 및 대조비교표 보고서](file:///f:/PyProject/CFDesigner/요구사항/@@OLD/요구사항09_전수검증_및_대조비교표_보고서-260902_1024.md)**: 5대 도메인 22개 세부 요구사항 1:1 대조 비교표, 결함 보완 내역 및 77개 테스트 100% 무결성 검증서
 * 🔬 **[FSM 버클링 모드 해석, 고차 모드 거동 및 수치 발산 방어 이론 분석서](file:///f:/PyProject/CFDesigner/docs/14_fsm_buckling_modes_and_higher_order_theory_analysis.md)**: CFS 원본 Sturm 수열 단일 모드 vs 웹 다중 모드 비교, 휨 상태 면내 막 발산 방어 메커니즘 및 3대 좌굴 모드 판별 SSOT
+
 * 🔗 **[KDS 국가건설기준 연동 가이드 (kcsc2md)](file:///f:/PyProject/kcsc2md/docs/외부프로젝트_연동_및_조회_가이드.md)**: KDS 기준 Ground Truth 조회 표준
 
 
