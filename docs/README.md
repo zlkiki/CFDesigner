@@ -17,11 +17,11 @@
 | **[`06_python_engine_architecture_specification.md`](file:///f:/PyProject/CFDesigner/docs/06_python_engine_architecture_specification.md)** | Python 독립 수치해석 및 설계 엔진 아키텍처 명세서 | 5대 계층(CAD/기하/FSM/설계/리포트) 독립 Python 엔진 구조 및 API 사양 |
 | **[`07_web_application_ui_ux_specification.md`](file:///f:/PyProject/CFDesigner/docs/07_web_application_ui_ux_specification.md)** | CFDesigner 웹 애플리케이션 및 UI/UX 구조 명세서 | 4대 화면 구성, 10대 전문 모달, 2D/3D 인터랙션, 반응형 연산 UX, 전수 API 사양 |
 | **[`08_online_help_manual_specification.md`](file:///f:/PyProject/CFDesigner/docs/08_online_help_manual_specification.md)** | 온라인 도움말 시스템 통합 명세서 (한·영 Bilingual) | 8대 카테고리 27개 토픽, 3-Way 뷰(한글/스플릿/영문), 인라인 토글, 다국어 검색 통합 SSOT |
-| **[`09_cfs_legacy_help_manual_vs_web_gap_analysis.md`](file:///f:/PyProject/CFDesigner/docs/09_cfs_legacy_help_manual_vs_web_gap_analysis.md)** | CFS 레거시 도움말 vs 웹 도움말 100% 이식 검증서 | 원본 도움말 79개 토픽 + 16종 이미지 vs 웹 27개 토픽 1:1 전수 대조 및 100% 이식 검증 (Gap 0건) |
-| **[`10_cfs_legacy_ui_vs_web_gap_analysis.md`](file:///f:/PyProject/CFDesigner/docs/10_cfs_legacy_ui_vs_web_gap_analysis.md)** | CFS 레거시 UI vs 웹 구현 Gap 분석서 | 상용 CFS 14.0 원본 기능 100% 전수 대조 및 Phase 1~5 웹 이식 검증 |
 | **[`11_pytest_testing_guide.md`](file:///f:/PyProject/CFDesigner/docs/11_pytest_testing_guide.md)** | Pytest 도메인별 3대 테스트 가이드 | 엔진 / UI / 도움말 3대 영역 분리 구조, 초고속 실행 치트시트 및 검증 규칙 |
 | **[`12_structural_calculation_report_specification.md`](file:///f:/PyProject/CFDesigner/docs/12_structural_calculation_report_specification.md)** | 구조계산서 및 출력 시스템 명세서 | 듀얼 리포트 모드, CFS 원본 14종 리포트 전수 이식, 10대 장별 수식/테이블 및 SVG 다이어그램 사양 |
 | **[`14_fsm_buckling_modes_and_higher_order_theory_analysis.md`](file:///f:/PyProject/CFDesigner/docs/14_fsm_buckling_modes_and_higher_order_theory_analysis.md)** | FSM 버클링 모드 해석 및 고차 모드 거동 분석서 | Sturm 수열 vs 다중 모드 비교, 휨 상태 면내 막 발산 방어 메커니즘 및 3대 좌굴 모드 판별 SSOT |
+| **[`archive/09_cfs_legacy_help_manual_vs_web_gap_analysis.md`](file:///f:/PyProject/CFDesigner/docs/archive/09_cfs_legacy_help_manual_vs_web_gap_analysis.md)** | CFS 레거시 도움말 vs 웹 이식 검증서 (보관) | 원본 도움말 79개 토픽 + 16종 이미지 vs 웹 27개 토픽 1:1 전수 대조 및 100% 이식 검증 (Gap 0건) |
+| **[`archive/10_cfs_legacy_ui_vs_web_gap_analysis.md`](file:///f:/PyProject/CFDesigner/docs/archive/10_cfs_legacy_ui_vs_web_gap_analysis.md)** | CFS 레거시 UI vs 웹 구현 Gap 분석서 (보관) | 상용 CFS 14.0 원본 기능 100% 전수 대조 및 Phase 1~5 웹 이식 검증 |
 | **[`cfs_help_manual/`](file:///f:/PyProject/CFDesigner/decompiled_src/cfs_help_manual/overview.htm)** | CFS 14.0 공식 매뉴얼 원문 아카이브 | CFS.chm 추출 95개 HTML 공식 이론 및 인터페이스 도움말 (`decompiled_src/`) |
 
 ---

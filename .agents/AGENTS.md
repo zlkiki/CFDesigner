@@ -111,8 +111,8 @@
 * 🚀 **[Python 독립 엔진 아키텍처 명세서](file:///f:/PyProject/CFDesigner/docs/06_python_engine_architecture_specification.md)**: 5대 계층 독립 Python 엔진 구조 및 API 사양
 * 💻 **[CFDesigner 웹 앱 UI/UX 명세서](file:///f:/PyProject/CFDesigner/docs/07_web_application_ui_ux_specification.md)**: 4대 화면, 10대 전문 모달, 2D/3D 인터랙션 및 UX 파이프라인 규약
 * 📖 **[온라인 도움말 시스템 통합 명세서](file:///f:/PyProject/CFDesigner/docs/08_online_help_manual_specification.md)**: 한·영 Bilingual 3-Way 뷰, 8대 카테고리 27개 토픽 및 다국어 검색 통합 SSOT
-* 📊 **[CFS 레거시 도움말 vs 웹 이식 검증서](file:///f:/PyProject/CFDesigner/docs/09_cfs_legacy_help_manual_vs_web_gap_analysis.md)**: 원본 도움말 79개 토픽 + 16종 이미지 vs 웹 27개 토픽 1:1 전수 대조 및 100% 이식 검증 (Gap 0건 완결판)
-* 🔍 **[CFS Legacy UI vs Web Gap 분석서](file:///f:/PyProject/CFDesigner/docs/10_cfs_legacy_ui_vs_web_gap_analysis.md)**: CFS 원본 UI 기능 전수 대조 및 웹 구현 현황
+* 📊 **[CFS 레거시 도움말 vs 웹 이식 검증서 (보관)](file:///f:/PyProject/CFDesigner/docs/archive/09_cfs_legacy_help_manual_vs_web_gap_analysis.md)**: 원본 도움말 79개 토픽 + 16종 이미지 vs 웹 27개 토픽 1:1 전수 대조 및 100% 이식 검증 (Gap 0건 완결판, 보관본)
+* 🔍 **[CFS Legacy UI vs Web Gap 분석서 (보관)](file:///f:/PyProject/CFDesigner/docs/archive/10_cfs_legacy_ui_vs_web_gap_analysis.md)**: CFS 원본 UI 기능 전수 대조 및 웹 구현 현황 (보관본)
 * 🧪 **[Pytest 도메인별 3대 테스트 가이드](file:///f:/PyProject/CFDesigner/docs/11_pytest_testing_guide.md)**: 엔진 / UI / 도움말 3대 영역 분리 구조, 초고속 실행 치트시트 및 검증 규칙
 * 📑 **[구조계산서 및 출력 시스템 명세서](file:///f:/PyProject/CFDesigner/docs/12_structural_calculation_report_specification.md)**: 듀얼 리포트 모드, CFS 원본 14종 리포트 전수 이식, 10대 장별 수식/테이블 및 SVG 다이어그램 사양
 * 📊 **[요구사항 09 전수검증 및 대조비교표 보고서](file:///f:/PyProject/CFDesigner/요구사항/@@OLD/요구사항09_전수검증_및_대조비교표_보고서-260902_1024.md)**: 5대 도메인 22개 세부 요구사항 1:1 대조 비교표, 결함 보완 내역 및 77개 테스트 100% 무결성 검증서
