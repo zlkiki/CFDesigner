@@ -1,67 +1,48 @@
 # CFDesigner - Pytest 도메인별 3대 테스트 가이드 (11_pytest_testing_guide.md)
 
-본 문서는 **CFDesigner (냉간성형강 구조해석 및 설계 시스템)**의 신속하고 무결한 검증을 위한 **3대 도메인별 Pytest 스위트 구조, 초고속 실행 명령 및 테스트 작성 규칙**을 정의합니다.
+본 문서는 **CFDesigner (냉간성형강 구조해석 및 설계 시스템)**의 신속하고 무결한 검증을 위한 **수정 소스별 초고속 분할 시험 매핑 맵, 도메인별 Pytest 스위트 구조 및 실행 규칙**을 정의합니다.
 
 ---
 
-## 1. 3대 도메인 분리 목적 및 아키텍처
+## 1. 수정 소스별 0.1s~2s 초고속 타겟팅 실행 맵 (Fast Targeted Execution Matrix)
 
-개발 작업 시 전체 86개 테스트를 매번 실행하는 오버헤드를 줄이고, **작업 중인 도메인에만 집중하여 0.5~2초 내에 즉각적인 피드백**을 얻을 수 있도록 테스트 스위트를 3대 영역으로 분리 운영합니다.
+> 💡 **핵심 원칙**: 코드를 수정한 후 전체 113개 테스트(약 2분 소요)를 매번 돌리지 않고, **수정된 소스가 영향을 받는 타겟 테스트 파일 1~2개만 즉시 실행하여 0.1~3초 내에 검증**합니다.
 
-```text
-tests/
-├── engine/          # ⚙️ [도메인 1] 순수 공학/수치해석/설계식 엔진 검증 (24 tests)
-│   ├── test_c_section.py                # C형강 단면성질, FSM 고유치, KDS DSM 내력 검증
-│   ├── test_z_section.py                # Z형강 주축(Principal Axis) 회전 및 비대칭 성질 검증
-│   ├── test_dxf_integration.py          # DXF 2D Polyline 수입 -> 중심선 메싱 -> 해석 파이프라인
-│   ├── test_fsm_engine.py               # FSM 휨/편심 응력구배, Indefinite Kg 고유치, 폐구단면(Tube) 절점 공유
-│   ├── test_kds_trace_engine.py         # KDS/AISI 한계상태별 수식 정의, 파라미터 대입식, 상관식 Trace 검증
-│   ├── test_phase3_advanced_design.py   # 웨브 크리플링, 퀵 디자인 최적화, Winter 유효폭
-│   └── test_phase4_frame1d_analysis.py  # 1D 뼈대 연속보 유한요소 해석 및 SFD/BMD 다이어그램
-│
-├── ui/              # 💻 [도메인 2] 웹 UI 연동, API 엔드포인트 및 JSON 스키마 (25 tests)
-│   ├── test_web_api.py                  # 메인 페이지, 마법사 API, FSM 해석/설계 API, 계산서 HTML
-│   ├── test_quick_design.py             # CFS 원본 frmQuickDesign 3열 UI, 3대 D/C 한계상태 및 교차 검증
-│   ├── test_report_generation.py        # 요약/상세 보고서, SVG 다이어그램, KaTeX Trace 렌더링 검증
-│   ├── test_phase1_geometry_edit.py     # 단면 스프레드시트 편집, 2D 회전/대칭 변환, 보강 리브 삽입
-│   └── test_phase2_library_material.py  # SSMA 단면 라이브러리(1000+개), 재료 DB, 가공경화(Fya) 계산기
-│
-└── manual/          # 📖 [도메인 3] 온라인 도움말 시스템 및 정적 자산 무결성 (37 tests)
-    └── test_manual_api.py               # 8대 카테고리 트리, 27개 토픽 한/영 원문 1:1 대칭성, KaTeX 수식, 도해 링크
-```
-
----
-
-## 2. 초고속 도메인별 실행 명령어 치트시트
-
-| 개발 작업 도메인 | 추천 실행 명령 | 검증 대상 | 평균 소요 시간 |
+| 내가 수정한 소스 코드 영역 | 타겟 실행 명령어 (`pytest ...`) | 검증 대상 및 내용 | 예상 소요 시간 |
 |---|---|---|:---:|
-| **엔진 / 공학 수식 작업** | `pytest tests/engine/` | 단면 특성치($A, I, J, C_w$), FSM 좌굴하중계수, KDS 공칭강도, 수식 Trace, 1D FEM | **~1.5초** |
-| **웹 UI / API 라우트 작업** | `pytest tests/ui/` | FastAPI 엔드포인트, 퀵디자인 3대 D/C, 구조계산서 KaTeX HTML, 기하 편집 | **~1.2초** |
-| **온라인 도움말 / 문서 작업** | `pytest tests/manual/` | 한/영 8대 트리 구조, 27개 토픽 1:1 대칭, 도해 이미지, 수식($$) 렌더링 | **~1.2초** |
-| **마스터 요구사항 완료 직전** | `pytest` | 전체 3대 영역 일괄 회귀 방지 통합 검증 (총 86 tests 100% Pass) | **~25초** |
-
-
-### 마커(Marker) 기반 실행 옵션
-`pytest.ini`에 사전 등록된 마커를 사용하여 실행할 수도 있습니다:
-```bash
-pytest -m engine    # 엔진 테스트만 실행
-pytest -m ui        # UI/API 테스트만 실행
-pytest -m manual    # 도움말 테스트만 실행
-```
+| **프론트엔드 UI / JS 로직**<br>(`app.js`, `viewer_3d.js`, `canvas_2d.js`, `index.html`) | `pytest tests/ui/test_frontend_integrity.py` | HTML 247개 DOM ID 매칭, JS 클래스 메서드 실재(`TypeError` 방어), 이미지 링크 | **0.03초** |
+| **KDS 부재설계 & 수식 Trace**<br>(`src/design/`, `kds_trace_engine.py`) | `pytest tests/engine/test_kds_trace_engine.py` | KDS 14 31 10 압축/휨/전단/조합응력 LaTeX 수식 및 수치 대입식 | **0.6초** |
+| **1D 뼈대 유한요소 해석 (FEM)**<br>(`src/solver/frame1d.py`, `analysis_router.py`) | `pytest tests/engine/test_phase4_frame1d_analysis.py` | 단순보, 2경간 연속보, 캔틸레버 SFD/BMD/처짐/반력 이론해 일치성 | **0.5초** |
+| **단면 편집, 변환 및 라이브러리**<br>(`src/geometry/`, `src/library/`) | `pytest tests/ui/test_phase1_geometry_edit.py tests/ui/test_phase2_library_material.py` | 스프레드시트 편집, 2D 회전/대칭/리브 삽입, SSMA DB, 가공경화($F_{ya}$) | **0.8초** |
+| **FSM 좌굴 해석 엔진 알고리즘**<br>(`src/solver/strip_assembler.py`, `eigen_solver.py`) | `pytest tests/engine/test_fsm_engine.py` | FSM 순수압축, 강축/약축 휨 응력구배, Indefinite $[K_g]$, 폐구단면 절점공유 | **1.2초** |
+| **CAD / DXF 수입 & 메싱 파이프라인**<br>(`src/cad/`, `part_mesher.py`) | `pytest tests/engine/test_dxf_integration.py` | 2D Polyline DXF 수입 $\rightarrow$ 중심선 메싱 $\rightarrow$ FSM $\rightarrow$ KDS 설계 | **1.5초** |
+| **퀵디자인 최적화 탐색 엔진**<br>(`src/design/quick_design.py`, `frmQuickDesign`) | `pytest tests/ui/test_quick_design.py` | 3열 UI 컨트롤, 강도/처짐/지압 3대 D/C 한계상태 및 CFS 원본 교차검증 | **1.8초** |
+| **FastAPI 백엔드 API 엔드포인트**<br>(`src/api/routers/`, Pydantic DTO) | `pytest tests/ui/test_api_contract_schema.py` | 마법사 5종, FSM solve/params 다중모드 스키마 대칭성, 부재검토 스키마 | **2.5초** |
+| **다단계 사용자 상태 전이 & 워크플로우**<br>(단면변경 $\rightarrow$ 휨FSM $\rightarrow$ 도심정렬 $\rightarrow$ 계산서) | `pytest tests/ui/test_stateful_workflows.py` | 연속 조작 시 응력 상태(`load_type`) 지속 보존 및 E2E 데이터 파이프라인 | **3.0초** |
+| **온라인 도움말 & 한/영 매뉴얼**<br>(`src/manual/`, `manual_routes.py`) | `pytest tests/manual/` | 8대 트리 구조, 27개 토픽 한/영 1:1 대칭, LaTeX 수식, 도해 이미지 실재 | **1.2초** |
 
 ---
 
-## 3. 도메인별 테스트 배치 및 작성 규칙
+## 2. 도메인 및 속도별 마커(Marker) 기반 실행 옵션
 
-1. **엔진 테스트 (`tests/engine/`)**:
-   - `RSG/CFS/` C# Ground Truth 계산치 대비 **오차 0.1% 미만 무결성**을 검증하는 단언문(`assert pytest.approx(expected, rel=1e-3)`)을 작성합니다.
-   - 외부 UI나 HTTP 네트워크에 의존하지 않는 순수 Python 함수/클래스 단위 테스트로 작성합니다.
+| 실행 목적 | 추천 명령어 | 포함 테스트 | 소요 시간 |
+|---|---|---|:---:|
+| **⚡ 일상 개발 초고속 회귀 검증**<br>(무거운 광대역 스윕 제외) | `pytest -m "not slow"` | 전체 98개 핵심 단위/통합 테스트 | **~40초** |
+| **⚙️ 엔진 도메인 고속 검증** | `pytest tests/engine/ -m "not slow"` | 엔진 영역 17개 단위 테스트 | **~3초** |
+| **💻 UI / API / 프론트엔드 검증** | `pytest tests/ui/` | 웹 API, 스키마, 상태전이, DOM Linter 44개 테스트 | **~15초** |
+| **📖 온라인 도움말 전체 검증** | `pytest tests/manual/` | 27개 토픽 한영 원문 및 정적 자산 37개 테스트 | **~1.2초** |
+| **🔬 릴리즈 직전 심층 광대역 수치 Sanity** | `pytest -m slow` | 5종 단면 $\times$ 3종 하중 $\times$ 30스텝 (450회 FSM 스윕) | **~88초** |
+| **🏆 마스터 완료 직전 전수 회귀 테스트** | `pytest` | 전체 113개 테스트 전수 100% 무결성 검증 | **~125초** |
 
-2. **웹 UI / API 테스트 (`tests/ui/`)**:
-   - `fastapi.testclient.TestClient`를 사용하여 백엔드 라우터(`src/api/`)의 HTTP 상태 코드(200 OK) 및 JSON 응답 필드를 검증합니다.
-   - 단면 편집, 회전, 대칭, SSMA 라이브러리 선택, 퀵디자인 탐색 등 사용자의 UI 액션에 대응하는 API 흐름을 검증합니다.
+---
 
-3. **온라인 도움말 테스트 (`tests/manual/`)**:
-   - 8대 대분류 트리와 27개 개별 토픽의 한/영 대조(`content_ko`, `content_en`) 누락 여부를 검증합니다.
-   - 본문에 포함된 도해 이미지(`/static/images/manual/...`)의 파일 시스템 실재 여부 및 LaTeX 수식(`$$...$$`)의 유효성을 검증합니다.
+## 3. 고도화된 엄밀한 단언(Strict Assertions) 작성 규칙
+
+1. **`assert > 0` 무조건적 금지**:
+   - 단순 양수 체크 대신 물리적 기대 범위(`assert 0.1 <= val <= 1.05 * Fy * Ag`) 및 공학적 차원(Dimension)을 명시적으로 단언합니다.
+2. **C# Ground Truth 0.1% 오차 검증 (`pytest.approx`)**:
+   - 표준 단면(C, Z)에 대해 CFS.exe 원본 계산치와 신규 엔진 계산치를 `pytest.approx(expected, rel=1e-3)`로 검증합니다.
+3. **API 완결형 스키마 검증**:
+   - 최상위 키뿐만 아니라 서브필드, 노드/스트립 배열, 차트 포인트의 결측/Null 여부를 강제합니다.
+4. **프론트엔드 정적 무결성 동기화**:
+   - `index.html`의 ID 또는 JS 클래스 메서드를 변경할 때는 반드시 `pytest tests/ui/test_frontend_integrity.py`를 실행하여 0.03초 내에 정합성을 확인합니다.

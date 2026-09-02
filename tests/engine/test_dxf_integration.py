@@ -68,20 +68,30 @@ def test_dxf_end_to_end():
     print("4. Executing FSM Elastic Buckling Analysis...")
     assembler = StripAssembler(geom=geom, props=props, e_modulus=205000.0, poisson=0.3)
     analyzer = SignatureCurveAnalyzer(assembler)
-    buckle_res = analyzer.analyze(l_min=20.0, l_max=4000.0, num_points=25, yield_stress=345.0, member_length=2500.0)
-    print(f"   -> Local Pcrl = {buckle_res.p_crl/1000.0:.2f} kN, Distortional Pcrd = {buckle_res.p_crd/1000.0:.2f} kN")
+    buckle_comp = analyzer.analyze(l_min=20.0, l_max=4000.0, num_points=25, load_type="compression", yield_stress=345.0, member_length=2500.0)
+    print(f"   -> Compression: Local Pcrl = {buckle_comp.p_crl/1000.0:.2f} kN, Distortional Pcrd = {buckle_comp.p_crd/1000.0:.2f} kN")
+
+    assembler_flex = StripAssembler(geom=geom, props=props, e_modulus=205000.0, poisson=0.3)
+    assembler_flex.apply_loading(load_type="bending_x")
+    analyzer_flex = SignatureCurveAnalyzer(assembler_flex)
+    buckle_flex = analyzer_flex.analyze(l_min=20.0, l_max=4000.0, num_points=25, load_type="bending_x", yield_stress=345.0, member_length=2500.0)
+    print(f"   -> Flexure: Local Mcrl = {buckle_flex.m_crl/1e6:.2f} kN·m, Distortional Mcrd = {buckle_flex.m_crd/1e6:.2f} kN·m")
 
     print("5. Performing KDS 14 31 10 / AISI S100 DSM Member Design...")
-    comp_res = DSMCompression.design_column(ag=props.area, fy=345.0, p_cre=buckle_res.p_cre, p_crl=buckle_res.p_crl, p_crd=buckle_res.p_crd)
-    flex_res = DSMFlexure.design_beam(sf=props.sx_top, fy=345.0, m_cre=buckle_res.p_cre, m_crl=buckle_res.p_crl, m_crd=buckle_res.p_crd)
+    comp_res = DSMCompression.design_column(ag=props.area, fy=345.0, p_cre=buckle_comp.p_cre, p_crl=buckle_comp.p_crl, p_crd=buckle_comp.p_crd)
+    flex_res = DSMFlexure.design_beam(sf=props.sx_top, fy=345.0, m_cre=buckle_flex.m_cre, m_crl=buckle_flex.m_crl, m_crd=buckle_flex.m_crd)
     print(f"   -> Design Compressive Strength phi*Pn = {comp_res.phi_pn/1000.0:.2f} kN (Governing: {comp_res.governing_mode})")
     print(f"   -> Design Flexural Strength phi*Mn = {flex_res.phi_mn/1e6:.2f} kN-m (Governing: {flex_res.governing_mode})")
+
+    # Tight assertions: physical bound checks and dimension checks
+    assert comp_res.phi_pn > 0 and comp_res.phi_pn <= 0.85 * props.area * 345.0
+    assert flex_res.phi_mn > 0 and flex_res.phi_mn <= 0.90 * props.sx_top * 345.0
 
     print("6. Generating Markdown Report & Plots...")
     report_md = CalculationReportGenerator.generate_markdown_report(
         section_name="C 120x60x20x2.0 (DXF Imported)",
         props=props,
-        buckle_res=buckle_res,
+        buckle_res=buckle_comp,
         comp_res=comp_res,
         flex_res=flex_res,
         fy=345.0,
