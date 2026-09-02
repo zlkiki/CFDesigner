@@ -8,7 +8,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from .routes import router
+
+from .routers.section_router import router as section_router
+from .routers.fsm_router import router as fsm_router
+from .routers.design_router import router as design_router
+from .routers.report_router import router as report_router
+from .routers.analysis_router import router as analysis_router
 from .manual_routes import router as manual_router
 
 app = FastAPI(
@@ -26,8 +31,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API Routers
-app.include_router(router)
+# Include API Routers (modularized domain routers)
+app.include_router(section_router)
+app.include_router(fsm_router)
+app.include_router(design_router)
+app.include_router(report_router)
+app.include_router(analysis_router)
 app.include_router(manual_router)
 
 from src.resource_helper import get_resource_path

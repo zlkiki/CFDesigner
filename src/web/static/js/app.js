@@ -1,7 +1,24 @@
 /**
  * CFDesigner Main Application Controller
  * Handles user interactions, API synchronization, 2D/3D viewers, and report generation.
+ *
+ * Architecture: ES Module entry point with mixin-based modularization.
+ * Modularized feature mixins are imported from ./modules/ and applied after class definition.
+ * Legacy method bodies remain in this file for fallback; modular versions take precedence.
  */
+
+// ---------------------------------------------------------
+// ES Module Imports: Feature Mixins
+// Mixin functions extend CFDesignerApp.prototype after class definition.
+// ---------------------------------------------------------
+import { applySectionEditorMixin } from './modules/section_editor.js';
+import { applyLibraryBrowserMixin } from './modules/library_browser.js';
+import { applyMaterialManagerMixin } from './modules/material_manager.js';
+import { applyQuickDesignMixin } from './modules/quick_design.js';
+import { applyFsmToolsMixin } from './modules/fsm_tools.js';
+import { applyEffectiveWidthMixin } from './modules/effective_width.js';
+import { applyFrameAnalysisMixin } from './modules/frame_analysis.js';
+import { applyReportViewerMixin } from './modules/report_viewer.js';
 
 class CFDesignerApp {
   constructor() {
@@ -2495,6 +2512,19 @@ class CFDesignerApp {
     }
   }
 }
+
+// ---------------------------------------------------------
+// Apply Feature Mixins to CFDesignerApp.prototype
+// Mixin methods override legacy method bodies defined in this file.
+// ---------------------------------------------------------
+applySectionEditorMixin(CFDesignerApp);
+applyLibraryBrowserMixin(CFDesignerApp);
+applyMaterialManagerMixin(CFDesignerApp);
+applyQuickDesignMixin(CFDesignerApp);
+applyFsmToolsMixin(CFDesignerApp);
+applyEffectiveWidthMixin(CFDesignerApp);
+applyFrameAnalysisMixin(CFDesignerApp);
+applyReportViewerMixin(CFDesignerApp);
 
 // Instantiate on DOM Load
 window.addEventListener('DOMContentLoaded', () => {

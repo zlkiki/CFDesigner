@@ -41,8 +41,8 @@ graph TD
     end
 
     subgraph L4 ["4. 리포팅 및 서비스 계층"]
-        REPT["src/report/<br>• html_report.py (A4 계산서 렌더러)<br>• summary_table.py (요약표 생성)<br>• plotter.py (단면 시각화)"]
-        API["src/api/<br>• routes.py (메인 REST API)<br>• manual_routes.py (도움말 API)<br>• server.py (FastAPI 서버)"]
+        REPT["src/report/<br>• html_report.py (A4 계산서 렌더러)<br>• summary_report.py / detailed_report.py<br>• svg_diagrams.py (순수 SVG 다이어그램)"]
+        API["src/api/<br>• server.py (FastAPI 서버)<br>• routers/ (5대 도메인 분할 라우터 & _deps.py)<br>• manual_routes.py (도움말 API)"]
     end
 
     CAD --> GEOM
@@ -115,8 +115,15 @@ graph TD
   - 제1장(단면 제원)부터 제8장(웨브 크리플링) 및 제9장(1D 해석)까지 10대 장별 SVG 다이어그램, 메타데이터 결재 서명란, 인터랙티브 Trace 아코디언(`<details class="trace-accordion">`), KaTeX 실시간 수식 렌더러 통합.
 * **[`svg_diagrams.py`](file:///f:/PyProject/CFDesigner/src/report/svg_diagrams.py)**:
   - 단면도, 도심/전단중심 마커, 요소 번호 배지, FSM 시그니처 커브 및 SFD/BMD/처짐 벡터 다이어그램의 순수 SVG 생성기.
-* **[`routes.py`](file:///f:/PyProject/CFDesigner/src/api/routes.py)**:
-  - 마법사, DXF 업로드, 단면특성, 기하변환, 리브추가, 유효폭, FSM 좌굴, 부재설계, 크리플링, 퀵디자인, 1D 구조해석, 구조계산서 HTML 생성(`POST /api/report/html`) 엔드포인트 총괄 라우터.
+* **[`src/api/routers/`](file:///f:/PyProject/CFDesigner/src/api/routers/) (도메인별 모듈화 REST 라우터)**:
+  - **`_deps.py`**: 공통 Pydantic DTO 모델, 모드형상 추출(`extract_mode_shapes`), 차트 변환(`build_signature_chart_data`) 및 엔진 의존성 통합.
+  - **`section_router.py`**: 단면 마법사, DXF 파싱 업로드, 기하 변환, 리브 삽입, 라이브러리 및 재료 API.
+  - **`fsm_router.py`**: FSM 탄성좌굴 해석 및 커스텀 파장/응력 스윕 API.
+  - **`design_router.py`**: KDS 14 31 10 DSM 부재설계, 웨브 크리플링, 퀵디자인 최적화 API.
+  - **`report_router.py`**: 요약/상세 A4 구조계산서 HTML 생성 API.
+  - **`analysis_router.py`**: 1D FEM 보 구조해석 및 설계 부재력 자동 이전 API.
+* **[`manual_routes.py`](file:///f:/PyProject/CFDesigner/src/api/manual_routes.py)**:
+  - 8대 카테고리 27개 토픽 TOC 조회, 본문 반환, 다국어 가중치 검색 API.
 
 ---
 
@@ -127,15 +134,11 @@ graph LR
     Decompiled["CFS 14.0 C# 소스<br>(Ground Truth)"] --> CrossCheck["교차 검증 (Cross-Check)"]
     KCSC["KDS 14 31 10 기준<br>(kcsc2md)"] --> CrossCheck
     PythonEngine["신규 Python 엔진<br>(src/)"] --> CrossCheck
-    CrossCheck --> PyTest["pytest 테스트 스위트<br>(55개 단위/통합 테스트 100% 통과)"]
+    CrossCheck --> PyTest["pytest 테스트 스위트<br>(86개 단위/통합 테스트 100% 통과)"]
 ```
 
-* **테스트 디렉토리 (`tests/`) - 10개 테스트 파일 (55개 전수 테스트 100% 통과)**:
-  - [`tests/test_c_section.py`](file:///f:/PyProject/CFDesigner/tests/test_c_section.py), [`tests/test_z_section.py`](file:///f:/PyProject/CFDesigner/tests/test_z_section.py): C/Z단면 기하특성 $0.01\%$ 오차 및 FSM 고유치 검증.
-  - [`tests/test_dxf_integration.py`](file:///f:/PyProject/CFDesigner/tests/test_dxf_integration.py): DXF 폴리라인 파싱 및 메싱 검증.
-  - [`tests/test_phase1_geometry_edit.py`](file:///f:/PyProject/CFDesigner/tests/test_phase1_geometry_edit.py): 요소 테이블 편집, 회전, 대칭, 리브 삽입 검증.
-  - [`tests/test_phase2_library_material.py`](file:///f:/PyProject/CFDesigner/tests/test_phase2_library_material.py): `*.cfsl` 단면 DB 파서 및 코너 가공경화($F_{ya}$) 검증.
-  - [`tests/test_phase3_advanced_design.py`](file:///f:/PyProject/CFDesigner/tests/test_phase3_advanced_design.py): KDS 웨브 크리플링, 퀵 디자인, Winter 유효단면 반복해석 검증.
-  - [`tests/test_phase4_frame1d_analysis.py`](file:///f:/PyProject/CFDesigner/tests/test_phase4_frame1d_analysis.py): 1D FEM 구조해석, SFD/BMD/처짐 검증.
-  - [`tests/test_web_api.py`](file:///f:/PyProject/CFDesigner/tests/test_web_api.py), [`tests/test_manual_api.py`](file:///f:/PyProject/CFDesigner/tests/test_manual_api.py): FastAPI 엔드포인트 및 다국어 검색 E2E 검증.
-* **현재 검증 현황**: **55개 전수 테스트 100% Pass**
+* **테스트 디렉토리 (`tests/`) - 3대 도메인 13개 테스트 파일 (86개 전수 테스트 100% 통과)**:
+  - **`tests/engine/` (24 tests)**: C/Z단면 선적분, FSM 고유치, DXF 메싱, FSM 응력구배/폐구단면, KDS 수식 Trace, 퀵디자인/웨브크리플링, 1D FEM 해석.
+  - **`tests/ui/` (25 tests)**: Web API E2E, 퀵디자인 3열 UI & 3대 D/C 교차검증, 요약/상세 구조계산서 & SVG 다이어그램, 기하편집, SSMA 라이브러리/가공경화.
+  - **`tests/manual/` (37 tests)**: 온라인 도움말 8대 카테고리 27개 전수 토픽 한/영 원문 1:1 대칭성, 수식($$), 도해 링크 무결성 검증.
+* **현재 검증 현황**: **86개 전수 테스트 100% Pass**

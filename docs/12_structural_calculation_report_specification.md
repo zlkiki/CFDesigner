@@ -217,7 +217,7 @@ class ReportOptions:
 
 ---
 
-## 7. REST API 사양 (`src/api/routes.py`)
+## 7. REST API 사양 (`src/api/routers/report_router.py`)
 
 | 엔드포인트 | 메서드 | 파라미터 | 반환값 | 설명 |
 |---|---|---|---|---|

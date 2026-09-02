@@ -171,3 +171,21 @@ graph TD
    - 해당 단면의 요소 기하 데이터가 메인 2D 캔버스와 3D 뷰어로 즉시 주입.
    - 부재설계 탭의 비지지길이($L_x, L_y, L_t$)가 퀵디자인 경간 길이로 동기화.
    - FSM 탄성 좌굴해석 및 KDS 부재내력 검토가 백그라운드에서 자동 재연산되어 화면 전체가 갱신됨.
+
+### 5.4 프론트엔드 ES 모듈 및 Mixin 분할 아키텍처 (`src/web/static/js/modules/`)
+단일 거대 파일이었던 `app.js`를 모던 브라우저 표준 ES Module 및 Mixin 패턴으로 모듈화하여 단일 책임 원칙(SRP)과 유지보수성을 극대화했습니다.
+
+| ES 모듈 파일 | 역할 및 담당 기능 | 확장 메서드 (Mixin) |
+|---|---|---|
+| **[`section_editor.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/modules/section_editor.js)** | 요소 스프레드시트 편집, 직교/임의각 회전, 대칭, 리브 삽입 | `openElementEditorModal`, `applyElementsEditor`, `transformSection`, `submitRotate`, `submitInsertRibs` |
+| **[`library_browser.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/modules/library_browser.js)** | 1,000+ 표준 단면 검색 및 2D 캔버스 실시간 미리보기 | `openLibraryModal`, `loadLibrary`, `previewLibrarySection`, `loadSelectedLibSection` |
+| **[`material_manager.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/modules/material_manager.js)** | 강종 프리셋 선택, 코너 가공경화($F_{ya}$) 계산 및 설계 반영 | `openMaterialModal`, `onMaterialPresetChanged`, `recalcColdWork`, `applyMaterialToDesign` |
+| **[`quick_design.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/modules/quick_design.js)** | 3대 한계상태 최적 단면 탐색 및 메인 단면 원클릭 주입 | `openQuickDesignModal`, `executeQuickDesign`, `applyQuickDesignCandidate` |
+| **[`fsm_tools.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/modules/fsm_tools.js)** | 웨브 크리플링 계산, FSM 파라미터 스윕, 수치 테이블 & CSV | `calculateWebCrippling`, `applyFsmCustomParams`, `openFsmDataModal`, `exportFsmCsv` |
+| **[`effective_width.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/modules/effective_width.js)** | Winter 유효폭 해석 및 2D 점선 유효단면 오버레이 토글 | `toggleEffectiveWidthToolbar`, `openEffectiveModal`, `computeEffectiveModalValues`, `resetEffectiveState` |
+| **[`frame_analysis.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/modules/frame_analysis.js)** | 1D FEM 보 해석, 경간/하중 테이블 렌더링, 부재설계 이전 | `openFrameAnalysisModal`, `loadFramePreset`, `executeFrameAnalysis`, `transferFrameResultToDesign` |
+| **[`report_viewer.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/modules/report_viewer.js)** | A4 구조계산서 듀얼 모드 생성, KaTeX 수식 Trace 전개 뷰어 | `openReportModal`, `toggleAllTraceDetails`, `refreshReport` |
+
+* **진입점 (`index.html`)**: `<script type="module" src="/static/js/app.js"></script>`로 로드.
+* **통합 방식**: `app.js`에서 각 Mixin 함수를 임포트하여 `apply*Mixin(CFDesignerApp)`를 통해 프로토타입에 결합.
+

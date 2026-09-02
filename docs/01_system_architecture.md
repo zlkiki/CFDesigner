@@ -13,7 +13,8 @@ CFDesigner는 **프론트엔드 UI**, **비동기 REST API**, **CAD/기하 모�
 ```mermaid
 graph TD
     subgraph L1 ["1. 프론트엔드 웹 UI 계층 (src/web/)"]
-        UI_Main["메인 대시보드 (index.html, app.js)<br>• 4분할 레이아웃 & 실시간 상태바<br>• 10대 전문 모달 다이얼로그"]
+        UI_Main["메인 앱 코어 (index.html, app.js)<br>• 4분할 레이아웃 & 실시간 상태바<br>• ES Module & 8대 기능 Mixin 결합"]
+        UI_Mods["기능별 ES 모듈 (static/js/modules/)<br>• section_editor, library_browser, material_manager<br>• quick_design, fsm_tools, effective_width<br>• frame_analysis, report_viewer"]
         UI_2D["2D CAD 캔버스 (canvas_2d.js)<br>• 줌/팬, 코너 Fillet, 도심/주축, Winter 유효단면"]
         UI_3D["3D WebGL 뷰어 (viewer_3d.js)<br>• Three.js 로컬/디스토셔널/글로벌 모드 애니메이션"]
         UI_Charts["차트 엔진 (chart_fsm.js, chart_diagrams.js)<br>• FSM 시그니처 커브 / SFD / BMD / 처짐"]
@@ -21,8 +22,8 @@ graph TD
     end
 
     subgraph L2 ["2. 백엔드 REST API 계층 (src/api/)"]
-        API_Server["FastAPI 서버 (server.py)<br>• 정적 파일 서빙 & CORS / 비동기 라우터"]
-        API_Main["메인 라우터 (routes.py)<br>• /api/section/*, /api/fsm/*, /api/design/*<br>• /api/library/*, /api/frame/*, /api/report/*"]
+        API_Server["FastAPI 서버 (server.py)<br>• 정적 파일 서빙 & CORS / 비동기 도메인 라우터 마운트"]
+        API_Routers["5대 도메인 라우터 (routers/)<br>• section_router.py, fsm_router.py, design_router.py<br>• report_router.py, analysis_router.py, _deps.py"]
         API_Manual["도움말 라우터 (manual_routes.py)<br>• /api/manual/categories, /topic/{id}, /search"]
     end
 
@@ -63,8 +64,8 @@ graph TD
 sequenceDiagram
     autonumber
     actor User as 엔지니어 (User)
-    participant UI as 프론트엔드 UI (app.js)
-    participant API as 백엔드 REST API (routes.py)
+    participant UI as 프론트엔드 UI (app.js & modules/)
+    participant API as 백엔드 REST API (routers/)
     participant Geom as 기하 엔진 (gross_properties.py)
     participant FSM as FSM 솔버 (strip_assembler / eigen_solver)
     participant DSM as KDS 설계 엔진 (dsm / shear_and_crippling)
@@ -87,7 +88,16 @@ sequenceDiagram
 
 ### 3.1 프론트엔드 웹 UI 계층 (`src/web/`)
 * **[`index.html`](file:///f:/PyProject/CFDesigner/src/web/index.html)**: 4분할 레이아웃(헤더/사이드바/워크스페이스/대시보드) 및 10대 전문 모달 마크업.
-* **[`app.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/app.js)**: 전역 상태 관리기, REST API 호출기, 모달 라이프사이클 제어.
+* **[`app.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/app.js)**: 메인 앱 컨트롤러 코어. ES Module entry point로서 8대 기능 Mixin을 결합하고 전역 상태, 뷰어 인스턴스, REST API 파이프라인 관리.
+* **기능별 ES 모듈 (`src/web/static/js/modules/`)**:
+  - `section_editor.js`: 요소 스프레드시트 편집기, 기하 변환(회전/미러/정렬), 중간 리브 삽입.
+  - `library_browser.js`: 1,000+ 표준 단면 라이브러리 브라우저 및 2D 캔버스 프리뷰.
+  - `material_manager.js`: KS/ASTM 강종 프리셋 및 코너 가공경화($F_{ya}$) 자동 계산기.
+  - `quick_design.js`: 3대 한계상태(강도/처짐/크리플링) 실시간 3열 풀스펙 최적 단면 탐색.
+  - `fsm_tools.js`: 웨브 크리플링 지압 검토, FSM 커스텀 파라미터 스윕, 수치 테이블 및 CSV 내보내기.
+  - `effective_width.js`: Winter 유효폭 해석 및 2D 점선 유효단면 오버레이.
+  - `frame_analysis.js`: 1D 보/연속보 FEM 구조해석 및 부재설계 원클릭 연동.
+  - `report_viewer.js`: 요약/상세 구조계산서 렌더링 및 KaTeX 수식 Trace 뷰어.
 * **[`canvas_2d.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/canvas_2d.js)**: 2D CAD 인터랙션(줌/팬/도심/주축/Winter 유효단면 점선 오버레이).
 * **[`viewer_3d.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/viewer_3d.js)**: Three.js WebGL 기반 3D 부재 좌굴 모드 실시간 진동 애니메이션.
 * **[`chart_fsm.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/chart_fsm.js)**: 로그 스케일 FSM 시그니처 커브 및 극소점 동기화.
@@ -95,9 +105,15 @@ sequenceDiagram
 * **[`manual.html`](file:///f:/PyProject/CFDesigner/src/web/manual.html)** / **[`manual.js`](file:///f:/PyProject/CFDesigner/src/web/static/js/manual.js)**: 3-Way Bilingual 온라인 매뉴얼 SPA.
 
 ### 3.2 백엔드 REST API 계층 (`src/api/`)
-* **[`server.py`](file:///f:/PyProject/CFDesigner/src/api/server.py)**: FastAPI 어플리케이션 인스턴스, 정적 파일 마운트, CORS 미들웨어 구성.
-* **[`routes.py`](file:///f:/PyProject/CFDesigner/src/api/routes.py)**: 단면 모델링, 기하 변환, 유효폭, FSM, KDS 설계, 1D 구조해석, A4 리포트 등 16개 핵심 엔드포인트 구현.
-* **[`manual_routes.py`](file:///f:/PyProject/CFDesigner/src/api/manual_routes.py)**: 6대 카테고리 25개 토픽 TOC, 개별 본문, 다국어 가중치 검색 API.
+* **[`server.py`](file:///f:/PyProject/CFDesigner/src/api/server.py)**: FastAPI 어플리케이션 인스턴스, 정적 파일 마운트, CORS 미들웨어 및 5대 도메인 라우터 일괄 마운트.
+* **도메인별 분할 라우터 (`src/api/routers/`)**:
+  - `_deps.py`: 공통 Pydantic 요청/응답 모델, 모드형상 추출 헬퍼, 공통 엔진 의존성.
+  - `section_router.py`: 단면 마법사, DXF 업로드, 기하 변환, 리브 삽입, 라이브러리 및 재료 API.
+  - `fsm_router.py`: FSM 탄성좌굴 해석 및 커스텀 파장/응력 스윕 API.
+  - `design_router.py`: KDS 14 31 10 DSM 부재설계, 웨브 크리플링, 퀵디자인 최적화 API.
+  - `report_router.py`: 요약/상세 A4 구조계산서 HTML 생성 API.
+  - `analysis_router.py`: 1D FEM 보 구조해석 및 설계 부재력 자동 이전 API.
+* **[`manual_routes.py`](file:///f:/PyProject/CFDesigner/src/api/manual_routes.py)**: 8대 카테고리 27개 토픽 TOC, 개별 본문, 다국어 가중치 검색 API.
 
 ### 3.3 CAD & 기하 모델링 계층 (`src/cad/`, `src/geometry/`)
 * **[`dxf_reader.py`](file:///f:/PyProject/CFDesigner/src/cad/dxf_reader.py)** & **[`part_mesher.py`](file:///f:/PyProject/CFDesigner/src/cad/part_mesher.py)**: 2D DXF 파싱 및 코너 모서리($R$) 호 분할 메싱.
